@@ -1,0 +1,127 @@
+%
+% Tesi D.S.I. - modello preso da
+% Stanford University PhD thesis style -- modifications to the report style
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                         %
+%			TESI DOTTORATO                                                   %
+%			______________                                                   %
+%                                                                         %
+%			AUTORE: Elena Pagani                                             %
+%                                                                         %
+%			Ultima revisione: 7.X.1998                                       %
+%           correzioni atrent                                             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+\documentclass[a4paper,12pt]{report}
+%    \renewcommand{\baselinestretch}{1.6}      % interline spacing
+%
+% \includeonly{}
+%
+%			PREAMBOLO
+%
+\usepackage[a4paper]{geometry}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage[pdfa]{hyperref}
+\usepackage{epsfig}
+\usepackage[english]{babel}
+\usepackage{setspace}
+\usepackage{tesi}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{comment}
+\usepackage[section]{placeins}
+\usepackage[a-1b]{pdfx}
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+\usepackage{tikz}
+\usepackage{subcaption}
+\usepackage{subfigure}
+
+
+%
+\newtheorem{myteor}{Teorema}[section]
+%
+\newenvironment{teor}{\begin{myteor}\sl}{\end{myteor}}
+%
+\usepackage[
+    backend=biber,
+    style=draft,
+ ]{biblatex}
+\addbibresource{biblio.bib}
+\usepackage{subfiles}
+%
+%			TITOLO
+%
+\begin{document}
+
+\includegraphics{tesiSCIENZE_TECNOLOGIE.jpg}
+\title{Algorithms for traffic management in urban air mobility}
+\author{Filippo Magi}
+\dept{Corso di Laurea in Informatica Magistrale} 
+\anno{2023-2024}
+\matricola{17305A}
+\relatore{Prof. Alberto Ceselli}
+\correlatore{Prof. Claudia D'Ambrosio}
+%
+%        \submitdate{month year in which submitted to GPO}
+%		- date LaTeX'd if omitted
+%	\copyrightyear{year degree conferred (next year if submitted in Dec.)}
+%		- year LaTeX'd (or next year, in December) if omitted
+%	\copyrighttrue or \copyrightfalse
+%		- produce or don't produce a copyright page (false by default)
+%	\figurespagetrue or \figurespagefalse
+%		- produce or don't produce a List of Figures page
+%		  (false by default)
+%	\tablespagetrue or \tablespagefalse
+%		- produce or don't produce a List of Tables page
+%		  (false by default)
+% 
+%			DEDICA
+%
+\beforepreface
+\prefacesection{}
+        {\hfill \Large {\sl dedicato a \dots}}
+% 
+%			PREFAZIONE
+%
+\prefacesection{Preface}
+\subfile{thesis/sections/preface}
+%
+%
+%			ORGANIZZAZIONE
+\section*{Thesis organizzation}
+\label{organizzazione}
+La tesi \`e organizzata come segue:
+\begin{itemize}
+\item nel Capitolo 1 ....
+\end{itemize}
+% 
+% 
+
+\afterpreface
+%			CAPITOLO 1: dshjkfg
+\chapter{Introduction}
+\label{cap1}
+
+
+%
+%
+\section{Testing maps}\label{sec:maps}
+\subfile{thesis/sections/topologies}
+
+\chapter{Exact Algorithm}\label{chap:ExactAlgo}
+%
+%			BIBLIOGRAFIA
+%
+\printbibliography
+% 
+\end{document}
+
+
+ 
