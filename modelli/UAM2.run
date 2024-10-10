@@ -1,0 +1,26 @@
+option solver cplex;
+option cplex_options 'time=216000';
+for { i in 0..4}
+{
+	reset;
+	model UAM_decomposition2.mod;
+	data ("grid" & i & ".dat");
+	option cplex_options 'logfile="grid" & i & ".out"';
+	solve;
+}
+for { i in 0..4}
+{
+	reset;
+	model UAM_decomposition2.mod;
+	data ("metroplex" & i & ".dat");
+	option cplex_options 'logfile="metroplex" & i & ".out"';
+	solve;
+}
+for { i in 0..4}
+{
+	reset;
+	model UAM_decomposition2.mod;
+	data ("airport" & i & ".dat");
+	option cplex_options 'logfile="airport" & i & ".out"';
+	solve;
+}

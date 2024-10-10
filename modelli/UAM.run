@@ -1,0 +1,6 @@
+model UAM_decomposition.mod;
+data UAM_decomposition.dat;
+solve;
+display t_ear;
+display t_lat;
+display w;

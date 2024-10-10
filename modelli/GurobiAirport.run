@@ -1,0 +1,14 @@
+reset;
+param outfile symbolic := "runMeAG.run";
+
+for{i in 0..19}{
+    printf "\nreset;" > (outfile);
+    printf "\nmodel UAM_decomposition2.mod;"> (outfile);
+    printf "\ndata data\\airport%s.dat;",i > (outfile);
+    printf "\noption gurobi_options 'timing=1 timelim=3600 logfile=output\\airport%d.out';",i >(outfile);  
+    printf "\nsolve;" > (outfile);
+    printf "\ndisplay {j in 1.._nvars} (_varname[j],_var[j], _var[j].ub, _var[j].lb, _var[j].rc) >output\\airport%d.sol;",i >(outfile);
+}
+close (outfile);
+option solver gurobi;
+include runMeAG.run;

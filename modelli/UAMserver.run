@@ -1,0 +1,25 @@
+
+model UAM_decomposition2.mod;
+# Read the dat file
+param data_name symbolic;
+let data_name :=sprintf("data/%s",($datFile));
+data (data_name);
+# Select the solver and set its options
+option solver gurobi;
+option gurobi_options 'timing=1 outlev=1 threads=1';
+# Define the name of the file where the solution will be saved
+param sol_name symbolic;
+let sol_name := sprintf("output/%s.sol", ($datFile));
+# Define the name of the file where the log of the solver will be saved
+param log_name symbolic;
+let log_name := sprintf("output/%s.log", ($datFile));
+solve > (log_name);
+
+printf "\n### solve_result = %s, _total_solve_time = %f\n\n", solve_result, _total_solve_time > (log_name);
+# Store the solution in a file
+printf "### solve_result = %s, _total_solve_time = %f\n\n", solve_result, _total_solve_time > (sol_name);
+for {j in 1.._nvars} {
+   printf "let %s := %.20f;\n", _varname[j], _var[j] > (sol_name);
+}
+
+
