@@ -1,30 +1,30 @@
 #data
-param nf;												#number of flights
-param nn;											#number of nodes
-set F:= 0..nf-1;											#set of flights
-set V:= 0..nn-1;										#set of nodes
-set E within {V cross V};						#arcs
-param s{F};											#starting point for each flight
-param e{F};											#ending poitn for each flight
-param d{x in V,y in V: (x,y) in E}>=0;								#distance for each pair of nodes
+param nf;																						#number of flights
+param nn;																					#number of nodes
+set F:= 0..nf-1;																				#set of flights
+set V:= 0..nn-1;																				#set of nodes
+set E within {V cross V};																#arcs
+param s{F};																					#starting point for each flight
+param e{F};																					#ending poitn for each flight
+param d{x in V,y in V: (x,y) in E}>=0;											#distance for each pair of nodes
 param v_max{F,x in V, y in V: (x,y) in E};
 param v_min{F,x in V, y in V: (x,y) in E};
-#param v{F,V};										#entering speed 
+#param v{F,V};																				#entering speed 
 param bigM:=sum{f in F,i in V,j in V: (i,j) in E}d[i,j] * v_min[f,i,j];	#bigM for linearizing purpose
 param angleM{x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and x1<> x2};							# angle-for merging
 param angleP{x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and x1<>x2};							# angle+ for splitting
 param anglePM{x in V, x1 in V,x2 in V: (x,x1) in E and (x2,x) in E};							#angle -+ divering
-param D;												# safety distance
+param D;																						# safety distance
 param t_hat_ear{F,V};
 param t_hat_lat{F,V};
 #variables
-var w{V,V,F} binary;			#flight f pass through arc i,j
-var z_up{V,V,F} integer >=0 ;				# variable for w*t, understand why is not integer
-var z_down{V,V,F} integer >=0;			#variable for w*t
+var w{V,V,F} binary;																		#flight f pass through arc i,j
+var z_up{V,V,F} integer >=0 ;														# variable for w*t, understand why is not integer
+var z_down{V,V,F} integer >=0;													#variable for w*t
 var t_down{F,V} >=0;
 var t_up {F,V} >= 0;
-var t_ear{F,V} integer>=0 ;			#variable time, understand why is not integer
-var t_lat{F,V} >=0;			#variable time, undestand why is not integer
+var t_ear{F,V} integer>=0 ;															#variable time, understand why is not integer
+var t_lat{F,V} >=0;																		#variable time, undestand why is not integer
 
 #binary variables for linearization of conflicts
 var y1t{F,F,V,V} binary;
