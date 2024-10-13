@@ -18,8 +18,10 @@ solve > (log_name);
 printf "\n### solve_result = %s, _total_solve_time = %f\n\n", solve_result, _total_solve_time > (log_name);
 # Store the solution in a file
 printf "### solve_result = %s, _total_solve_time = %f\n\n", solve_result, _total_solve_time > (sol_name);
+printf "\t\t variable\t value\t UB\t LB 
 for {j in 1.._nvars} {
-   printf "let %s := %.20f;\n", _varname[j], _var[j] > (sol_name);
+   #TODO update with upper and lower bound
+   printf "let %s :=\t %.20f\t %.20f\t %.20f;\n", _varname[j], _var[j] , _var[j].ub, _var[j].lb > (sol_name);
 }
 
 
