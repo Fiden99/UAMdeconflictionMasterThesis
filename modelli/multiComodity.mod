@@ -18,9 +18,9 @@ param D;																						# safety distance
 param t_hat_ear{F,V};
 param t_hat_lat{F,V};
 #variables
-var w{V,V,F} binary;																		#flight f pass through arc i,j
-var z_up{V,V,F} integer >=0 ;														# variable for w*t, understand why is not integer
-var z_down{V,V,F} integer >=0;													#variable for w*t
+var w{i in V,j in V,F: (i,j) in E} binary;																		#flight f pass through arc i,j
+var z_up{i in V,j in V,F: (i,j) in E} integer >=0 ;														# variable for w*t, understand why is not integer
+var z_down{i in V,j in V,F: (i,j) in E} integer >=0;													#variable for w*t
 var t_down{F,V} >=0;
 var t_up {F,V} >= 0;
 var t_ear{F,V} integer>=0 ;															#variable time, understand why is not integer
@@ -54,7 +54,7 @@ subject to startingW{i in F}:
 sum{x in V: (s[i],x) in E} w[s[i],x,i]=1;
 subject to finishingW{i in F}:
 sum{x in V: (x,e[i]) in E} w[x,e[i],i]=1;
-subject to allW{i in F,x in V :  x<> s[i] and x <> e[i]}:
+subject to allW{i in F, x in V :  x <> s[i] and x <> e[i]}:
 sum{y in V: (x,y) in E} w[x,y,i]=sum{y in V: (y,x) in E} w[y,x,i];
 
 subject to limitT_down{i in F, x in V : x <> s[i]}:
@@ -66,21 +66,21 @@ t_ear[i,x] <= t_up[i,x];
 subject to defineT_down{f in F,y in V}:	
 t_down[f,y]=sum{x in V: (x,y) in E} (w[x,y,f] *d[x,y]/v_max[f,x,y] +  z_down[x,y,f]);
 
-subject to linearizeDown1{f in F,x in V,y in V}:
+subject to linearizeDown1{f in F,x in V,y in V: (x,y) in E}:
 z_down[x,y,f] <= bigM* w[x,y,f];
-subject to linearizeDown2{f in F,x in V,y in V}:
+subject to linearizeDown2{f in F,x in V,y in V: (x,y) in E}:
 z_down[x,y,f] <=t_ear[f,x];
-subject to linearizeDown3{f in F,x in V,y in V}:
+subject to linearizeDown3{f in F,x in V,y in V: (x,y) in E}:
 z_down[x,y,f] >=  t_ear[f,x] - bigM* (1- w[x,y,f]);
 
 subject to defineT_up{f in F,y in V}: 		
 t_up[f,y]=sum{x in V: (x,y) in E} (w[x,y,f] * d[x,y]/v_min[f,x,y] + z_up[x,y,f]);
 
-subject to linearizeUp1{f in F,x in V,y in V}:
+subject to linearizeUp1{f in F,x in V,y in V: (x,y) in E}:
 z_up[x,y,f] <= bigM* w[x,y,f];
-subject to linearizeUp2{f in F,x in V,y in V}:
+subject to linearizeUp2{f in F,x in V,y in V: (x,y) in E}:
 z_up[x,y,f] <=t_ear[f,x];
-subject to linearizeUp3{f in F,x in V,y in V}:
+subject to linearizeUp3{f in F,x in V,y in V: (x,y) in E}:
 z_up[x,y,f] >=  t_ear[f,x] - bigM* (1- w[x,y,f]);
 
 # conflicts 
@@ -170,8 +170,10 @@ problem conflicts: UAM,
     t_ear, t_lat, w, z_up, z_down, t_down, t_up,
     y1t, y1o1, y1o2, y2t, y2o1, y2o2, ym, ymo1, ymo2, yd, ydo1, ydo2, ys, yso1, yso2,
 #constrains
-    afterprecalculated, calculateLat, startingW, finishingW, allW,
-    limitT_down, limitT_up, defineT_down, linearizeDown1, linearizeDown2, linearizeDown3,
+    afterprecalculated, calculateLat, 
+    startingW, finishingW, allW,
+    limitT_down, limitT_up, 
+    defineT_down, linearizeDown1, linearizeDown2, linearizeDown3,
     defineT_up, linearizeUp1, linearizeUp2, linearizeUp3,
     trail11, trail12, trail13, trail14, trail15,
     trail21, trail22, trail23, trail24, trail25,
