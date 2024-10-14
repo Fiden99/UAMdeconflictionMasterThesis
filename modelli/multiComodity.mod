@@ -160,26 +160,26 @@ yso1[i,j,x,x1,x2]+yso2[i,j,x,x1,x2]<=1;
 #minimize z: sum{i in F,x in V, y in V: (x,y) in E} w[x,y,i];
 #objective 50
 minimize UAM: sum{i in F} t_ear[i,e[i]];
-minimize MC: sum{f in F, x in V,y in V: (x,y) in E} w[x,y,f]*d[x,y];
+minimize MC: sum{f in F, x in V,y in V: (x,y) in E} w[x,y,f] * d[x,y];
 
 #l'ordine è obj, variabili, vincoli
-problem path: MC, w,startingW,finishingW,allW;
+#problem path: MC, w,startingW,finishingW,allW;
 
-problem conflicts: UAM,
+#problem conflicts: UAM,
 #variables
-    t_ear, t_lat, w, z_up, z_down, t_down, t_up,
-    y1t, y1o1, y1o2, y2t, y2o1, y2o2, ym, ymo1, ymo2, yd, ydo1, ydo2, ys, yso1, yso2,
+#    t_ear, t_lat, w, z_up, z_down, t_down, t_up,
+#   y1t, y1o1, y1o2, y2t, y2o1, y2o2, ym, ymo1, ymo2, yd, ydo1, ydo2, ys, yso1, yso2,
 #constrains
-    afterprecalculated, calculateLat, 
-    startingW, finishingW, allW,
-    limitT_down, limitT_up, 
-    defineT_down, linearizeDown1, linearizeDown2, linearizeDown3,
-    defineT_up, linearizeUp1, linearizeUp2, linearizeUp3,
-    trail11, trail12, trail13, trail14, trail15,
-    trail21, trail22, trail23, trail24, trail25,
-    merge1, merge2, merge3, merge4, merge5,
-    diver1, diver2, diver3, diver4, diver5,
-    split1, split2, split3, split4, split5;
+#    afterprecalculated, calculateLat, 
+#    startingW, finishingW, allW,
+#    limitT_down, limitT_up, 
+#    defineT_down, linearizeDown1, linearizeDown2, linearizeDown3,
+#    defineT_up, linearizeUp1, linearizeUp2, linearizeUp3,
+#    trail11, trail12, trail13, trail14, trail15,
+#    trail21, trail22, trail23, trail24, trail25,
+#    merge1, merge2, merge3, merge4, merge5,
+#    diver1, diver2, diver3, diver4, diver5,
+#    split1, split2, split3, split4, split5;
 
 /*
 subject to trail1{i in F,j in F, x in V, y in V:(x,y) in E}:
