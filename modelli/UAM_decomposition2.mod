@@ -9,16 +9,16 @@ param e{F};																					#ending poitn for each flight
 param d{x in V,y in V: (x,y) in E}>=0;											#distance for each pair of nodes
 param v_max{F,x in V, y in V: (x,y) in E};
 param v_min{F,x in V, y in V: (x,y) in E};
-#param v{F,V};																				#entering speed 
-param bigM:=sum{f in F,i in V,j in V: (i,j) in E}d[i,j] * v_min[f,i,j];	#bigM for linearizing purpose
-param angleM{x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and x1<> x2};							# angle-for merging
-param angleP{x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and x1<>x2};							# angle+ for splitting
+#param v{F,V};																				    #entering speed 
+param bigM:=sum{f in F,i in V,j in V: (i,j) in E}d[i,j] * v_min[f,i,j];	                        #bigM for linearizing purpose
+param angleM{x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and x1<> x2};				# angle-for merging
+param angleP{x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and x1<>x2};					# angle+ for splitting
 param anglePM{x in V, x1 in V,x2 in V: (x,x1) in E and (x2,x) in E};							#angle -+ divering
 param D;																						# safety distance
 param t_hat_ear{F,V};
 param t_hat_lat{F,V};
 #variables
-var w{i in V,j in V,F: (i,j) in E} binary;																	#flight f pass through arc i,j
+var w{i in V,j in V,F: (i,j) in E} binary;																#flight f pass through arc i,j
 var z_up{i in V,j in V,F: (i,j) in E} integer >=0 ;														# variable for w*t, understand why is not integer
 var z_down{i in V,j in V,F: (i,j) in E} integer >=0;													#variable for w*t
 var t_down{F,V} >=0;
