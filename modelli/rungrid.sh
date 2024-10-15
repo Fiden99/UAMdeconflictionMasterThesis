@@ -1,7 +1,8 @@
-for i in data/grid*.dat; do
+
+for i in $PWD/data/grid*.dat; do
         datFile=$(basename "$i" .dat)
         echo "$datFile"
-        datFile="$datFile" ampl heuristicAlgo.run
+        absPath=$PWD datFile="$datFile" ampl heuristicAlgo.run
 done
 
 
