@@ -14,10 +14,10 @@ let alpha:=4;
 param found default 0;
 param starting_time:=time();
 param sol_name symbolic;
-let sol_name := sprintf("%s/heuristicOut/2_%s.sol", ($absPath),($datFile));
+let sol_name := sprintf("%d%s/heuristicOut/3_%s.sol", ($value),($absPath),($datFile));
 # Define the name of the file where the log of the solver will be saved
 param log_name symbolic;
-let log_name := sprintf("%s/heuristicOut/2_%s.log", ($absPath),($datFile));
+let log_name := sprintf("%d%s/heuristicOut/3_%s.log", ($value),($absPath),($datFile));
 
 
 repeat
@@ -58,6 +58,5 @@ display iterations, starting_time-time(),UAM, w, t_ear;
 printf "### total_solve_time = %f\n\n",starting_time-time() > (sol_name);
 printf "\t\t variable\t value\t UB\t LB"
 for {j in 1.._nvars} {
-   #TODO update with upper and lower bound
    printf "let %s :=\t %.20f\t %.20f\t %.20f;\n", _varname[j], _var[j] , _var[j].ub, _var[j].lb > (sol_name);
 }
