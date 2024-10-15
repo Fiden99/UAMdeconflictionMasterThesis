@@ -27,21 +27,24 @@ var t_ear{F,V} integer>=0 ;															#variable time, understand why is not 
 var t_lat{F,V} >=0;																		#variable time, undestand why is not integer
 
 #binary variables for linearization of conflicts
-var y1t{F,F,V,V} binary;
-var y1o1{F,F,V,V} binary;
-var y1o2{F,F,V,V} binary;
-var y2t{F,F,V,V} binary;
-var y2o1{F,F,V,V} binary;
-var y2o2{F,F,V,V} binary;
-var ym{F,F,V,V,V} binary;
-var ymo1{F,F,V,V,V} binary;
-var ymo2{F,F,V,V,V} binary;
-var yd{F,F,V,V,V} binary;
-var ydo1{F,F,V,V,V} binary;
-var ydo2{F,F,V,V,V} binary;
-var ys{F,F,V,V,V} binary;
-var yso1{F,F,V,V,V} binary;
-var yso2{F,F,V,V,V} binary;
+var y1t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
+var y1o1{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
+var y1o2{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
+var y2t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
+var y2o1{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
+var y2o2{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
+
+var ym{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2} binary;
+var ymo1{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2} binary;
+var ymo2{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2} binary;
+
+var yd{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2} binary;
+var ydo1{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2} binary;
+var ydo2{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2} binary;
+
+var ys{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2} binary;
+var yso1{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2} binary;
+var yso2{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2} binary;
 
 #constrains
 
