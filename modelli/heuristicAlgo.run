@@ -17,7 +17,7 @@ param sol_name symbolic;
 let sol_name := sprintf("%s/heuristicOut/%d%s.sol", ($absPath),($value),($datFile));
 # Define the name of the file where the log of the solver will be saved
 param log_name symbolic;
-let log_name := sprintf("%s/heuristicOut/%d%s.log", ,($absPath),($value),($datFile));
+let log_name := sprintf("%s/heuristicOut/%d%s.log",($absPath),($value),($datFile));
 
 
 repeat
