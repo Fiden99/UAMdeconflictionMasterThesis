@@ -1,15 +1,14 @@
 #!/bin/bash
-#SBATCH --job-name=ampl_array_job       # Nome del job
+#SBATCH --job-name=heuristicUAM_array_job       # Nome del job
 #SBATCH --output=/home/magi/UAMdeconflictionMasterThesis/modelli/out/ampl_output_%A_%a.txt  # File di output per stdout (%A = job ID, %a = array task ID)
 #SBATCH --error=/home/magi/UAMdeconflictionMasterThesis/modelli/out/ampl_error_%A_%a.txt    # File di output per stderr
 #SBATCH --ntasks=1                      # Numero di task per job
 #SBATCH --time=96:00:00                 # Tempo massimo per ogni job 
-#SBATCH --mem=16GB                      # Memoria per ogni job
 #SBATCH --nodes=1
 
 # Definisci il job array in base al numero di file presenti nella directory data/
 NUM_FILES=$(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat |wc -l)
-#SBATCH --array=0-$(($NUM_FILES -1))
+#SBATCH --array=0-$(($NUM_FILES -1))%3
 
 # Carica il modulo AMPL (se necessario, se AMPL è gestito tramite moduli)
 # module load ampl
@@ -24,4 +23,4 @@ datFile=${FILES[$SLURM_ARRAY_TASK_ID]}
 datFileBase=$(basename "$datFile" .dat)
 
 # Esegui AMPL con il file .dat corrente
-value=1 absPath=$PWD datFile=$datFileBase ampl /home/magi/UAMdeconflictionMasterThesis/modelli/heuristicAlgo.run
+value="1" absPath=$PWD datFile=$datFileBase ampl /home/magi/UAMdeconflictionMasterThesis/modelli/heuristicAlgo.run
