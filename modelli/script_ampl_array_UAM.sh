@@ -3,8 +3,8 @@
 #SBATCH --output=/home/magi/UAMdeconflictionMasterThesis/modelli/out/ampl_output_%A_%a.txt  # File di output per stdout (%A = job ID, %a = array task ID)
 #SBATCH --error=/home/magi/UAMdeconflictionMasterThesis/modelli/out/ampl_error_%A_%a.txt    # File di output per stderr
 #SBATCH --ntasks=1                      # Numero di task per job
-#SBATCH --time=96:00:00                 # Tempo massimo per ogni job 
-#SBATCH --mem=8GB                       # Memoria per ogni job
+#SBATCH --time=4:00:00:00                 # Tempo massimo per ogni job 
+#SBATCH --mem=16GB                       # Memoria per ogni job
 
 # Definisci il job array in base al numero di file presenti nella directory data/
 NUM_FILES=$(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat |wc -l)
