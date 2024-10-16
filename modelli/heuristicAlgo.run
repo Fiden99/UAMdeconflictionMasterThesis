@@ -14,10 +14,10 @@ let alpha:=4;
 param found default 0;
 param starting_time:=time();
 param sol_name symbolic;
-let sol_name := sprintf("%d%s/heuristicOut/3_%s.sol", ($value),($absPath),($datFile));
+let sol_name := sprintf("%s/heuristicOut/%d%s.sol", ($absPath),($value),($datFile));
 # Define the name of the file where the log of the solver will be saved
 param log_name symbolic;
-let log_name := sprintf("%d%s/heuristicOut/3_%s.log", ($value),($absPath),($datFile));
+let log_name := sprintf("%s/heuristicOut/%d%s.log",($absPath),($value),($datFile));
 
 
 repeat
