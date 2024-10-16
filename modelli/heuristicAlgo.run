@@ -23,13 +23,8 @@ let log_name := sprintf("%d%s/heuristicOut/3_%s.log", ($value),($absPath),($datF
 repeat
 {
 	solve MC >(log_name);
-	printf "find path\n";
-	display w;
 	fix {f in F, i in V,j in V: (i,j)in E} w[i,j,f];
-	printf "fixed\n";
 	solve UAM > (log_name);
-	printf "solved conflicts\n";
-	display w;
 	if solve_result == "solved" then
 	{
 		let found:=1;
@@ -41,22 +36,19 @@ repeat
 		{
 			  if (w[i,j,f1] + w[i,j,f2] == 2) then 
 			  {
-			  #c'è un conflitto, ma non sono sicuro che sia quello interessato
-			    printf "conflict between flights %d %d in arc (%d,%d)\n", f1, f2, i, j;
-			    let d[i,j] := min(sqrt(alpha) * d[i,j],1e5);
+			  let d[i,j] := min(sqrt(alpha) * d[i,j],1e5);
 			  }
 		}
 	}
 	let iterations:=iterations + 1;
 	unfix{ i in V, j in V,f in F: (i,j) in E} w[i,j,f];
-	display d;
 }
 while (found==0);
-display iterations, starting_time-time(),UAM, w, t_ear;
 
 # Store the solution in a file
-printf "### total_solve_time = %f\n\n",starting_time-time() > (sol_name);
-printf "\t\t variable\t value\t UB\t LB"
-for {j in 1.._nvars} {
-   printf "let %s :=\t %.20f\t %.20f\t %.20f;\n", _varname[j], _var[j] , _var[j].ub, _var[j].lb > (sol_name);
+printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
+printf "variable\t\t value\t UB\t\t\t LB\n" >(sol_name);
+for { j in 1.._nvars} {
+   printf "let %s :=\t %d\t %f\t %f;\n", _varname[j], _var[j] , _var[j].ub, _var[j].lb > (sol_name);
 }
+
