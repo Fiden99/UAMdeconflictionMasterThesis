@@ -3,18 +3,19 @@
 #SBATCH --output=/home/magi/UAMdeconflictionMasterThesis/modelli/out/ampl_output_%A_%a.txt  # File di output per stdout (%A = job ID, %a = array task ID)
 #SBATCH --error=/home/magi/UAMdeconflictionMasterThesis/modelli/out/ampl_error_%A_%a.txt    # File di output per stderr
 #SBATCH --ntasks=1                      # Numero di task per job
+#SBATCH --cpus-per-task=1               # Numero di core per job
 #SBATCH --time=96:00:00                 # Tempo massimo per ogni job 
-#SBATCH --nodes=1
+#SBATCH --array=0-54
+
+# Crea una lista di tutti i file .dat nella directory "data/"
+FILES=($(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat | grep -v "airport0.dat"| grep -v "airport10.dat" |grep -v "airport11.dat" |grep -v "airport12.dat"|grep -v "airport13.dat"))
+# FILES=(/home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat)
 
 # Definisci il job array in base al numero di file presenti nella directory data/
-NUM_FILES=$(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat |wc -l)
-#SBATCH --array=0-$(($NUM_FILES -1))%3
+NUM_FILES=${#FILES[@]}
 
 # Carica il modulo AMPL (se necessario, se AMPL è gestito tramite moduli)
 # module load ampl
-
-# Crea una lista di tutti i file .dat nella directory "data/"
-FILES=(/home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat)
 
 # Seleziona il file corrispondente all'indice dell'array di Slurm
 datFile=${FILES[$SLURM_ARRAY_TASK_ID]}
