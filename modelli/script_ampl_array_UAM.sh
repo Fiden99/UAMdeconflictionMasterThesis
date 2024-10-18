@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=heuristicUAM_array_job       # Nome del job
+#SBATCH --job-name=UAM_array_job       # Nome del job
 #SBATCH --output=/home/magi/UAMdeconflictionMasterThesis/modelli/out/ampl_output_%A_%a.txt  # File di output per stdout (%A = job ID, %a = array task ID)
 #SBATCH --error=/home/magi/UAMdeconflictionMasterThesis/modelli/out/ampl_error_%A_%a.txt    # File di output per stderr
 #SBATCH --ntasks=1                      # Numero di task per job
@@ -8,7 +8,7 @@
 #SBATCH --array=0-59
 
 # Crea una lista di tutti i file .dat nella directory "data/"
-FILES=($(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat)
+FILES=($(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat))
 # FILES=(/home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat)
 
 # Definisci il job array in base al numero di file presenti nella directory data/
