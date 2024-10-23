@@ -2,18 +2,16 @@
 #include "node.h"
 namespace Graph
 {
-	class Edge
+	Edge::Edge() :
+		source{ nullptr },
+		destination{ nullptr },
+		distance{ 0 }
 	{
-	public:
-		Graph::Node* source;
-		Graph::Node* destination;
-		int distance;
-		Edge(Node* source, Node* destination, int distance)
-		{
-			this->source = source;
-			this->destination = destination;
-			this->distance = distance;
-		}
-	};
-
+	}
+	Edge::Edge(Node* source, Node* destination, int distance) :
+		source{ source },
+		destination{ destination },
+		distance{ distance }
+	{
+	}
 }

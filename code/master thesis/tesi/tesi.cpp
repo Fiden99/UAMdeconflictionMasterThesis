@@ -2,9 +2,6 @@
 //
 
 #include <iostream>
-
-
-
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -13,27 +10,22 @@
 //#include "Graph.h"
 
 
-int getInteger(std::string_view); // forward declaration for function getInteger
+
+
+//int getInteger(std::string_view); // forward declaration for function getInteger
+void reader(std::string& filename);
+//void ciao();
+
+
 
 int main()
 {
-	std::string_view name{ "Alex" };
-	std::cout << "Hello World!" << '\n';
-	std::cout << getInteger(name) << "," << name << ",Hello World!" << '\n';
-	std::cout << std::pow(2, 3);
-	std::cout << std::asin(1.0) * 2;
-
+	std::string filename = "C:\\Users\\Filippo\\Desktop\\materiale universitario\\magistrale\\tesi\\modelli\\data\\airport0.dat";
+	reader(filename);
+	//ciao();
 	return 0;
-}
-int getInteger(std::string_view name)
-{
-	std::cout << name << "\n";
-	name = "Ciaone";
-	std::cout << name << "\n";
-	std::cout << "Enter an integer: ";
-	int x;
-	std::cin >> x;
-	return x;
+
+
 }
 // Per eseguire il programma: CTRL+F5 oppure Debug > Avvia senza eseguire debug
 // Per eseguire il debug del programma: F5 oppure Debug > Avvia debug

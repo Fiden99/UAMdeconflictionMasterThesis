@@ -136,12 +136,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="edge.cpp" />
+    <ClCompile Include="flights.cpp" />
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="node.cpp" />
+    <ClCompile Include="reader.cpp" />
     <ClCompile Include="tesi.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="edge.h" />
+    <ClInclude Include="flights.h" />
     <ClInclude Include="graph.h" />
     <ClInclude Include="node.h" />
   </ItemGroup>

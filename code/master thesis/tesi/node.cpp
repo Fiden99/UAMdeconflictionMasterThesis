@@ -1,33 +1,32 @@
 
 #include <vector>
-#include "Edge.h"
-#include "Node.h"
+#include <map>
+#include <functional>
+#include "edge.h"
+#include "node.h"
 
 namespace Graph
 {
-
-	class Node
+	Node::Node()
 	{
-	public:
-		int id;
-		std::vector<Edge> edges;
-		int flights;
-		int* v_max;
-		int* v_min;
-		float* angleP;
-		float* angleM;
-		float* anglePM;
-		int* t_cost_ear;
-		Node(int id, int flights)
-		{
-			this->id = id;
-			this->flights = flights;
-			this->v_max = new int[flights];
-			this->v_min = new int[flights];
-			this->angleP = new float[flights];
-			this->angleM = new float[flights];
-			this->anglePM = new float[flights];
-			this->t_cost_ear = new int[flights];
-		}
-	};
+	}
+	Node::Node(int id) :
+		id{ id }
+	{
+	}
+	Node::Node(int id, std::vector<Edge*> inArcs, std::vector<Edge*> outArcs) :
+		id{ id },
+		inArcs{ inArcs },
+		outArcs{ outArcs }
+	{
+	}
+	Node::Node(int id, std::vector<Edge*> inArcs, std::vector<Edge*> outArcs, std::map<std::pair<Node*, Node*>, float> angleP, std::map<std::pair<Node*, Node*>, float> angleM, std::map<std::pair<Node*, Node*>, float> anglePM) :
+		id{ id },
+		inArcs{ inArcs },
+		outArcs{ outArcs },
+		angleP{ angleP },
+		angleM{ angleM },
+		anglePM{ anglePM }
+	{
+	}
 }
