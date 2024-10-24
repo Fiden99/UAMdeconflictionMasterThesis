@@ -141,12 +141,14 @@
     <ClCompile Include="node.cpp" />
     <ClCompile Include="reader.cpp" />
     <ClCompile Include="tesi.cpp" />
+    <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="edge.h" />
     <ClInclude Include="flights.h" />
     <ClInclude Include="graph.h" />
     <ClInclude Include="node.h" />
+    <ClInclude Include="timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
