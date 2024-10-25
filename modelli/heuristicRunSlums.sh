@@ -8,7 +8,7 @@
 #SBATCH --array=0-54
 
 # Crea una lista di tutti i file .dat nella directory "data/"
-FILES=($(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat | grep -v "airport0.dat"| grep -v "airport10.dat" |grep -v "airport11.dat" |grep -v "airport12.dat"|grep -v "airport13.dat"))
+FILES=($(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat))
 # FILES=(/home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat)
 
 # Definisci il job array in base al numero di file presenti nella directory data/

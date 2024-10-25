@@ -60,6 +60,13 @@ sum{x in V: (x,e[i]) in E} w[x,e[i],i]=1;
 subject to allW{i in F, x in V :  x <> s[i] and x <> e[i]}:
 sum{y in V: (x,y) in E} w[x,y,i]=sum{y in V: (y,x) in E} w[y,x,i];
 
+subject to startingPath{i in F}:
+sum{x in V: (x,s[i]) in E} w[x,s[i],i] -sum{x in V: (s[i],x) in E} w[s[i],x,i]=-1;
+subject to finishingPath{i in F}:
+sum{x in V:(e[i],x) in E} w[e[i],x,i] - sum{x in V: (x,e[i]) in E} w[x,e[i],i]=-1;
+subject to allPath{i in F, x in V :  x <> s[i] and x <> e[i]}:
+sum{y in V: (x,y) in E} w[x,y,i]=sum{y in V: (y,x) in E} w[y,x,i];
+
 subject to limitT_down{i in F, x in V : x <> s[i]}:
 t_down[i,x] <= t_ear[i,x];
 subject to limitT_up{i in F, x in V: x <> s[i]}:
@@ -166,23 +173,39 @@ minimize UAM: sum{i in F} t_ear[i,e[i]];
 minimize MC: sum{f in F, x in V,y in V: (x,y) in E} w[x,y,f] * d[x,y];
 
 #l'ordine è obj, variabili, vincoli
-#problem path: MC, w,startingW,finishingW,allW;
+problem path: MC, w,startingPath,finishingPath,allPath;
 
-#problem conflicts: UAM,
+problem conflicts: UAM,
 #variables
-#    t_ear, t_lat, w, z_up, z_down, t_down, t_up,
-#   y1t, y1o1, y1o2, y2t, y2o1, y2o2, ym, ymo1, ymo2, yd, ydo1, ydo2, ys, yso1, yso2,
+    t_ear, t_lat, z_up, z_down, t_down, t_up,
+   y1t, y1o1, y1o2, y2t, y2o1, y2o2, ym, ymo1, ymo2, yd, ydo1, ydo2, ys, yso1, yso2,
+   #w
 #constrains
-#    afterprecalculated, calculateLat, 
-#    startingW, finishingW, allW,
-#    limitT_down, limitT_up, 
-#    defineT_down, linearizeDown1, linearizeDown2, linearizeDown3,
-#    defineT_up, linearizeUp1, linearizeUp2, linearizeUp3,
-#    trail11, trail12, trail13, trail14, trail15,
-#    trail21, trail22, trail23, trail24, trail25,
-#    merge1, merge2, merge3, merge4, merge5,
-#    diver1, diver2, diver3, diver4, diver5,
-#    split1, split2, split3, split4, split5;
+    afterprecalculated, calculateLat, 
+    #startingW, finishingW, allW,
+    limitT_down, limitT_up, 
+    defineT_down, linearizeDown1, linearizeDown2, linearizeDown3,
+    defineT_up, linearizeUp1, linearizeUp2, linearizeUp3,
+    trail11, trail12, trail13, trail14, trail15,
+    trail21, trail22, trail23, trail24, trail25,
+    merge1, merge2, merge3, merge4, merge5,
+    diver1, diver2, diver3, diver4, diver5,
+    split1, split2, split3, split4, split5;
+problem wholeModel: UAM,
+#variables
+    t_ear, t_lat, w, z_up, z_down, t_down, t_up,
+   y1t, y1o1, y1o2, y2t, y2o1, y2o2, ym, ymo1, ymo2, yd, ydo1, ydo2, ys, yso1, yso2,
+#constrains
+    afterprecalculated, calculateLat, 
+    startingW, finishingW, allW,
+    limitT_down, limitT_up, 
+    defineT_down, linearizeDown1, linearizeDown2, linearizeDown3,
+    defineT_up, linearizeUp1, linearizeUp2, linearizeUp3,
+    trail11, trail12, trail13, trail14, trail15,
+    trail21, trail22, trail23, trail24, trail25,
+    merge1, merge2, merge3, merge4, merge5,
+    diver1, diver2, diver3, diver4, diver5,
+    split1, split2, split3, split4, split5;
 
 /*
 subject to trail1{i in F,j in F, x in V, y in V:(x,y) in E}:
