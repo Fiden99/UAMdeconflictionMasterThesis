@@ -18,11 +18,10 @@ void reader(std::string& filename);
 
 
 
-int main()
+int main(int argc, char* argv[])
 {
 	std::string filename = "C:\\Users\\Filippo\\Desktop\\materiale universitario\\magistrale\\tesi\\modelli\\data\\airport0.dat";
 	reader(filename);
-	//ciao();
 	return 0;
 
 

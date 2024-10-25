@@ -8,6 +8,8 @@ namespace Graph
 	//use to use reference std::reference_wrapper
 	class Node
 	{
+	private:
+		static inline int counter{ 0 };
 	public:
 		int id;
 		//TODO capire come inserire l'indirizzo o la referenza

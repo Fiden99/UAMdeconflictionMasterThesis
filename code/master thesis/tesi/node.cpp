@@ -7,8 +7,10 @@
 
 namespace Graph
 {
-	Node::Node()
+	Node::Node() :
+		id{ counter }
 	{
+		++counter;
 	}
 	Node::Node(int id) :
 		id{ id }
