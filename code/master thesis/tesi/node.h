@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include "edge.h"
+#include <optional>
 namespace Graph
 {
 	class Edge;
@@ -16,13 +17,16 @@ namespace Graph
 		std::vector<Edge*> inArcs;
 		std::vector<Edge*> outArcs;
 		//angoli, con this il nodo angolato, x nel modello
-		std::map<std::pair<Node*, Node*>, float> angleP;
-		std::map<std::pair<Node*, Node*>, float> angleM;
-		std::map<std::pair<Node*, Node*>, float> anglePM;
+		std::map<std::pair<Node*, Node*>, double> angleP;
+		std::map<std::pair<Node*, Node*>, double> angleM;
+		std::map<std::pair<Node*, Node*>, double> anglePM;
 		//int* t_cost_ear;
 		Node();
 		Node(int id);
 		Node(int id, std::vector<Edge*> inArcs, std::vector<Edge*> outArcs);
-		Node(int id, std::vector<Edge*> inArcs, std::vector<Edge*> outArcs, std::map<std::pair<Node*, Node*>, float> angleP, std::map<std::pair<Node*, Node*>, float> angleM, std::map<std::pair<Node*, Node*>, float> anglePM);
+		Node(int id, std::vector<Edge*> inArcs, std::vector<Edge*> outArcs, std::map<std::pair<Node*, Node*>, double> angleP, std::map<std::pair<Node*, Node*>, double> angleM, std::map<std::pair<Node*, Node*>, double> anglePM);
+		//utility functions
+		Edge* getInEdge(int nodeID);
+		Edge* getOutEdge(int nodeID);
 	};
 }

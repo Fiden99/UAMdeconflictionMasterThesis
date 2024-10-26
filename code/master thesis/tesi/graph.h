@@ -7,6 +7,7 @@ namespace Graph
 	{
 	public:
 		std::vector<Node*> nodes;
+		Graph();
 		Graph(int);
 	};
 }

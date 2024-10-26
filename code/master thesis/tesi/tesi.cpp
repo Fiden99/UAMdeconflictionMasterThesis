@@ -2,29 +2,27 @@
 //
 
 #include <iostream>
-#include <iostream>
-#include <cstdlib>
-#include <string>
-#include <string_view>
-#include <cmath>
-//#include "Graph.h"
+#include <vector>
+#include "flights.h"
+#include "Graph.h"
 
 
 
 
 //int getInteger(std::string_view); // forward declaration for function getInteger
-void reader(std::string& filename);
+void reader(std::string& filename, Graph::Graph& graph, std::vector<Graph::Flight*>& flights);
 //void ciao();
 
 
 
 int main(int argc, char* argv[])
 {
-	std::string filename = "C:\\Users\\Filippo\\Desktop\\materiale universitario\\magistrale\\tesi\\modelli\\data\\airport0.dat";
-	reader(filename);
+	std::string filename = "C:\\Users\\Filippo\\Desktop\\materiale universitario\\magistrale\\tesi\\modelli\\data\\grid0.dat";
+	Graph::Graph graph;
+	std::vector<Graph::Flight*> flights;
+	reader(filename, graph, flights);
+
 	return 0;
-
-
 }
 // Per eseguire il programma: CTRL+F5 oppure Debug > Avvia senza eseguire debug
 // Per eseguire il debug del programma: F5 oppure Debug > Avvia debug
