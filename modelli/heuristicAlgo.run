@@ -1,8 +1,9 @@
 reset;
 option solver gurobi;
-option gurobi_options 'timing=1 outlev=1 threads=1 timelim=21600';
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=3600';
 param data_name symbolic;
 let data_name :=sprintf("%s/data/%s.dat",($absPath),($datFile));
+#let data_name :=sprintf("%s/data/nn10nf100/%s.dat",($absPath),($datFile));
 param model_name symbolic;
 let model_name :=sprintf("%s/multiComodity.mod",($absPath));
 model (model_name);
@@ -14,18 +15,25 @@ let alpha:=4;
 param found default 0;
 param sol_name symbolic;
 let sol_name := sprintf("%s/heuristicOut/%s%s.sol", ($absPath),($value),($datFile));
+#let sol_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.sol", ($absPath),($value),($datFile));
 # Define the name of the file where the log of the solver will be saved
 param log_name symbolic;
 let log_name := sprintf("%s/heuristicOut/%s%s.log",($absPath),($value),($datFile));
+#let log_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.log",($absPath),($value),($datFile));
 display data_name;
+
 
 repeat
 {
+	#unfix{ i in V, j in V,f in F: (i,j) in E} w[i,j,f];
 	option relax_integrality 1;
 	solve path >(log_name);
+	if solve_result <> "solved" then
+	{
+		printf "No path found\n";
+		break;
+	}
 	printf "find path in it %d\nsolve time:= %f, ampl time:= %f, sol:=%d",iterations,_solve_time,_ampl_time,MC >(sol_name);
-	#to put a check if I found a path or not, if I couldn't find it's useless continue
-	fix {f in F, i in V,j in V: (i,j)in E} w[i,j,f];
 	option relax_integrality 0;
 	solve conflicts > (log_name);
 	printf "find time in it %d\nsolve time:= %f, ampl time:= %f, sol:=%d",iterations,_solve_time,_ampl_time,UAM >(sol_name);
@@ -43,8 +51,9 @@ repeat
 			  }
 		}
 	}
+	display d;
 	let iterations:=iterations + 1;
-	unfix{ i in V, j in V,f in F: (i,j) in E} w[i,j,f];
+
 }
 while (found==0);
 
