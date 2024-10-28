@@ -32,18 +32,24 @@ namespace Graph
 		anglePM{ anglePM }
 	{
 	}
-	Edge* Node::getInEdge(int nodeID)
+	Edge* Node::getInEdge(const int nodeID)
 	{
 		auto it = find_if(inArcs.begin(), inArcs.end(), [nodeID](Edge* edge) {return edge->source->id == nodeID; });
 		if (it == inArcs.end())
 			throw std::exception("Edge not found");
 		return *it;
 	}
-	Edge* Node::getOutEdge(int nodeID)
+	Edge* Node::getOutEdge(const int nodeID)
 	{
 		auto it = find_if(outArcs.begin(), outArcs.end(), [nodeID](Edge* edge) {return edge->destination->id == nodeID; });
 		if (it == outArcs.end())
 			throw std::exception("Edge not found");
 		return *it;
+	}
+
+	bool Node::isGoingTo(const int nodeID)
+	{
+		auto it = find_if(outArcs.begin(), outArcs.end(), [nodeID](Edge* edge) {return edge->destination->id == nodeID; });
+		return it != outArcs.end();
 	}
 }

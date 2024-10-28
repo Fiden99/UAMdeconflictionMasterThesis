@@ -1,12 +1,11 @@
 #pragma once
 #include <vector>
 #include <map>
-#include "edge.h"
 #include <optional>
+#include "edge.h"
 namespace Graph
 {
 	class Edge;
-	//use to use reference std::reference_wrapper
 	class Node
 	{
 	private:
@@ -26,7 +25,8 @@ namespace Graph
 		Node(int id, std::vector<Edge*> inArcs, std::vector<Edge*> outArcs);
 		Node(int id, std::vector<Edge*> inArcs, std::vector<Edge*> outArcs, std::map<std::pair<Node*, Node*>, double> angleP, std::map<std::pair<Node*, Node*>, double> angleM, std::map<std::pair<Node*, Node*>, double> anglePM);
 		//utility functions
-		Edge* getInEdge(int nodeID);
-		Edge* getOutEdge(int nodeID);
+		Edge* getInEdge(const int nodeID);
+		Edge* getOutEdge(const int nodeID);
+		bool isGoingTo(const int nodeID);
 	};
 }
