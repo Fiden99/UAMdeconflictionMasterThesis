@@ -23,6 +23,11 @@ repeat
 {
 	option relax_integrality 1;
 	solve path >(log_name);
+	if solve_result <> "solved" then
+	{
+		printf "path not found in given time";
+		break;
+	}
 	printf "find path in it %d\nsolve time:= %f, ampl time:= %f, sol:=%d",iterations,_solve_time,_ampl_time,MC >(sol_name);
 	#to put a check if I found a path or not, if I couldn't find it's useless continue
 	fix {f in F, i in V,j in V: (i,j)in E} w[i,j,f];

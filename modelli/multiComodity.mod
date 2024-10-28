@@ -63,7 +63,7 @@ sum{y in V: (x,y) in E} w[x,y,i]=sum{y in V: (y,x) in E} w[y,x,i];
 subject to startingPath{i in F}:
 sum{x in V: (x,s[i]) in E} w[x,s[i],i] -sum{x in V: (s[i],x) in E} w[s[i],x,i]=-1;
 subject to finishingPath{i in F}:
-sum{x in V:(e[i],x) in E} w[e[i],x,i] - sum{x in V: (x,e[i]) in E} w[x,e[i],i]=-1;
+sum{x in V: (x,e[i]) in E} w[x,e[i],i]- sum{x in V:(e[i],x) in E} w[e[i],x,i]=1;
 subject to allPath{i in F, x in V :  x <> s[i] and x <> e[i]}:
 sum{y in V: (x,y) in E} w[x,y,i]=sum{y in V: (y,x) in E} w[y,x,i];
 
