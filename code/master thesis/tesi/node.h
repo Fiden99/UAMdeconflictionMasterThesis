@@ -1,11 +1,11 @@
 #pragma once
 #include <vector>
 #include <map>
+#include <optional>
 #include "edge.h"
 namespace Graph
 {
 	class Edge;
-	//use to use reference std::reference_wrapper
 	class Node
 	{
 	private:
@@ -16,13 +16,17 @@ namespace Graph
 		std::vector<Edge*> inArcs;
 		std::vector<Edge*> outArcs;
 		//angoli, con this il nodo angolato, x nel modello
-		std::map<std::pair<Node*, Node*>, float> angleP;
-		std::map<std::pair<Node*, Node*>, float> angleM;
-		std::map<std::pair<Node*, Node*>, float> anglePM;
+		std::map<std::pair<Node*, Node*>, double> angleP;
+		std::map<std::pair<Node*, Node*>, double> angleM;
+		std::map<std::pair<Node*, Node*>, double> anglePM;
 		//int* t_cost_ear;
 		Node();
 		Node(int id);
 		Node(int id, std::vector<Edge*> inArcs, std::vector<Edge*> outArcs);
-		Node(int id, std::vector<Edge*> inArcs, std::vector<Edge*> outArcs, std::map<std::pair<Node*, Node*>, float> angleP, std::map<std::pair<Node*, Node*>, float> angleM, std::map<std::pair<Node*, Node*>, float> anglePM);
+		Node(int id, std::vector<Edge*> inArcs, std::vector<Edge*> outArcs, std::map<std::pair<Node*, Node*>, double> angleP, std::map<std::pair<Node*, Node*>, double> angleM, std::map<std::pair<Node*, Node*>, double> anglePM);
+		//utility functions
+		Edge* getInEdge(const int nodeID);
+		Edge* getOutEdge(const int nodeID);
+		bool isGoingTo(const int nodeID);
 	};
 }

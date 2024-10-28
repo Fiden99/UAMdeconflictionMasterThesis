@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include "node.h"
 namespace Graph
 {
@@ -9,11 +10,11 @@ namespace Graph
 		Node* source;
 		Node* destination;
 		int distance;
-		//TODO capire come gestire v_min e v_max che dovrebbero essere vettori/array
-		/*int v_min;
-		int v_max;
-		*/
+		std::vector<double> v_min;
+		std::vector<double> v_max;
 		Edge();
 		Edge(Node* source, Node* destination, int distance);
+		Edge(Node* source, Node* destination, int distance, std::vector<double> v_min, std::vector<double> v_max);
+		Edge(Node* source, Node* destination, int distance, int nFlights);
 	};
 }

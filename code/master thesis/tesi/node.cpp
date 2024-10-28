@@ -4,6 +4,7 @@
 #include <functional>
 #include "edge.h"
 #include "node.h"
+#include <iostream>
 
 namespace Graph
 {
@@ -22,7 +23,7 @@ namespace Graph
 		outArcs{ outArcs }
 	{
 	}
-	Node::Node(int id, std::vector<Edge*> inArcs, std::vector<Edge*> outArcs, std::map<std::pair<Node*, Node*>, float> angleP, std::map<std::pair<Node*, Node*>, float> angleM, std::map<std::pair<Node*, Node*>, float> anglePM) :
+	Node::Node(int id, std::vector<Edge*> inArcs, std::vector<Edge*> outArcs, std::map<std::pair<Node*, Node*>, double> angleP, std::map<std::pair<Node*, Node*>, double> angleM, std::map<std::pair<Node*, Node*>, double> anglePM) :
 		id{ id },
 		inArcs{ inArcs },
 		outArcs{ outArcs },
@@ -30,5 +31,25 @@ namespace Graph
 		angleM{ angleM },
 		anglePM{ anglePM }
 	{
+	}
+	Edge* Node::getInEdge(const int nodeID)
+	{
+		auto it = find_if(inArcs.begin(), inArcs.end(), [nodeID](Edge* edge) {return edge->source->id == nodeID; });
+		if (it == inArcs.end())
+			throw std::exception("Edge not found");
+		return *it;
+	}
+	Edge* Node::getOutEdge(const int nodeID)
+	{
+		auto it = find_if(outArcs.begin(), outArcs.end(), [nodeID](Edge* edge) {return edge->destination->id == nodeID; });
+		if (it == outArcs.end())
+			throw std::exception("Edge not found");
+		return *it;
+	}
+
+	bool Node::isGoingTo(const int nodeID)
+	{
+		auto it = find_if(outArcs.begin(), outArcs.end(), [nodeID](Edge* edge) {return edge->destination->id == nodeID; });
+		return it != outArcs.end();
 	}
 }

@@ -139,6 +139,7 @@
     <ClCompile Include="flights.cpp" />
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="node.cpp" />
+    <ClCompile Include="printDat.cpp" />
     <ClCompile Include="reader.cpp" />
     <ClCompile Include="tesi.cpp" />
     <ClCompile Include="timer.cpp" />
