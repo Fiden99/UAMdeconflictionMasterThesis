@@ -25,6 +25,9 @@ var t_down{F,V} >=0;
 var t_up {F,V} >= 0;
 var t_ear{F,V} integer>=0 ;															#variable time, understand why is not integer
 var t_lat{F,V} >=0;																		#variable time, undestand why is not integer
+#heuristic var
+var dMCF{x in V,y in V: (x,y) in E} >=0;
+
 
 #binary variables for linearization of conflicts
 var y1t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
@@ -170,7 +173,7 @@ yso1[i,j,x,x1,x2]+yso2[i,j,x,x1,x2]<=1;
 #minimize z: sum{i in F,x in V, y in V: (x,y) in E} w[x,y,i];
 #objective 50
 minimize UAM: sum{i in F} t_ear[i,e[i]];
-minimize MC: sum{f in F, x in V,y in V: (x,y) in E} w[x,y,f] * d[x,y];
+minimize MC: sum{f in F, x in V,y in V: (x,y) in E} w[x,y,f] * dMCF[x,y];
 
 #l'ordine è obj, variabili, vincoli
 problem path: MC, w,startingPath,finishingPath,allPath;

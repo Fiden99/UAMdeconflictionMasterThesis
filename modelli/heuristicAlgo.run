@@ -21,8 +21,8 @@ param log_name symbolic;
 let log_name := sprintf("%s/heuristicOut/%s%s.log",($absPath),($value),($datFile));
 #let log_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.log",($absPath),($value),($datFile));
 display data_name;
-
-
+for {i in V, j in V:(i,j) in E}
+	let dMCF[i,j]:= d[i,j];
 repeat
 {
 	#unfix{ i in V, j in V,f in F: (i,j) in E} w[i,j,f];
@@ -47,11 +47,11 @@ repeat
 		{
 			  if (w[i,j,f1] + w[i,j,f2] == 2) then 
 			  {
-			  let d[i,j] := min(sqrt(alpha) * d[i,j],1e5);
+			  let dMCF[i,j] := min(sqrt(alpha) * dMCF[i,j],1e5);
 			  }
 		}
 	}
-	display d;
+	display dMCF;
 	let iterations:=iterations + 1;
 
 }
