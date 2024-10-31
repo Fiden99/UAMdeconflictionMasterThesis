@@ -39,6 +39,9 @@
     <ClCompile Include="printDat.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="ShortestPathAlgo.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graph.h">
@@ -54,6 +57,9 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="timer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="ShortestPathAlgo.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

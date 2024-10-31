@@ -2,12 +2,7 @@
 //
 
 #include <iostream>
-#include <vector>
-#include "flights.h"
-#include "Graph.h"
-
-
-
+#include "ShortestPathAlgo.h"
 
 //presente in reader.cpp
 void reader(std::string& filename, Graph::Graph& graph, std::vector<Graph::Flight*>& flights);
@@ -20,12 +15,15 @@ int main(int argc, char* argv[])
 	Graph::Graph graph;
 	std::vector<Graph::Flight*> flights;
 	reader(filename, graph, flights);
+	getMinPathDijsktra(graph, flights);
+	getMinPathsFW(graph, flights);
 	std::cout << "ho letto il file" << std::endl;
 	filename = "C:\\Users\\Filippo\\Desktop\\materiale universitario\\magistrale\\tesi\\modelli\\testCPP\\testGrid0.dat";
 	printDat(filename, graph, flights);
 	system(("notepad " + filename).c_str());
 	return 0;
 }
+
 // Per eseguire il programma: CTRL+F5 oppure Debug > Avvia senza eseguire debug
 // Per eseguire il debug del programma: F5 oppure Debug > Avvia debug
 
