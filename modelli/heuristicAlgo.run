@@ -1,6 +1,6 @@
 reset;
 option solver gurobi;
-option gurobi_options 'timing=1 outlev=1 threads=1 timelim=3600';
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=60';
 param data_name symbolic;
 let data_name :=sprintf("%s/data/%s.dat",($absPath),($datFile));
 #let data_name :=sprintf("%s/data/nn10nf100/%s.dat",($absPath),($datFile));
@@ -25,24 +25,31 @@ for {i in V, j in V:(i,j) in E}
 	let dMCF[i,j]:= d[i,j];
 repeat
 {
-	#unfix{ i in V, j in V,f in F: (i,j) in E} w[i,j,f];
+	
 	option relax_integrality 1;
+	printf "solving path in it %d\n\n",iterations> (log_name);
+	#capire perché inserisce troppe variablili
 	solve path >(log_name);
 	if solve_result <> "solved" then
 	{
 		printf "path not found in given time\n";
 		break;
 	}
+	for {i in V,j in V,f in F: (i,j) in E}
+		let w[i,j,f]:=wPath[i,j,f];
 	printf "find path in it %d\nsolve time:= %f, ampl time:= %f, sol:=%d",iterations,_solve_time,_ampl_time,MC >(sol_name);
 	option relax_integrality 0;
 	solve conflicts > (log_name);
 	printf "find time in it %d\nsolve time:= %f, ampl time:= %f, sol:=%d",iterations,_solve_time,_ampl_time,UAM >(sol_name);
+	display solve_result, solve_result_num;
+	#if (solve_result == "solved" or 400<=solve_result_num or solve_result_num<=403 ) then
 	if solve_result == "solved" then
 	{
 		let found:=1;
 	}
 	else
 	{
+		#come posso capire dove ci sono i conflitti se non ho una soluzione?
 		for { f1 in F, f2 in F, i in V, j in V: (i,j) in E and f1 <> f2 } 
 		{
 			  if (w[i,j,f1] + w[i,j,f2] == 2) then 
@@ -61,6 +68,9 @@ while (found==0);
 printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
 display UAM >(sol_name);
 printf "variable\t\t value\t UB\t\t\t LB\n" >(sol_name);
+for {i in V,j in V, f in F: (i,j) in E}{
+	printf "w[%d,%d,%d] :=\t %d;\n", i,j,f, w[i,j,f] > (sol_name);
+}
 for { j in 1.._nvars} {
    printf "let %s :=\t %d\t %f\t %f;\n", _varname[j], _var[j] , _var[j].ub, _var[j].lb > (sol_name);
 }

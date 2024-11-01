@@ -9,6 +9,7 @@ param e{F};																					#ending poitn for each flight
 param d{x in V,y in V: (x,y) in E}>=0 default 0;											#distance for each pair of nodes
 param v_max{F,x in V, y in V: (x,y) in E};
 param v_min{F,x in V, y in V: (x,y) in E};
+param dMCF{x in V,y in V: (x,y) in E} >=0 default 0;
 #param v{F,V};																				#entering speed 
 param bigM:=sum{f in F,i in V,j in V: (i,j) in E}d[i,j] * v_min[f,i,j];	#bigM for linearizing purpose
 param angleM{x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E  and x1<> x2};							# angle-for merging
@@ -17,8 +18,8 @@ param anglePM{x in V, x1 in V,x2 in V: (x,x1) in E and (x2,x) in E and x1<>x2};	
 param D;																						# safety distance
 param t_hat_ear{F,V};
 param t_hat_lat{F,V};
+param w{i in V,j in V,F: (i,j) in E} binary;																		#flight f pass through arc i,j
 #variables
-var w{i in V,j in V,F: (i,j) in E} binary;																		#flight f pass through arc i,j
 var z_up{i in V,j in V,F: (i,j) in E} integer >=0 ;														# variable for w*t, understand why is not integer
 var z_down{i in V,j in V,F: (i,j) in E} integer >=0;													#variable for w*t
 var t_down{F,V} >=0;
@@ -26,8 +27,7 @@ var t_up {F,V} >= 0;
 var t_ear{F,V} integer>=0 ;															#variable time, understand why is not integer
 var t_lat{F,V} >=0;																		#variable time, undestand why is not integer
 #heuristic var
-var dMCF{x in V,y in V: (x,y) in E} >=0;
-
+var wPath{i in V,j in V,F: (i,j) in E} binary;		
 
 #binary variables for linearization of conflicts
 var y1t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
@@ -64,11 +64,11 @@ subject to allW{i in F, x in V :  x <> s[i] and x <> e[i]}:
 sum{y in V: (x,y) in E} w[x,y,i]=sum{y in V: (y,x) in E} w[y,x,i];
 
 subject to startingPath{i in F}:
-sum{x in V: (x,s[i]) in E} w[x,s[i],i] -sum{x in V: (s[i],x) in E} w[s[i],x,i]=-1;
+sum{x in V: (x,s[i]) in E} wPath[x,s[i],i] -sum{x in V: (s[i],x) in E} wPath[s[i],x,i]=-1;
 subject to finishingPath{i in F}:
-sum{x in V: (x,e[i]) in E} w[x,e[i],i]- sum{x in V:(e[i],x) in E} w[e[i],x,i]=1;
+sum{x in V: (x,e[i]) in E} wPath[x,e[i],i]- sum{x in V:(e[i],x) in E} wPath[e[i],x,i]=1;
 subject to allPath{i in F, x in V :  x <> s[i] and x <> e[i]}:
-sum{y in V: (x,y) in E} w[x,y,i]=sum{y in V: (y,x) in E} w[y,x,i];
+sum{y in V: (x,y) in E} wPath[x,y,i]=sum{y in V: (y,x) in E} wPath[y,x,i];
 
 subject to limitT_down{i in F, x in V : x <> s[i]}:
 t_down[i,x] <= t_ear[i,x];
@@ -173,16 +173,16 @@ yso1[i,j,x,x1,x2]+yso2[i,j,x,x1,x2]<=1;
 #minimize z: sum{i in F,x in V, y in V: (x,y) in E} w[x,y,i];
 #objective 50
 minimize UAM: sum{i in F} t_ear[i,e[i]];
-minimize MC: sum{f in F, x in V,y in V: (x,y) in E} w[x,y,f] * dMCF[x,y];
+minimize MC: sum{f in F, x in V,y in V: (x,y) in E} wPath[x,y,f] * dMCF[x,y];
 
 #l'ordine è obj, variabili, vincoli
-problem path: MC, w,startingPath,finishingPath,allPath;
+problem path: MC, wPath,startingPath,finishingPath,allPath;
 
 problem conflicts: UAM,
 #variables
     t_ear, t_lat, z_up, z_down, t_down, t_up,
    y1t, y1o1, y1o2, y2t, y2o1, y2o2, ym, ymo1, ymo2, yd, ydo1, ydo2, ys, yso1, yso2,
-   #w
+   #w,
 #constrains
     afterprecalculated, calculateLat, 
     #startingW, finishingW, allW,
@@ -196,7 +196,8 @@ problem conflicts: UAM,
     split1, split2, split3, split4, split5;
 problem wholeModel: UAM,
 #variables
-    t_ear, t_lat, w, z_up, z_down, t_down, t_up,
+    #w,
+    t_ear, t_lat, z_up, z_down, t_down, t_up,
    y1t, y1o1, y1o2, y2t, y2o1, y2o2, ym, ymo1, ymo2, yd, ydo1, ydo2, ys, yso1, yso2,
 #constrains
     afterprecalculated, calculateLat, 
