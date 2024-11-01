@@ -27,12 +27,13 @@ var t_up {F,V} >= 0;
 var t_ear{F,V} integer>=0 ;															#variable time, understand why is not integer
 var t_lat{F,V} >=0;																		#variable time, undestand why is not integer
 #heuristic var
-var wPath{i in V,j in V,F: (i,j) in E} binary;		
+var wPath{i in V,j in V,F: (i,j) in E} >=0, <=1;		
 
 #binary variables for linearization of conflicts
 var y1t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
 var y1o1{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
 var y1o2{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
+
 var y2t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
 var y2o1{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
 var y2o2{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
@@ -194,6 +195,8 @@ problem conflicts: UAM,
     merge1, merge2, merge3, merge4, merge5,
     diver1, diver2, diver3, diver4, diver5,
     split1, split2, split3, split4, split5;
+
+
 problem wholeModel: UAM,
 #variables
     #w,
