@@ -163,7 +163,7 @@ repeat
     }
     for {i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2}
     {
-        unfix ym[i,j,x,x1,x2]:=1;
+        unfix ym[i,j,x,x1,x2];
         restore merge1[i,j,x,x1,x2];
         restore merge2[i,j,x,x1,x2];
         restore merge3[i,j,x,x1,x2];
@@ -172,7 +172,7 @@ repeat
     }
     for {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2}
     {
-        fix yd[i,j,x,x1,x2]:=1;
+        unfix yd[i,j,x,x1,x2];
         restore diver1[i,j,x,x1,x2];
         restore diver2[i,j,x,x1,x2];
         restore diver3[i,j,x,x1,x2];
@@ -182,7 +182,7 @@ repeat
     
     for {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2}
     {
-        fix ys[i,j,x,x1,x2]:=1;
+        unfix ys[i,j,x,x1,x2];
         restore split1[i,j,x,x1,x2];
         restore split2[i,j,x,x1,x2];
         restore split3[i,j,x,x1,x2];
