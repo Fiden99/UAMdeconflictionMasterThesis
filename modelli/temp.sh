@@ -9,4 +9,4 @@
 # Crea una lista di tutti i file .dat nella directory "data/"
 
 # Esegui AMPL con il file .dat corrente
-value="5" absPath=$PWD datFile="airport0" ampl /home/magi/UAMdeconflictionMasterThesis/modelli/heuristicAlgo.run
+value="6" absPath=$PWD datFile="airport0" ampl /home/magi/UAMdeconflictionMasterThesis/modelli/reducedHeuristicAlgo.run
