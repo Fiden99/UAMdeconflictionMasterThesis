@@ -24,4 +24,4 @@ datFile=${FILES[$SLURM_ARRAY_TASK_ID]}
 datFileBase=$(basename "$datFile" .dat)
 
 # Esegui AMPL con il file .dat corrente
-value="6" absPath=$PWD datFile=$datFileBase ampl /home/magi/UAMdeconflictionMasterThesis/modelli/reducedHeuristicAlgo.run
+value="6" nNodes="3" nFlights="5" absPath=$PWD datFile=$datFileBase ampl /home/magi/UAMdeconflictionMasterThesis/modelli/reducedHeuristicAlgo.run

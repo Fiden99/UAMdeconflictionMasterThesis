@@ -2,7 +2,7 @@ reset;
 option solver gurobi;
 option gurobi_options 'timing=1 outlev=1 threads=1 timelim=60';
 param data_name symbolic;
-let data_name :=sprintf("%s/data/%s.dat",($absPath),($datFile));
+let data_name :=sprintf("%s/data/nn%snf%s/%s.dat",($absPath),($nNodes),($nFlights),($datFile));
 #let data_name :=sprintf("%s/data/nn10nf100/%s.dat",($absPath),($datFile));
 param model_name symbolic;
 let model_name :=sprintf("%s/multiComodity.mod",($absPath));
@@ -14,11 +14,11 @@ param alpha;
 let alpha:=4;
 param found default 0;
 param sol_name symbolic;
-let sol_name := sprintf("%s/heuristicOut/%s/%s%s.sol", ($absPath),($value),($value),($datFile));
+let sol_name := sprintf("%s/heuristicOut/nn%snf%s/%s%s.sol", ($absPath),($nNodes),($nFlights),($value),($value),($datFile));
 #let sol_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.sol", ($absPath),($value),($datFile));
 # Define the name of the file where the log of the solver will be saved
 param log_name symbolic;
-let log_name := sprintf("%s/heuristicOut/%s/%s%s.log",($absPath),($value),($value),($datFile));
+let log_name := sprintf("%s/heuristicOut/nn%snf%s/%s%s.log",($absPath),($nNodes),($nFlights),($value),($value),($datFile));
 #let log_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.log",($absPath),($value),($datFile));
 display data_name;
 for {i in V, j in V:(i,j) in E}
@@ -190,7 +190,6 @@ repeat
         restore split5[i,j,x,x1,x2];
     }
 	display solve_result, solve_result_num;
-	#if (solve_result == "solved" or 400<=solve_result_num or solve_result_num<=403 ) then
 	if (solve_result == "solved" or 400<=solve_result_num or solve_result_num<=403 ) then
 	{
         #update optimal solution
@@ -243,7 +242,8 @@ repeat
 			}
 		}
 	}
-	if (solve_result == "solved" ) then#or iterations>100) then
+    #if (solve_result =="solved") then
+	if (solve_result == "solved" or iterations>100) then
 	{
 		let found:=1;
 	}
