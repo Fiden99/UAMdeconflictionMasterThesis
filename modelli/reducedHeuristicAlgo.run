@@ -14,16 +14,18 @@ param alpha;
 let alpha:=4;
 param found default 0;
 param sol_name symbolic;
-let sol_name := sprintf("%s/heuristicOut/nn%snf%s/%s%s.sol", ($absPath),($nNodes),($nFlights),($value),($value),($datFile));
+let sol_name := sprintf("%s/heuristicOut/nn%snf%s/%s%s.sol", ($absPath),($nNodes),($nFlights),($value),($datFile));
 #let sol_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.sol", ($absPath),($value),($datFile));
 # Define the name of the file where the log of the solver will be saved
 param log_name symbolic;
-let log_name := sprintf("%s/heuristicOut/nn%snf%s/%s%s.log",($absPath),($nNodes),($nFlights),($value),($value),($datFile));
+let log_name := sprintf("%s/heuristicOut/nn%snf%s/%s%s.log",($absPath),($nNodes),($nFlights),($value),($datFile));
 #let log_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.log",($absPath),($value),($datFile));
 display data_name;
 for {i in V, j in V:(i,j) in E}
 	let dMCF[i,j]:= d[i,j];
 
+param lastOpt default 0;
+param sameOpt default 0;
 #heuristic var
 param opt default Infinity;
 
@@ -243,7 +245,8 @@ repeat
 		}
 	}
     #if (solve_result =="solved") then
-	if (solve_result == "solved" or iterations>100) then
+	#if (solve_result == "solved" or iterations>100) then
+	if (solve_result == "solved" or sameOpt>=10) then
 	{
 		let found:=1;
 	}
@@ -258,8 +261,17 @@ repeat
 			  }
 		}
 	}
+    if (UAM == lastOpt) then
+    {
+        let sameOpt:=sameOpt+1;
+    }
+    else
+    {
+        let sameOpt:=0;
+    }
 	display dMCF;
 	let iterations:=iterations + 1;
+    let lastOpt:=UAM;
 	#let cutoff:= cutoff- 0.1*opt;
 
 }
