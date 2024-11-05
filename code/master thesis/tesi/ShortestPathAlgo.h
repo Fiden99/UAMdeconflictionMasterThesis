@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include "boost/heap/fibonacci_heap.hpp"
-#include "boost/heap/priority_queue.hpp"
+#include "boost/heap/binomial_heap.hpp"
 #include "graph.h"
 #include "flights.h"
 
