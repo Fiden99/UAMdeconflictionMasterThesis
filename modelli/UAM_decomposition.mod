@@ -114,70 +114,49 @@ v_min[i,x,y]*(t_ear[i,y]-t_lat[j,y])>= D-bigM*y2t[i,j,x,y] - y2o2[i,j,x,y] * big
 subject to trail25 {i in F,j in F, x in V, y in V:(x,y) in E and i<>j}:
 y2o1[i,j,x,y]+y2o2[i,j,x,y]<=1;
 
-subject to merge1{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j
-and x1<> x2}:
+subject to merge1{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2}:
 2*(1-ym[i,j,x,x1,x2]) <= w[x1,x,i]+w[x2,x,j];
-subject to merge2{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j
-and x1<> x2}:
+subject to merge2{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2}:
 w[x1,x,i]+w[x2,x,j] <= 2 -ym[i,j,x,x1,x2];
 #TODO check if the speed parameter is correct for merge4
-subject to merge3 {i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j
-and x1<> x2}:
-t_ear[j,x]- t_lat[i,x]>=angleM[x,x1,x2]*D/v_min[j,x2,x]-bigM*ym[i,j,x,x1,x2] -
-ymo1[i,j,x,x1,x2]*bigM;
+subject to merge3 {i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2}:
+t_ear[j,x]- t_lat[i,x]>=angleM[x,x1,x2]*D/v_min[j,x2,x]-bigM*ym[i,j,x,x1,x2] - ymo1[i,j,x,x1,x2]*bigM;
 #t[j,x]- t[i,x]>=angleM[i,j,x]*D/v[j,x]-bigM*ym[i,j,x,x1,x2] - ymo1[i,j,x,x1,x2]*bigM;
-subject to merge4 {i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j
-and x1<> x2}:
-t_ear[i,x]- t_lat[j,x]>=angleM[x,x1,x2]*D/v_min[i,x1,x]-bigM*ym[i,j,x,x1,x2] -
-ymo2[i,j,x,x1,x2]*bigM;
+subject to merge4 {i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2}:
+t_ear[i,x]- t_lat[j,x]>=angleM[x,x1,x2]*D/v_min[i,x1,x]-bigM*ym[i,j,x,x1,x2] - ymo2[i,j,x,x1,x2]*bigM;
 #t[i,x]- t[j,x]>=angleM[i,j,x]*D/v[i,x]-bigM*ym[i,j,x,x1,x2] - ymo2[i,j,x,x1,x2]*bigM;
-subject to merge5{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j
-and x1<> x2}:
+subject to merge5{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2}:
 ymo1[i,j,x,x1,x2]+ymo2[i,j,x,x1,x2]<=1;
 
-subject to diver1 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and i<>j
-and x1<> x2}:
+subject to diver1 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and i<>j and x1<> x2}:
 2*(1-yd[i,j,x,x1,x2]) <= w[x,x1,i]+w[x2,x,j];
-subject to diver2 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and i<>j
-and x1<> x2}:
+subject to diver2 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and i<>j and x1<> x2}:
 w[x,x1,i]+w[x2,x,j] <= 2 -yd[i,j,x,x1,x2];
 #unica maniera che ha senso
-subject to diver3 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and i<>j
-and x1<> x2}: #and x <>e[i]
-t_ear[j,x]- t_lat[i,x]>=anglePM[x,x1,x2]*(D/v_min[j,x2,x]+D/v_min[i,x,x1]) -bigM*yd[i,j,x,x1,x2] -
-ydo1[i,j,x,x1,x2]*bigM;
+subject to diver3 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and i<>j and x1<> x2}: #and x <>e[i]
+t_ear[j,x]- t_lat[i,x]>=anglePM[x,x1,x2]*(D/v_min[j,x2,x]+D/v_min[i,x,x1]) -bigM*yd[i,j,x,x1,x2] - ydo1[i,j,x,x1,x2]*bigM;
 #t[j,x]- t[i,x]>=anglePM[i,j,x]*(D/v[j,x]+D/v[i,x1]) -bigM*yd[i,j,x,x1,x2] - ydo1[i,j,x,x1,x2]*bigM;
-subject to diver4 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and i<>j
-and x1<> x2}: #and x <> e[j]
-t_ear[i,x]- t_lat[j,x]>=anglePM[x,x1,x2]*(D/v_min[i,x2,x]+D/v_min[j,x,x1])-bigM*yd[i,j,x,x1,x2] -
-ydo2[i,j,x,x1,x2]*bigM;
+subject to diver4 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and i<>j and x1<> x2}: #and x <> e[j]
+t_ear[i,x]- t_lat[j,x]>=anglePM[x,x1,x2]*(D/v_min[i,x2,x]+D/v_min[j,x,x1])-bigM*yd[i,j,x,x1,x2] - ydo2[i,j,x,x1,x2]*bigM;
 #t[i,x]- t[j,x]>=anglePM[i,j,x]*(D/v[i,x]+D/v[j,x1])-bigM*yd[i,j,x,x1,x2] - ydo2[i,j,x,x1,x2]*bigM;
-subject to diver5 {i in F, j in F, x in V, x1 in V, x2 in V:(x,x1) in E and (x2,x) in E and i<>j
-and x1<> x2}:
+subject to diver5 {i in F, j in F, x in V, x1 in V, x2 in V:(x,x1) in E and (x2,x) in E and i<>j and x1<> x2}:
 ydo1[i,j,x,x1,x2]+ydo2[i,j,x,x1,x2]<=1;
 #put ending cases
 
 
 #change xy with explicit values that I have
-subject to split1 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j
-and x1<> x2}:
+subject to split1 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j and x1<> x2}:
 2*(1-ys[i,j,x,x1,x2]) <= w[x,x1,i]+w[x,x2,j];
-subject to split2 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j
-and x1<> x2}:
+subject to split2 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j and x1<> x2}:
 w[x,x1,i]+w[x,x2,j] <= 2 -ys[i,j,x,x1,x2];
 #TODO check if the speed parameter is correct for split4
-subject to split3 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j
-and x1<> x2}:
-t_ear[j,x]- t_lat[i,x]>=angleP[x,x1,x2]*D/v_min[i,x,x1]-bigM*ys[i,j,x,x1,x2] -
-yso1[i,j,x,x1,x2]*bigM;
+subject to split3 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j and x1<> x2}:
+t_ear[j,x]- t_lat[i,x]>=angleP[x,x1,x2]*D/v_min[i,x,x1]-bigM*ys[i,j,x,x1,x2] - yso1[i,j,x,x1,x2]*bigM;
 #t[j,x]- t[i,x]>=angleP[i,j,x]*D/v[i,x1]-bigM*ys[i,j,x,x1,x2] - yso1[i,j,x,x1,x2]*bigM;
-subject to split4 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j
-and x1<> x2}:
-t_ear[i,x]- t_lat[j,x]>=angleP[x,x1,x2]*D/v_min[j,x,x2]-bigM*ys[i,j,x,x1,x2] -
-yso2[i,j,x,x1,x2]*bigM;
+subject to split4 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j and x1<> x2}:
+t_ear[i,x]- t_lat[j,x]>=angleP[x,x1,x2]*D/v_min[j,x,x2]-bigM*ys[i,j,x,x1,x2] - yso2[i,j,x,x1,x2]*bigM;
 #t[i,x]- t[j,x]>=angleP[i,j,x]*D/v[i,x2]-bigM*ys[i,j,x,x1,x2] - yso2[i,j,x,x1,x2]*bigM;
-subject to split5 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j
-and x1<> x2}:
+subject to split5 {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j and x1<> x2}:
 yso1[i,j,x,x1,x2]+yso2[i,j,x,x1,x2]<=1;
 
 #objective 49

@@ -2,7 +2,7 @@ reset;
 option solver gurobi;
 option gurobi_options 'timing=1 outlev=1 threads=1 timelim=60';
 param data_name symbolic;
-let data_name :=sprintf("%s/data/%s.dat",($absPath),($datFile));
+let data_name :=sprintf("%s/data/nn%snf%s/%s.dat",($absPath),($nNodes),($nFlights),($datFile));
 #let data_name :=sprintf("%s/data/nn10nf100/%s.dat",($absPath),($datFile));
 param model_name symbolic;
 let model_name :=sprintf("%s/multiComodity.mod",($absPath));
@@ -14,16 +14,18 @@ param alpha;
 let alpha:=4;
 param found default 0;
 param sol_name symbolic;
-let sol_name := sprintf("%s/heuristicOut/%s/%s%s.sol", ($absPath),($value),($value),($datFile));
+let sol_name := sprintf("%s/heuristicOut/nn%snf%s/%s%s.sol", ($absPath),($nNodes),($nFlights),($value),($datFile));
 #let sol_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.sol", ($absPath),($value),($datFile));
 # Define the name of the file where the log of the solver will be saved
 param log_name symbolic;
-let log_name := sprintf("%s/heuristicOut/%s/%s%s.log",($absPath),($value),($value),($datFile));
+let log_name := sprintf("%s/heuristicOut/nn%snf%s/%s%s.log",($absPath),($nNodes),($nFlights),($value),($datFile));
 #let log_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.log",($absPath),($value),($datFile));
 display data_name;
 for {i in V, j in V:(i,j) in E}
 	let dMCF[i,j]:= d[i,j];
 
+param lastOpt default 0;
+param sameOpt default 0;
 #heuristic var
 param opt default Infinity;
 
@@ -163,7 +165,7 @@ repeat
     }
     for {i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2}
     {
-        unfix ym[i,j,x,x1,x2]:=1;
+        unfix ym[i,j,x,x1,x2];
         restore merge1[i,j,x,x1,x2];
         restore merge2[i,j,x,x1,x2];
         restore merge3[i,j,x,x1,x2];
@@ -172,7 +174,7 @@ repeat
     }
     for {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2}
     {
-        fix yd[i,j,x,x1,x2]:=1;
+        unfix yd[i,j,x,x1,x2];
         restore diver1[i,j,x,x1,x2];
         restore diver2[i,j,x,x1,x2];
         restore diver3[i,j,x,x1,x2];
@@ -182,7 +184,7 @@ repeat
     
     for {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2}
     {
-        fix ys[i,j,x,x1,x2]:=1;
+        unfix ys[i,j,x,x1,x2];
         restore split1[i,j,x,x1,x2];
         restore split2[i,j,x,x1,x2];
         restore split3[i,j,x,x1,x2];
@@ -190,7 +192,6 @@ repeat
         restore split5[i,j,x,x1,x2];
     }
 	display solve_result, solve_result_num;
-	#if (solve_result == "solved" or 400<=solve_result_num or solve_result_num<=403 ) then
 	if (solve_result == "solved" or 400<=solve_result_num or solve_result_num<=403 ) then
 	{
         #update optimal solution
@@ -243,7 +244,9 @@ repeat
 			}
 		}
 	}
-	if (solve_result == "solved" ) then#or iterations>100) then
+    #if (solve_result =="solved") then
+	#if (solve_result == "solved" or iterations>100) then
+	if (solve_result == "solved" or sameOpt>=10) then
 	{
 		let found:=1;
 	}
@@ -258,8 +261,17 @@ repeat
 			  }
 		}
 	}
+    if (UAM == lastOpt) then
+    {
+        let sameOpt:=sameOpt+1;
+    }
+    else
+    {
+        let sameOpt:=0;
+    }
 	display dMCF;
 	let iterations:=iterations + 1;
+    let lastOpt:=UAM;
 	#let cutoff:= cutoff- 0.1*opt;
 
 }

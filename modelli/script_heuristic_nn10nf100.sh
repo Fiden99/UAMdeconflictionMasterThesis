@@ -5,10 +5,10 @@
 #SBATCH --ntasks=1                      # Numero di task per job
 #SBATCH --cpus-per-task=1               # Numero di core per job
 #SBATCH --time=96:00:00                 # Tempo massimo per ogni job 
-#SBATCH --array=0-59
+#SBATCH --array=0-39
 
 # Crea una lista di tutti i file .dat nella directory "data/"
-FILES=($(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat))
+FILES=($(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/nn10nf100/*.dat))
 # FILES=(/home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat)
 
 # Definisci il job array in base al numero di file presenti nella directory data/
@@ -24,4 +24,4 @@ datFile=${FILES[$SLURM_ARRAY_TASK_ID]}
 datFileBase=$(basename "$datFile" .dat)
 
 # Esegui AMPL con il file .dat corrente
-value="6" nNodes="10" nFlights="100" absPath=$PWD datFile=$datFileBase ampl /home/magi/UAMdeconflictionMasterThesis/modelli/reducedHeuristicAlgo.run
+value="3" absPath=$PWD datFile=$datFileBase ampl /home/magi/UAMdeconflictionMasterThesis/modelli/heuristicAlgo.run
