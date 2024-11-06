@@ -74,123 +74,142 @@ repeat
 		break;
 	}
     # fix variables
+    printf("fixing variables\n");
 	for {i in V,j in V,f in F: (i,j) in E}
 		let w[i,j,f]:=wPath[i,j,f];
-
-    for {i in F, j in F, x in V, y in V:(x,y) in E and i<>j}
+    printf "fixing trail";
+    drop trail11;
+    drop trail12;
+    drop trail13;
+    drop trail14;
+    drop trail15;
+    drop trail21;
+    drop trail22;
+    drop trail23;
+    drop trail24;
+    drop trail25;
+    for {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2}
     {
-        if (w[x,y,i]+ w[x,y,j] == 2) then
-        {
-                fix y1t[i,j,x,y]:=0;
-                fix y2t[i,j,x,y]:=0;
-        }
-        else
-        {
-            drop trail11[i,j,x,y];
-            drop trail12[i,j,x,y];
-            drop trail13[i,j,x,y];
-            drop trail14[i,j,x,y];
-            drop trail15[i,j,x,y];
-            drop trail21[i,j,x,y];
-            drop trail22[i,j,x,y];
-            drop trail23[i,j,x,y];
-            drop trail24[i,j,x,y];
-            drop trail25[i,j,x,y];
-        }
+        fix y1t[i,j,x,y]:=0;
+        fix y2t[i,j,x,y]:=0;
+        drop trail11[i,j,x,y];
+        drop trail12[i,j,x,y];
+        drop trail13[i,j,x,y];
+        drop trail14[i,j,x,y];
+        drop trail15[i,j,x,y];
+        drop trail21[i,j,x,y];
+        drop trail22[i,j,x,y];
+        drop trail23[i,j,x,y];
+        drop trail24[i,j,x,y];
+        drop trail25[i,j,x,y];
     }
-    for {i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2}
+    printf "finish trail\n";
+    drop merge1;
+    drop merge2;
+    drop merge3;
+    drop merge4;
+    drop merge5;
+
+    drop split1;
+    drop split2;
+    drop split3;
+    drop split4;
+    drop split5;
+
+    drop diver1;
+    drop diver2;
+    drop diver3;
+    drop diver4;
+    drop diver5;
+
+    for {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<> x2}
     {
-        if (w[x1,x,i]+ w[x2,x,j] == 2) then
+        if ((x1,x) in E and (x2,x) in E and w[x1,x,i]+ w[x2,x,j] == 2) then
         {
+            printf "fix merge";
             fix ym[i,j,x,x1,x2]:=0;
+            printf "restore merge1";
+            restore merge1[i,j,x,x1,x2];
+            printf "restore merge2";
+            restore merge2[i,j,x,x1,x2];
+            printf "restore merge3";
+            restore merge3[i,j,x,x1,x2];
+            printf "restore merge4";
+            restore merge4[i,j,x,x1,x2];
+            printf "restore merge5";
+            restore merge5[i,j,x,x1,x2];
+            printf "finish restoring merge";
         }
-        else
+        if ((x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2) then
         {
-            drop merge1[i,j,x,x1,x2];
-            drop merge2[i,j,x,x1,x2];
-            drop merge3[i,j,x,x1,x2];
-            drop merge4[i,j,x,x1,x2];
-            drop merge5[i,j,x,x1,x2];
-        }
-    }
-    for {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2}
-    {
-        if (w[x,x1,i]+w[x2,x,j] == 2) then
-        {
+            printf "fixing diver";
             fix yd[i,j,x,x1,x2]:=0;
+            printf "restore diver1";
+            restore diver1[i,j,x,x1,x2];
+            printf "restore diver2";
+            restore diver2[i,j,x,x1,x2];
+            printf "restore diver3";            
+            restore diver3[i,j,x,x1,x2];
+            printf "restore diver4";            
+            restore diver4[i,j,x,x1,x2];
+            printf "restore diver5";            
+            restore diver5[i,j,x,x1,x2];
+            printf "finish restoring diver";
         }
-        else
+        if ((x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2) then
         {
-            drop diver1[i,j,x,x1,x2];
-            drop diver2[i,j,x,x1,x2];
-            drop diver3[i,j,x,x1,x2];
-            drop diver4[i,j,x,x1,x2];
-            drop diver5[i,j,x,x1,x2];
-        }
-    }
-    
-    for {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2}
-    {
-        if (w[x,x1,i]+w[x,x2,j] ==2) then
-        {
+            printf "fixing split";
             fix ys[i,j,x,x1,x2]:=0;
-        }
-        else
-        {
-            drop split1[i,j,x,x1,x2];
-            drop split2[i,j,x,x1,x2];
-            drop split3[i,j,x,x1,x2];
-            drop split4[i,j,x,x1,x2];
-            drop split5[i,j,x,x1,x2];
+            printf "restore split1";
+            restore split1[i,j,x,x1,x2];
+            printf "restore split2";
+            restore split2[i,j,x,x1,x2];
+            printf "restore split3";
+            restore split3[i,j,x,x1,x2];
+            printf "restore split4";
+            restore split4[i,j,x,x1,x2];
+            printf "restore split5";
+            restore split5[i,j,x,x1,x2];
+            printf "finish restoring split";    
         }
     }
-
+    printf "fixed variables, solving conflicts\n";
     #solving with fixed variables
 	solve conflicts > (log_name);
 	#unfix and restore variables
-    for {i in F, j in F, x in V, y in V:(x,y) in E and i<>j}
-    {
-        unfix y1t[i,j,x,y];
-        unfix y2t[i,j,x,y];
-        restore trail11[i,j,x,y];
-        restore trail12[i,j,x,y];
-        restore trail13[i,j,x,y];
-        restore trail14[i,j,x,y];
-        restore trail15[i,j,x,y];
-        restore trail21[i,j,x,y];
-        restore trail22[i,j,x,y];
-        restore trail23[i,j,x,y];
-        restore trail24[i,j,x,y];
-        restore trail25[i,j,x,y];
-    }
-    for {i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2}
-    {
-        unfix ym[i,j,x,x1,x2];
-        restore merge1[i,j,x,x1,x2];
-        restore merge2[i,j,x,x1,x2];
-        restore merge3[i,j,x,x1,x2];
-        restore merge4[i,j,x,x1,x2];
-        restore merge5[i,j,x,x1,x2];
-    }
-    for {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2}
-    {
-        unfix yd[i,j,x,x1,x2];
-        restore diver1[i,j,x,x1,x2];
-        restore diver2[i,j,x,x1,x2];
-        restore diver3[i,j,x,x1,x2];
-        restore diver4[i,j,x,x1,x2];
-        restore diver5[i,j,x,x1,x2];
-    }
-    
-    for {i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2}
-    {
-        unfix ys[i,j,x,x1,x2];
-        restore split1[i,j,x,x1,x2];
-        restore split2[i,j,x,x1,x2];
-        restore split3[i,j,x,x1,x2];
-        restore split4[i,j,x,x1,x2];
-        restore split5[i,j,x,x1,x2];
-    }
+    printf "restoring variables\n";
+ 
+    unfix y1t;
+    unfix y2t;
+    drop trail11;
+    drop trail12;
+    drop trail13;
+    drop trail14;
+    drop trail15;
+    drop trail21;
+    drop trail22;
+    drop trail23;
+    drop trail24;
+    drop trail25;
+    unfix ym;
+    drop merge1;
+    drop merge2;
+    drop merge3;
+    drop merge4;
+    drop merge5;
+    unfix yd;
+    drop diver1;
+    drop diver2;
+    drop diver3;
+    drop diver4;
+    drop diver5;
+    unfix ys;
+    drop split1;
+    drop split2;
+    drop split3;
+    drop split4;
+    drop split5;
+
 	display solve_result, solve_result_num;
 	if (solve_result == "solved" or 400<=solve_result_num or solve_result_num<=403 ) then
 	{
@@ -246,7 +265,7 @@ repeat
 	}
     #if (solve_result =="solved") then
 	#if (solve_result == "solved" or iterations>100) then
-	if (solve_result == "solved" or sameOpt>=10) then
+	if (solve_result == "solved" or sameOpt>=10 or iterations>200) then
 	{
 		let found:=1;
 	}
@@ -275,8 +294,9 @@ repeat
 	#let cutoff:= cutoff- 0.1*opt;
 
 }
+#"numero nodi","numero voli","tipologia","istanza", "risultato euristica","tempo euristica","optTime","numero iterazioni","iterazione dove trovo ottimo"
 while (found==0);
-
+printf "%d,%d,%s,instance,%d,%f,%f,%d\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> "results.csv";
 # Store the solution in a file
 printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
 display opt, iterations, optTime,iteropt>(sol_name);
