@@ -3,11 +3,11 @@ param data_name symbolic;
 let data_name :=sprintf("%s/data/nn%snf%s/%s.dat",($absPath),($nNodes),($nFlights),($datFile));
 param model_name symbolic;
 let model_name :=sprintf("%s/UAM_decomposition.mod",($absPath));
+option solver gurobi;
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=431990';
 model (model_name);
 data (data_name);
 # Select the solver and set its options
-option solver gurobi;
-option gurobi_options 'timing=1 outlev=1 threads=1';
 
 # Define the name of the file where the solution will be saved
 param sol_name symbolic;
@@ -19,10 +19,13 @@ solve > (log_name);
 
 printf "\n### solve_result = %s, _total_solve_time = %f\n\n", solve_result, _total_solve_time > (log_name);
 # Store the solution in a file
-printf "### solve_result = %s, _total_solve_time = %f\n\n", solve_result, _total_solve_time > (sol_name);
-printf "\t\t variable\t value\t UB\t LB"
+printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
+display opt >(sol_name);
+printf "variable\t\t value\tLB\t\t\tUB \n" >(sol_name);
 for { j in 1.._nvars} {
-   printf "let %s :=\t %d\t %f\t %f;\n", _varname[j], _var[j] , _var[j].ub, _var[j].lb > (sol_name);
+   printf "let %s :=\t %d\t %f\t %f;\n", _varname[j], _var[j] , _var[j].lb, _var[j].ub > (sol_name);
 }
+
+
 
 
