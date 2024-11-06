@@ -92,7 +92,9 @@ void getMinPathsFW(const Graph::Graph& graph, const std::vector<Graph::Flight*>&
 
 }
 
-void dijkstra(const Graph::Graph& graph, Graph::Flight* flight, std::vector<int>& y, std::vector<Graph::Node*>& pi)
+
+
+void dijkstraFibonacci(const Graph::Graph& graph, Graph::Flight* flight, std::vector<int>& y, std::vector<Graph::Node*>& pi)
 {
 	Graph::Node* source = flight->source;
 	Graph::Node* destination = flight->destination;
@@ -134,12 +136,15 @@ void getMinPathDijsktra(const Graph::Graph& graph, const std::vector<Graph::Flig
 
 	for (int i = 0; static_cast<size_t>(i) < flights.size(); ++i)
 	{
-		dijkstra(graph, flights[i], y, pi);
+		dijkstraFibonacci(graph, flights[i], y, pi);
 		values[i] = y;
 		path[i] = pi;
 	}
+	//da rimuovere successivamente, vedo solo se funziona
 
 
 }
 
 
+//TODO capire come far decidere quale coda usare all'utente
+//TODO usare la coda binomiale e binaria
