@@ -23,7 +23,20 @@ let log_name := sprintf("%s/heuristicOut/fixed/%s.log",($absPath),($datFile));
 display data_name;
 for {i in V, j in V:(i,j) in E}
 	let dMCF[i,j]:= d[i,j];
-
+for {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2}
+	{
+        let y1t[i,j,x,y]:=0;
+        let y2t[i,j,x,y]:=0;
+	}
+	for {i in F, j in F, x in V, x1 in V, x2 in V : i<>j and x1<>x2}
+	{
+        if ((x1,x) in E and (x2,x) in E and w[x1,x,i]+ w[x2,x,j] == 2) then
+			let ym[i,j,x,x1,x2]:=0;
+        if ((x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2) then
+            let yd[i,j,x,x1,x2]:=0;
+        if ((x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2) then
+            let ys[i,j,x,x1,x2]:=0;
+	}	
 solve path >(log_name);
 if solve_result <> "solved" then
 {
@@ -37,7 +50,7 @@ solve conflicts > (log_name);
 printf "find time in it %d\nsolve time:= %f, ampl time:= %f, sol:=%d",iterations,_solve_time,_ampl_time,UAM >(sol_name);
 
 # Store the solution in a file
-printf "%d,%d,%s,fixed_instance,%d,%f,%f,%d\n",($nNodes),($nFlights),($datFile),UAM,(_ampl_elapsed_time + _total_solve_elapsed_time)>> "results.csv";
+printf "%d,%d,%s,fixed_instance,%d,%f,%f,%d\n",($nNodes),($nFlights),($datFile),UAM,(_ampl_elapsed_time + _total_solve_elapsed_time)>> "resultsFixed.csv";
 printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
 display UAM >(sol_name);
 printf "variable\t\t value\t LB\t\t\t UB\n" >(sol_name);

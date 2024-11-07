@@ -19,6 +19,11 @@ param D;																						# safety distance
 param t_hat_ear{F,V};
 param t_hat_lat{F,V};
 param w{i in V,j in V,F: (i,j) in E} binary;																		#flight f pass through arc i,j
+param y1t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
+param y2t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
+param ym{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2} binary;
+param yd{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2} binary;
+param ys{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2} binary;
 #variables
 var z_up{i in V,j in V,F: (i,j) in E} integer >=0 ;														# variable for w*t, understand why is not integer
 var z_down{i in V,j in V,F: (i,j) in E} integer >=0;													#variable for w*t
@@ -30,23 +35,18 @@ var t_lat{F,V} >=0;																		#variable time, undestand why is not intege
 var wPath{i in V,j in V,F: (i,j) in E} >=0, <=1;		
 
 #binary variables for linearization of conflicts
-var y1t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
 var y1o1{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
 var y1o2{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
 
-var y2t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
 var y2o1{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
 var y2o2{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
 
-var ym{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2} binary;
 var ymo1{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2} binary;
 var ymo2{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2} binary;
 
-var yd{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2} binary;
 var ydo1{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2} binary;
 var ydo2{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2} binary;
 
-var ys{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2} binary;
 var yso1{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2} binary;
 var yso2{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2} binary;
 
@@ -182,8 +182,9 @@ problem path: MC, wPath,startingPath,finishingPath,allPath;
 problem conflicts: UAM,
 #variables
     t_ear, t_lat, z_up, z_down, t_down, t_up,
-   y1t, y1o1, y1o2, y2t, y2o1, y2o2, ym, ymo1, ymo2, yd, ydo1, ydo2, ys, yso1, yso2,
-   #w,
+    #y1t,y2t,ym, yd, ys,
+    y1o1, y1o2,  y2o1, y2o2,  ymo1, ymo2, ydo1, ydo2, yso1, yso2,
+    #w,
 #constrains
     afterprecalculated, calculateLat, 
     #startingW, finishingW, allW,
@@ -201,7 +202,8 @@ problem wholeModel: UAM,
 #variables
     #w,
     t_ear, t_lat, z_up, z_down, t_down, t_up,
-   y1t, y1o1, y1o2, y2t, y2o1, y2o2, ym, ymo1, ymo2, yd, ydo1, ydo2, ys, yso1, yso2,
+    #y1t,y2t,ym, yd, ys,
+    y1o1, y1o2,  y2o1, y2o2,  ymo1, ymo2, ydo1, ydo2, yso1, yso2,
 #constrains
     afterprecalculated, calculateLat, 
     startingW, finishingW, allW,
