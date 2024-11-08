@@ -19,11 +19,11 @@ param D;																						# safety distance
 param t_hat_ear{F,V};
 param t_hat_lat{F,V};
 param w{i in V,j in V,F: (i,j) in E} binary;																		#flight f pass through arc i,j
-param y1t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
-param y2t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary;
-param ym{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2} binary;
-param yd{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2} binary;
-param ys{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2} binary;
+param y1t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary default 1;
+param y2t{i in F, j in F, x in V, y in V:(x,y) in E and i<>j} binary default 1;
+param ym{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<> x2} binary default 1;
+param yd{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and  i<>j and x1<> x2} binary default 1;
+param ys{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and  i<>j and x1<> x2} binary default 1;
 #variables
 var z_up{i in V,j in V,F: (i,j) in E} integer >=0 ;														# variable for w*t, understand why is not integer
 var z_down{i in V,j in V,F: (i,j) in E} integer >=0;													#variable for w*t

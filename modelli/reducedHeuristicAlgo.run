@@ -73,10 +73,22 @@ repeat
 		printf "path not found in given time\n";
 		break;
 	}
-    # fix variables
+    # 
     printf("fixing variables\n");
 	for {i in V,j in V,f in F: (i,j) in E}
 		let w[i,j,f]:=wPath[i,j,f];
+    for {i in F, j in F, x in V, y in V:(x,y) in E and i<>j}
+    {
+        let y1t[i,j,x,y]:=1;
+        let y2t[i,j,x,y]:=1;
+    }
+    #capire se mi darà problemi qui
+    for {i in F, j in F, x in V, x1 in V, x2 in V: x1<> x2 and i<> j}
+    {
+        let ym[i,j,x,x1,x2]:=1;
+        let yd[i,j,x,x1,x2]:=1;
+        let ys[i,j,x,x1,x2]:=1;
+    }
     printf "drop trail";
     drop trail11;
     drop trail12;
@@ -125,7 +137,6 @@ repeat
     printf "dropped all conflcits cosntrains %f",_ampl_elapsed_time;
     for {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2}
     {
-        printf "%d%d%d%d%d\n", i,j,x,x1,x2;
         if ((x1,x) in E and (x2,x) in E and w[x1,x,i]+ w[x2,x,j] == 2) then
         {
             printf "fix merge %f\n",_ampl_elapsed_time;
@@ -144,69 +155,41 @@ repeat
         }
         if ((x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2) then
         {
-            printf "fixing diver";
+            printf "fixing diver %f\n",_ampl_elapsed_time;
             let yd[i,j,x,x1,x2]:=0;
-            printf "restore diver1";
+            printf "restore diver1 %f\n",_ampl_elapsed_time;
             restore diver1[i,j,x,x1,x2];
-            printf "restore diver2";
+            printf "restore diver2 %f\n",_ampl_elapsed_time;
             restore diver2[i,j,x,x1,x2];
-            printf "restore diver3";            
+            printf "restore diver3 %f\n",_ampl_elapsed_time;        
             restore diver3[i,j,x,x1,x2];
-            printf "restore diver4";            
+            printf "restore diver4 %f\n",_ampl_elapsed_time;
             restore diver4[i,j,x,x1,x2];
-            printf "restore diver5";            
+            printf "restore diver5 %f\n",_ampl_elapsed_time;
             restore diver5[i,j,x,x1,x2];
-            printf "finish restoring diver";
+            printf "finish restoring diver %f\n",_ampl_elapsed_time;
         }
         if ((x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2) then
         {
-            printf "fixing split";
+            printf "fixing split %f\n",_ampl_elapsed_time;
             let ys[i,j,x,x1,x2]:=0;
-            printf "restore split1";
+            printf "restore split1 %f\n",_ampl_elapsed_time;
             restore split1[i,j,x,x1,x2];
-            printf "restore split2";
+            printf "restore split2 %f\n",_ampl_elapsed_time;
             restore split2[i,j,x,x1,x2];
-            printf "restore split3";
+            printf "restore split3 %f\n",_ampl_elapsed_time;
             restore split3[i,j,x,x1,x2];
-            printf "restore split4";
+            printf "restore split4 %f\n",_ampl_elapsed_time;
             restore split4[i,j,x,x1,x2];
-            printf "restore split5";
+            printf "restore split5 %f\n",_ampl_elapsed_time;
             restore split5[i,j,x,x1,x2];
-            printf "finish restoring split";    
+            printf "finish restoring split %f\n",_ampl_elapsed_time;
         }
     }
     printf "fixed variables, solving conflicts\n";
     #solving with fixed variables
 	solve conflicts > (log_name);
 	#unfix and restore variables
-    printf "restoring variables\n";
- 
-    drop trail11;
-    drop trail12;
-    drop trail13;
-    drop trail14;
-    drop trail15;
-    drop trail21;
-    drop trail22;
-    drop trail23;
-    drop trail24;
-    drop trail25;
-    drop merge1;
-    drop merge2;
-    drop merge3;
-    drop merge4;
-    drop merge5;
-    drop diver1;
-    drop diver2;
-    drop diver3;
-    drop diver4;
-    drop diver5;
-    drop split1;
-    drop split2;
-    drop split3;
-    drop split4;
-    drop split5;
-
 	display solve_result, solve_result_num;
 	if (solve_result == "solved" or 400<=solve_result_num or solve_result_num<=403 ) then
 	{
