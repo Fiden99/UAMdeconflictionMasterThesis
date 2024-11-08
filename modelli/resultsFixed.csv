@@ -1,4 +1,4 @@
-"nNodi","nVoli","tipologia","istanza","risultato","tempo"
+"numero nodi","numero voli","tipologia","istanza","risultato euristica","tempo euristica"
 6,20,"grid",7,320,23.155744
 6,20,"grid",19,365,24.027723
 6,20,"grid",1,330,24.441403

@@ -1,4 +1,4 @@
-"numero nodi","numero voli","tipologia","istanza", "risultato euristica","tempo euristica","tempo dove trovo ottimo","iterazione dove trovo ottimo","numero iterazioni"
+"numero nodi","numero voli","tipologia","istanza","risultato euristica","tempo euristica","tempo dove trovo ottimo","iterazione dove trovo ottimo","numero iterazioni"
 5,15,"airport",0,562,2363.150261,1492.01,18,29
 5,15,"airport",1,522,369.293782,249.843,3,5
 5,15,"airport",2,584,198.035425,164.239,2,3
