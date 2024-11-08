@@ -276,7 +276,7 @@ repeat
 }
 #"numero nodi","numero voli","tipologia","istanza", "risultato euristica","tempo euristica","optTime","numero iterazioni","iterazione dove trovo ottimo"
 while (found==0);
-printf "%d,%d,%s,instance,%d,%f,%f,%d\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> "results.csv";
+printf "%s,%s,%s,instance,%d,%f,%f,%d\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> "results.csv";
 # Store the solution in a file
 printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
 display opt, iterations, optTime,iteropt>(sol_name);
