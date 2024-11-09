@@ -179,6 +179,8 @@ minimize MC: sum{f in F, x in V,y in V: (x,y) in E} wPath[x,y,f] * dMCF[x,y];
 #l'ordine è obj, variabili, vincoli
 problem path: MC, wPath,startingPath,finishingPath,allPath;
 
+
+#TOOD remove trail12, trail11, trail21, trail22, merge1, merge2, split1, split2, diver1, diver2
 problem conflicts: UAM,
 #variables
     t_ear, t_lat, z_up, z_down, t_down, t_up,
@@ -191,11 +193,16 @@ problem conflicts: UAM,
     limitT_down, limitT_up, 
     defineT_down, linearizeDown1, linearizeDown2, linearizeDown3,
     defineT_up, linearizeUp1, linearizeUp2, linearizeUp3,
-    trail11, trail12, trail13, trail14, trail15,
-    trail21, trail22, trail23, trail24, trail25,
-    merge1, merge2, merge3, merge4, merge5,
-    diver1, diver2, diver3, diver4, diver5,
-    split1, split2, split3, split4, split5;
+    #trail11, trail12, 
+    trail13, trail14, trail15,
+    #trail21, trail22, 
+    trail23, trail24, trail25,
+    #merge1, merge2, 
+    merge3, merge4, merge5,
+    #diver1, diver2, 
+    diver3, diver4, diver5,
+    #split1, split2, 
+    split3, split4, split5;
 
 
 problem wholeModel: UAM,

@@ -3,4 +3,6 @@ message: "If you use this software, please cite it as below."
 authors:
   - family-names: Magi
     given-names: Filippo
+  - family-names: D'Ambrosio
+    given-names: Claudia
 title: "Algorithms for traffic management in urban air mobility"

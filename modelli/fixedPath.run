@@ -35,7 +35,7 @@ for {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] =
 for {i in F, j in F, x in V, x1 in V, x2 in V : i<>j and x1<>x2}
 {
     if ((x1,x) in E and (x2,x) in E and w[x1,x,i]+ w[x2,x,j] == 2) then
-		let ym[i,j,x,x1,x2]:=0;
+		  let ym[i,j,x,x1,x2]:=0;
     if ((x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2) then
         let yd[i,j,x,x1,x2]:=0;
     if ((x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2) then
