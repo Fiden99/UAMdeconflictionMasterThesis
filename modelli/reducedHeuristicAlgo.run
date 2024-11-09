@@ -80,13 +80,13 @@ repeat
     printf "drop trail";
     let {i in F,j in F,x in V, y in V: (x,y) in E and i<>j} y1t[i,j,x,y]:=1;
     let {i in F,j in F,x in V, y in V: (x,y) in E and i<>j} y2t[i,j,x,y]:=1;
-    drop trail11;
-    drop trail12;
+    #drop trail11;
+    #drop trail12;
     drop trail13;
     drop trail14;
     drop trail15;
-    drop trail21;
-    drop trail22;
+    #drop trail21;
+    #drop trail22;
     drop trail23;
     drop trail24;
     drop trail25;
@@ -94,36 +94,36 @@ repeat
     printf "dropped all trail %f\n",_ampl_elapsed_time;
     let {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} y1t[i,j,x,y]:=0;
     let {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} y2t[i,j,x,y]:=0;
-    restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail11[i,j,x,y];
-    restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail12[i,j,x,y];
+    #restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail11[i,j,x,y];
+    #restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail12[i,j,x,y];
     restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail13[i,j,x,y];
     restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail14[i,j,x,y];
     restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail15[i,j,x,y];
-    restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail21[i,j,x,y];
-    restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail22[i,j,x,y];
+    #restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail21[i,j,x,y];
+    #restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail22[i,j,x,y];
     restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail23[i,j,x,y];
     restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail24[i,j,x,y];
     restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail25[i,j,x,y];
     printf "finish trail %f\n",_ampl_elapsed_time;
     #drop and fix to 0 merging constrians and variable 
     let {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x1,x) in E and (x2,x) in E} ym[i,j,x,x1,x2]:=1;
-    drop merge1;
-    drop merge2;
+    #drop merge1;
+    #drop merge2;
     drop merge3;
     drop merge4;
     drop merge5;
     #drop and fix to 0 splitting constrians and variable
     let {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x,x2) in E}ys[i,j,x,x1,x2]:=1;
-    drop split1;
-    drop split2;
+    #drop split1;
+    #drop split2;
     drop split3;
     drop split4;
     drop split5;
 
     #drop and fix to 0 diverging constrians and variable 
     let {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E} yd[i,j,x,x1,x2]:=1;
-    drop diver1;
-    drop diver2;
+    #drop diver1;
+    #drop diver2;
     drop diver3;
     drop diver4;
     drop diver5;
@@ -131,10 +131,10 @@ repeat
     #restore merge
     printf "fix merge %f\n",_ampl_elapsed_time;
     let {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x1,x) in E and (x2,x) in E and w[x1,x,i]+ w[x2,x,j] == 2} ym[i,j,x,x1,x2]:=0;
-    printf "restore merge1 %f\n",_ampl_elapsed_time;
-    restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x1,x) in E and (x2,x) in E and w[x1,x,i]+ w[x2,x,j] == 2} merge1[i,j,x,x1,x2];
-    printf "restore merge2 %f\n",_ampl_elapsed_time;
-    restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x1,x) in E and (x2,x) in E and w[x1,x,i]+ w[x2,x,j] == 2} merge2[i,j,x,x1,x2];
+    #printf "restore merge1 %f\n",_ampl_elapsed_time;
+    #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x1,x) in E and (x2,x) in E and w[x1,x,i]+ w[x2,x,j] == 2} merge1[i,j,x,x1,x2];
+    #printf "restore merge2 %f\n",_ampl_elapsed_time;
+    #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x1,x) in E and (x2,x) in E and w[x1,x,i]+ w[x2,x,j] == 2} merge2[i,j,x,x1,x2];
     printf "restore merge3 %f\n",_ampl_elapsed_time; 
     restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x1,x) in E and (x2,x) in E and w[x1,x,i]+ w[x2,x,j] == 2} merge3[i,j,x,x1,x2];
     printf "restore merge4 %f\n",_ampl_elapsed_time;
@@ -145,10 +145,10 @@ repeat
     #restore diver
     printf "fixing diver %f\n",_ampl_elapsed_time;
     let  {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2} yd[i,j,x,x1,x2]:=0;
-    printf "restore diver1 %f\n",_ampl_elapsed_time;
-    restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2} diver1[i,j,x,x1,x2];
-    printf "restore diver2 %f\n",_ampl_elapsed_time;
-    restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2} diver2[i,j,x,x1,x2];
+    #printf "restore diver1 %f\n",_ampl_elapsed_time;
+    #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2} diver1[i,j,x,x1,x2];
+    #printf "restore diver2 %f\n",_ampl_elapsed_time;
+    #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2} diver2[i,j,x,x1,x2];
     printf "restore diver3 %f\n",_ampl_elapsed_time;        
     restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2} diver3[i,j,x,x1,x2];
     printf "restore diver4 %f\n",_ampl_elapsed_time;
@@ -158,11 +158,11 @@ repeat
     printf "finish restoring diver %f\n",_ampl_elapsed_time;
     #restore split
     printf "fixing split %f\n",_ampl_elapsed_time;
-    let {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2} ys[i,j,x,x1,x2]:=0;
-    printf "restore split1 %f\n",_ampl_elapsed_time;
-    restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2} split1[i,j,x,x1,x2];
-    printf "restore split2 %f\n",_ampl_elapsed_time;
-    restore  {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2}split2[i,j,x,x1,x2];
+    #let {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2} ys[i,j,x,x1,x2]:=0;
+    #printf "restore split1 %f\n",_ampl_elapsed_time;
+    #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2} split1[i,j,x,x1,x2];
+    #printf "restore split2 %f\n",_ampl_elapsed_time;
+    #restore  {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2}split2[i,j,x,x1,x2];
     printf "restore split3 %f\n",_ampl_elapsed_time;
     restore  {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2}split3[i,j,x,x1,x2];
     printf "restore split4 %f\n",_ampl_elapsed_time;
