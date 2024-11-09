@@ -1,4 +1,4 @@
-"numero nodi","numero voli","tipologia","istanza", "risultato ottimo","tempo per ottimo", "tempo per primo upper bound","tempo per upper bound ottimo", "risultato euristica","tempo euristica","tempo ottimo dell'euristica","numero iterazioni","iterazione dove trovo ottimo"
+"numero nodi","numero voli","tipologia","istanza","risultato ottimo","tempo per ottimo", "tempo per primo upper bound","tempo per upper bound ottimo","risultato euristica","tempo euristica","tempo ottimo dell'euristica","numero iterazioni","iterazione dove trovo ottimo"
 3,5,"airport",0,52,124.620166,11,109,52,0.369596,0.369596,1,1
 3,5,"airport",1,44,37.603002,6,30,44, 0.448076,0.448076,1,1
 3,5,"airport",2,54,246.039782,6,40,54,0.458130,0.458130,1,1
