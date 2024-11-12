@@ -184,7 +184,7 @@ repeat
         printf "let yso1[%d,%d,%d,%d,%d] = %f\n",i,j,x,x1,x2,yso1[i,j,x,x1,x2];
         printf "let yso2[%d,%d,%d,%d,%d] = %f\n",i,j,x,x1,x2,yso2[i,j,x,x1,x2];
     }
-        for {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E}
+    for {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E}
     {
         printf "let ydo1[%d,%d,%d,%d,%d] = %f\n",i,j,x,x1,x2,ydo1[i,j,x,x1,x2];
         printf "let ydo2[%d,%d,%d,%d,%d] = %f\n",i,j,x,x1,x2,ydo2[i,j,x,x1,x2];
