@@ -1,5 +1,6 @@
 #include "ShortestPathAlgo.h"
 #include <iostream>
+#include <set>
 
 //TODO testare se funziona
 
@@ -94,10 +95,8 @@ void getMinPathsFW(const Graph::Graph& graph, const std::vector<Graph::Flight*>&
 
 
 
-void dijkstraFibonacci(const Graph::Graph& graph, Graph::Flight* flight, std::vector<int>& y, std::vector<Graph::Node*>& pi)
+void dijkstraFibonacci(const Graph::Graph& graph, Graph::Node* source, std::vector<int>& y, std::vector<Graph::Node*>& pi)
 {
-	Graph::Node* source = flight->source;
-	Graph::Node* destination = flight->destination;
 	y[source->id] = 0;
 	auto compareDijkstra = [&y](const Graph::Node* a, const Graph::Node* b) -> bool {
 		return y[a->id] > y[b->id];
@@ -133,12 +132,15 @@ void getMinPathDijsktra(const Graph::Graph& graph, const std::vector<Graph::Flig
 	std::vector<Graph::Node*> pi(graph.nodes.size(), nullptr);
 	std::vector<std::vector<Graph::Node*>> path(flights.size());
 	std::vector<std::vector<int>> values(flights.size());
-
-	for (int i = 0; static_cast<size_t>(i) < flights.size(); ++i)
+	std::set<Graph::Node*> usedNodes;
+	std::transform(flights.begin(), flights.end(), std::inserter(usedNodes, usedNodes.end()), [](const Graph::Flight* flight) {return flight->source; });
+	int j = 0;
+	for (auto i : usedNodes)
 	{
-		dijkstraFibonacci(graph, flights[i], y, pi);
-		values[i] = y;
-		path[i] = pi;
+		dijkstraFibonacci(graph, i, y, pi);
+		values[j] = y;
+		path[j] = pi;
+		++j;
 	}
 	//da rimuovere successivamente, vedo solo se funziona
 
