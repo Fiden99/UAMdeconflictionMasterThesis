@@ -11,7 +11,7 @@ void printDat(std::string& filename, Graph::Graph& graph, std::vector<Graph::Fli
 
 int main(int argc, char* argv[])
 {
-	std::string filename = "C:\\Users\\Filippo\\Desktop\\materiale universitario\\magistrale\\tesi\\modelli\\data\\grid0.dat";
+	std::string filename = "C:\\Users\\Filippo\\Desktop\\materiale universitario\\magistrale\\tesi\\modelli\\metroplexTestCPP.dat";
 	Graph::Graph graph;
 	std::vector<Graph::Flight*> flights;
 	reader(filename, graph, flights);

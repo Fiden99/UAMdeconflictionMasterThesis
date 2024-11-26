@@ -54,7 +54,7 @@ void readingNum(std::string& line, int& index, int& value)
 	throw std::runtime_error("Error reading numbers from line");
 }
 
-void readMatrix(std::ifstream& file, Graph::Graph& graph, const int nn, const int nf)
+/*void readMatrix(std::ifstream& file, Graph::Graph& graph, const int nn, const int nf)
 {
 	std::string line;
 	for (int i = 0; i < nn; ++i)
@@ -78,6 +78,37 @@ void readMatrix(std::ifstream& file, Graph::Graph& graph, const int nn, const in
 			graph.nodes[j]->inArcs.push_back(edge);
 		}
 	}
+}
+*/
+void readArcDistance(std::ifstream& file, Graph::Graph& graph, const int nn, const int nf)
+{
+	std::string line;
+	//nel caso peggiore o un grafo
+	for (int i = 0; i < nn * nn; ++i)
+	{
+		if (!getline(file, line))
+			throw std::runtime_error("Error reading the file");
+		std::istringstream iss(line);
+		int source, destination, distance;
+		if (iss >> source >> destination >> distance)
+		{
+			auto edge = new Graph::Edge{ graph.nodes[source],graph.nodes[destination],distance,nf };
+			graph.nodes[source]->outArcs.push_back(edge);
+			graph.nodes[destination]->inArcs.push_back(edge);
+			if (!iss.eof())
+			{
+				std::string readed;
+				iss >> readed;
+				if (readed == ";")
+					return;
+			}
+		}
+		else
+		{
+			throw std::runtime_error("Error reading numbers from line");
+		}
+	}
+
 }
 void readSpeed(std::ifstream& file, Graph::Graph& graph, const int nn, const bool find_v_min)
 {
@@ -217,14 +248,17 @@ void reader(std::string& filename, Graph::Graph& graph, std::vector<Graph::Fligh
 	int nn = findNumNodes(line);
 	//Graph::Graph graph(nn);
 	graph = Graph::Graph(nn);
+	//reading the distance
+	if (!getline(file, line))
+		throw std::runtime_error("Error reading the file");
+	if (line.find("param: E: d:=") == std::string::npos)
+		throw std::runtime_error("Couldn't find E and d");
+	readArcDistance(file, graph, nn, nf);
 
-	while (getline(file, line))
-	{
-		//skip E, getting line but searching for s
-		if (line.find("param s:=") != std::string::npos) {
-			break;
-		}
-	}
+	if (!getline(file, line))
+		throw std::runtime_error("Error reading the file");
+	if (line.find("param s:=") == std::string::npos)
+		throw std::runtime_error("Couldn't find s");
 	//ho letto param s:=, devo leggere i valori di s
 	for (int i = 0; i < nf; ++i)
 	{
@@ -249,12 +283,6 @@ void reader(std::string& filename, Graph::Graph& graph, std::vector<Graph::Fligh
 		readingNum(line, index, value);
 		flights[index]->destination = graph.nodes[value];
 	}
-	//reading the distance
-	if (!getline(file, line))
-		throw std::runtime_error("Error reading the file");
-	if (line.find("param d:") == std::string::npos)
-		throw std::runtime_error("Couldn't find d");
-	readMatrix(file, graph, nn, nf);
 	if (!getline(file, line))
 		throw std::runtime_error("Error reading the file");
 	if (line.find("param v_min:=") == std::string::npos)
