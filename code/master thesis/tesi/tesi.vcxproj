@@ -142,6 +142,7 @@
     <ClCompile Include="edge.cpp" />
     <ClCompile Include="flights.cpp" />
     <ClCompile Include="graph.cpp" />
+    <ClCompile Include="hypergraph.cpp" />
     <ClCompile Include="node.cpp" />
     <ClCompile Include="printDat.cpp" />
     <ClCompile Include="reader.cpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="edge.h" />
     <ClInclude Include="flights.h" />
     <ClInclude Include="graph.h" />
+    <ClInclude Include="hypergraph.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="ShortestPathAlgo.h" />
     <ClInclude Include="timer.h" />

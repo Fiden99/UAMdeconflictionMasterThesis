@@ -12,7 +12,19 @@ enum class typeAngle
 	anglePM
 };
 
-void printMatrix(std::ofstream& file, const Graph::Graph& graph, const bool isDistance)
+void printArcDistance(std::ofstream& file, const Graph::Graph& graph)
+{
+	file << "param: E: d:=\n";
+	for (const auto node : graph.nodes)
+	{
+		for (const auto edge : node->outArcs)
+		{
+			file << edge->source->id << " " << edge->destination->id << " " << edge->distance << "\n";
+		}
+	}
+	file << ";\n";
+}
+/*void printMatrix(std::ofstream& file, const Graph::Graph& graph, const bool isDistance)
 {
 	if (isDistance)
 		file << "set D:";
@@ -49,7 +61,7 @@ void printMatrix(std::ofstream& file, const Graph::Graph& graph, const bool isDi
 		file << std::endl;
 	}
 
-}
+}*/
 
 void printSpeed(std::ofstream& file, const Graph::Graph& graph, const int nf, const bool isMin)
 {
@@ -148,10 +160,10 @@ void printDat(std::string& filename, Graph::Graph& graph, std::vector<Graph::Fli
 	// Controlla se il file è stato aperto correttamente
 	if (!file.is_open())
 		throw std::runtime_error("Impossibile aprire il file " + filename);
-	file << "param nn:=" << graph.nodes.size() << ";" << std::endl;
 	file << "param nf:=" << flights.size() << ";" << std::endl;
+	file << "param nn:=" << graph.nodes.size() << ";" << std::endl;
 	//print E
-	printMatrix(file, graph, false);
+	printArcDistance(file, graph);
 	//print s
 	file << "param s:=" << std::endl;
 	for (int i = 0; static_cast<size_t>(i) < flights.size(); ++i)
@@ -171,7 +183,8 @@ void printDat(std::string& filename, Graph::Graph& graph, std::vector<Graph::Fli
 			file << i << "\t" << flights[i]->destination->id << std::endl;
 	}
 	//print D
-	printMatrix(file, graph, true);
+	//we don't need anymore
+	//printArcDistance(file, graph, true);
 	//print v_min
 	printSpeed(file, graph, flights.size(), true);
 	//print v_max
