@@ -49,17 +49,17 @@ param opt_y2t{i in F, j in F,(x,y) in E : i<>j} default Infinity;
 param opt_y2o1{i in F, j in F,(x,y) in E : i<>j} default Infinity;
 param opt_y2o2{i in F, j in F,(x,y) in E : i<>j} default Infinity;
 
-param opt_ym{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<>x2} default Infinity;
-param opt_ymo1{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<>x2} default Infinity;
-param opt_ymo2{i in F, j in F, x in V, x1 in V, x2 in V: (x1,x) in E and (x2,x) in E and i<>j and x1<>x2} default Infinity;
+param opt_ym{i in F, j in F, x in V,  (x1,x) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
+param opt_ymo1{i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
+param opt_ymo2{i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
 
-param opt_yd{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and i<>j and x1<>x2} default Infinity;
-param opt_ydo1{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and i<>j and x1<>x2} default Infinity;
-param opt_ydo2{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x2,x) in E and i<>j and x1<>x2} default Infinity;
+param opt_yd{i in F, j in F, x in V, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
+param opt_ydo1{i in F, j in F, x in V, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
+param opt_ydo2{i in F, j in F, x in V, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
 
-param opt_ys{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j and x1<>x2} default Infinity;
-param opt_yso1{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j and x1<>x2} default Infinity;
-param opt_yso2{i in F, j in F, x in V, x1 in V, x2 in V: (x,x1) in E and (x,x2) in E and i<>j and x1<>x2} default Infinity;
+param opt_ys{i in F, j in F, x in V, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
+param opt_yso1{i in F, j in F, x in V, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
+param opt_yso2{i in F, j in F, x in V, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
 
 param opt_w{(i,j) in E,F} default Infinity;		
 
