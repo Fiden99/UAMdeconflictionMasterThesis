@@ -7,11 +7,11 @@ set E within {V cross V};																#arcs
 param s{F};																					#starting point for each flight
 param e{F};																					#ending poitn for each flight
 param d{E}>=0 default 0;											                    #distance for each pair of nodes
-param v_max{F,x in V, y in V: (x,y) in E};
-param v_min{F,x in V, y in V: (x,y) in E};
-param dMCF{x in V,y in V: (x,y) in E} >=0 default 0;
+param v_max{F,E};
+param v_min{F,E};
+param dMCF{E} >=0 default 0;
 #param v{F,V};																				#entering speed 
-param bigM:=sum{f in F,i in V,j in V: (i,j) in E}d[i,j] * v_min[f,i,j];	#bigM for linearizing purpose
+param bigM:=sum{f in F,(i,j) in E} d[i,j] * v_min[f,i,j];	#bigM for linearizing purpose
 param angleM{x in V, (x1,x) in E, (x2,x) in E: x1<>x2};							# angle-for merging
 param angleP{x in V, (x,x1) in E, (x,x2) in E: x1<>x2};							# angle+ for splitting
 param anglePM{x in V,(x,x1) in E, (x2,x) in E: x1<>x2};							#angle -+ divering
@@ -20,7 +20,7 @@ param t_hat_ear{F,V};
 param t_hat_lat{F,V};
 param w{(i,j) in E,F} binary;																		#flight f pass through arc i,j
 param y1t{i in F, j in F, (x,y) in E: i<>j} binary default 1;
-param y2t{ii in F, j in F, (x,y) in E: i<>j} binary default 1;
+param y2t{i in F, j in F, (x,y) in E: i<>j} binary default 1;
 param ym{i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2} binary default 1;
 param yd{i in F, j in F, x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2} binary default 1;
 param ys{i in F, j in F, x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2} binary default 1;
@@ -139,15 +139,15 @@ t_ear[i,x]- t_lat[j,x]>=angleM[x,x1,x2]*D/v_min[i,x1,x]-bigM*ym[i,j,x,x1,x2] - y
 subject to merge5{i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2}:
 ymo1[i,j,x,x1,x2]+ymo2[i,j,x,x1,x2]<=1;
 
-subject to diver1 {i in F, j in F,x in V,(x,x1) in E and (x2,x) in E: i<>j and x1<>x2}:
+subject to diver1 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2}:
 2*(1-yd[i,j,x,x1,x2]) <= w[x,x1,i]+w[x2,x,j];
-subject to diver2 {i in F, j in F,x in V,(x,x1) in E and (x2,x) in E: i<>j and x1<>x2}: 
+subject to diver2 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2}: 
 w[x,x1,i]+w[x2,x,j] <= 2 -yd[i,j,x,x1,x2];
 #unica maniera che ha senso
-subject to diver3 {i in F, j in F,x in V,(x,x1) in E and (x2,x) in E: i<>j and x1<>x2}: #and x <>e[i]
+subject to diver3 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2}: #and x <>e[i]
 t_ear[j,x]- t_lat[i,x]>=anglePM[x,x1,x2]*(D/v_min[j,x2,x]+D/v_min[i,x,x1]) -bigM*yd[i,j,x,x1,x2] - ydo1[i,j,x,x1,x2]*bigM;
 #t[j,x]- t[i,x]>=anglePM[i,j,x]*(D/v[j,x]+D/v[i,x1]) -bigM*yd[i,j,x,x1,x2] - ydo1[i,j,x,x1,x2]*bigM;
-subject to diver4 {i in F, j in F,x in V,(x,x1) in E and (x2,x) in E: i<>j and x1<>x2}: #and x <> e[j]
+subject to diver4 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2}: #and x <> e[j]
 t_ear[i,x]- t_lat[j,x]>=anglePM[x,x1,x2]*(D/v_min[i,x2,x]+D/v_min[j,x,x1])-bigM*yd[i,j,x,x1,x2] - ydo2[i,j,x,x1,x2]*bigM;
 #t[i,x]- t[j,x]>=anglePM[i,j,x]*(D/v[i,x]+D/v[j,x1])-bigM*yd[i,j,x,x1,x2] - ydo2[i,j,x,x1,x2]*bigM;
 subject to diver5 {i in F, j in F, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2}:
@@ -156,18 +156,18 @@ ydo1[i,j,x,x1,x2]+ydo2[i,j,x,x1,x2]<=1;
 
 
 #change xy with explicit values that I have
-subject to split1 {i in F, j in F,x in V,(x,x1) in E and (x,x2) in E: i<>j and x1<>x2}:
+subject to split1 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2}:
 2*(1-ys[i,j,x,x1,x2]) <= w[x,x1,i]+w[x,x2,j];
-subject to split2 {i in F, j in F,x in V,(x,x1) in E and (x,x2) in E: i<>j and x1<>x2}:
+subject to split2 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2}:
 w[x,x1,i]+w[x,x2,j] <= 2 -ys[i,j,x,x1,x2];
 #TODO check if the speed parameter is correct for split4
-subject to split3 {i in F, j in F,x in V,(x,x1) in E and (x,x2) in E: i<>j and x1<>x2}:
+subject to split3 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2}:
 t_ear[j,x]- t_lat[i,x]>=angleP[x,x1,x2]*D/v_min[i,x,x1]-bigM*ys[i,j,x,x1,x2] - yso1[i,j,x,x1,x2]*bigM;
 #t[j,x]- t[i,x]>=angleP[i,j,x]*D/v[i,x1]-bigM*ys[i,j,x,x1,x2] - yso1[i,j,x,x1,x2]*bigM;
-subject to split4 {i in F, j in F,x in V,(x,x1) in E and (x,x2) in E: i<>j and x1<>x2}:
+subject to split4 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2}:
 t_ear[i,x]- t_lat[j,x]>=angleP[x,x1,x2]*D/v_min[j,x,x2]-bigM*ys[i,j,x,x1,x2] - yso2[i,j,x,x1,x2]*bigM;
 #t[i,x]- t[j,x]>=angleP[i,j,x]*D/v[i,x2]-bigM*ys[i,j,x,x1,x2] - yso2[i,j,x,x1,x2]*bigM;
-subject to split5 {i in F, j in F,x in V,(x,x1) in E and (x,x2) in E: i<>j and x1<>x2}:
+subject to split5 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2}:
 yso1[i,j,x,x1,x2]+yso2[i,j,x,x1,x2]<=1;
 
 #objective 49

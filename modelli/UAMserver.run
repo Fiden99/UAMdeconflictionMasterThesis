@@ -4,19 +4,22 @@ let data_name :=sprintf("%s/data/nn%snf%s/%s.dat",($absPath),($nNodes),($nFlight
 param model_name symbolic;
 let model_name :=sprintf("%s/UAM_decomposition.mod",($absPath));
 option solver gurobi;
-option gurobi_options 'timing=1 outlev=1 threads=1 timelim=431990';
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=431900';
 model (model_name);
 data (data_name);
 # Select the solver and set its options
 
 # Define the name of the file where the solution will be saved
 param sol_name symbolic;
-let sol_name := sprintf("%s/output/nn%snf%s/%s%s.sol", ($absPath),($nNodes),($nFlights),($value),($datFile));
+let sol_name := sprintf("%s/output/nn%snf%s/%s/%s.sol", ($absPath),($nNodes),($nFlights),($value),($datFile));
 # Define the name of the file where the log of the solver will be saved
 param log_name symbolic;
-let log_name := sprintf("%s/output/nn%snf%s/%s%s.log", ($absPath),($nNodes),($nFlights),($value),($datFile));
+let log_name := sprintf("%s/output/nn%snf%s/%s/%s.log", ($absPath),($nNodes),($nFlights),($value),($datFile));
 solve > (log_name);
 
+param results_name symbolic;
+let results_name :=sprintf("%s/results/exactResultsnn%snf%s.csv",($absPath),($nNodes),($nFlights));
+printf "%s,%s,%s,%d,%f\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time) > (results_name);
 printf "\n### solve_result = %s, _total_solve_time = %f\n\n", solve_result, _total_solve_time > (log_name);
 # Store the solution in a file
 printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
