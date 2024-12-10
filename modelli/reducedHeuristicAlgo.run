@@ -3,7 +3,7 @@ reset;
 option presolve 0;
 
 option solver gurobi;
-option gurobi_options 'timing=1 outlev=1 threads=1 timelim=60';
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=300';
 param data_name symbolic;
 let data_name :=sprintf("%s/data/nn%snf%s/%s.dat",($absPath),($nNodes),($nFlights),($datFile));
 #let data_name :=sprintf("%s/data/nn10nf100/%s.dat",($absPath),($datFile));
@@ -69,8 +69,9 @@ param iteropt default Infinity;
 #trying to reduce dimension of let
 set F_pairs := {i in F, j in F: i<>j};
 set nodesM  := {x in V, (x1,x) in E, (x2,x) in E: x1<>x2};
-set nodesS  := {x in V, (x,x1) in E, (x,x2) in E: x1<>x2};
 set nodesD  := {x in V, (x,x1) in E, (x2,x) in E: x1<>x2};
+set nodesS  := {x in V, (x,x1) in E, (x,x2) in E: x1<>x2};
+display nodesM,nodesS,nodesD;
 repeat
 {
 	printf "solving path in it %d\n\n",iterations> (log_name);
@@ -154,31 +155,31 @@ repeat
     printf "finish restoring merge %f\n",_ampl_elapsed_time;
     #restore diver
     printf "fixing diver %f\n",_ampl_elapsed_time;
-    let  {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x1,x,i]+ w[x2,x,j] == 2} yd[i,j,x,x1,x2]:=0;
+    let  {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x,x1,i]+w[x2,x,j] == 2} yd[i,j,x,x1,x2]:=0;
     #printf "restore diver1 %f\n",_ampl_elapsed_time;
     #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2} diver1[i,j,x,x1,x2];
     #printf "restore diver2 %f\n",_ampl_elapsed_time;
     #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2} diver2[i,j,x,x1,x2];
     printf "restore diver3 %f\n",_ampl_elapsed_time;        
-    restore {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x1,x,i]+ w[x2,x,j] == 2} diver3[i,j,x,x1,x2];
+    restore {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x,x1,i]+w[x2,x,j] == 2} diver3[i,j,x,x1,x2];
     printf "restore diver4 %f\n",_ampl_elapsed_time;
-    restore {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x1,x,i]+ w[x2,x,j] == 2} diver4[i,j,x,x1,x2];
+    restore {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x,x1,i]+w[x2,x,j] == 2} diver4[i,j,x,x1,x2];
     printf "restore diver5 %f\n",_ampl_elapsed_time;
-    restore {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x1,x,i]+ w[x2,x,j] == 2} diver5[i,j,x,x1,x2];
+    restore {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x,x1,i]+w[x2,x,j] == 2} diver5[i,j,x,x1,x2];
     printf "finish restoring diver %f\n",_ampl_elapsed_time;
     #restore split
     printf "fixing split %f\n",_ampl_elapsed_time;
-    let {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x1,x,i]+ w[x2,x,j] == 2} ys[i,j,x,x1,x2]:=0;
+    let {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x,x1,i]+w[x,x2,j] == 2} ys[i,j,x,x1,x2]:=0;
     #printf "restore split1 %f\n",_ampl_elapsed_time;
     #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2} split1[i,j,x,x1,x2];
     #printf "restore split2 %f\n",_ampl_elapsed_time;
     #restore  {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2}split2[i,j,x,x1,x2];
     printf "restore split3 %f\n",_ampl_elapsed_time;
-    restore  {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x1,x,i]+ w[x2,x,j] == 2} split3[i,j,x,x1,x2];
+    restore  {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x,x1,i]+w[x,x2,j] == 2} split3[i,j,x,x1,x2];
     printf "restore split4 %f\n",_ampl_elapsed_time;
-    restore  {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x1,x,i]+ w[x2,x,j] == 2} split4[i,j,x,x1,x2];
+    restore  {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x,x1,i]+w[x,x2,j] == 2} split4[i,j,x,x1,x2];
     printf "restore split5 %f\n",_ampl_elapsed_time;
-    restore  {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x1,x,i]+ w[x2,x,j] == 2} split5[i,j,x,x1,x2];
+    restore  {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x,x1,i]+w[x,x2,j] == 2} split5[i,j,x,x1,x2];
     printf "finish restoring split %f\n",_ampl_elapsed_time;
 
     printf "fixed variables, solving conflicts\n";
@@ -191,8 +192,9 @@ repeat
     display yso1,yso2,ydo1,ydo2,ymo1,ymo2,t_ear, t_lat;
 
 	display solve_result, solve_result_num;
-	if (solve_result == "solved" or 400<=solve_result_num or solve_result_num<=403 ) then
+	if (solve_result == "solved" or (400<=solve_result_num and solve_result_num<=405)) then
 	{
+        printf "solved conflicts\n";
         #update optimal solution
 		if (opt > UAM) then
 		{
@@ -243,6 +245,12 @@ repeat
 			}
 		}
 	}
+    else
+    {
+        printf "conflicts not solved\n, exit";
+        let iterations:=iterations + 1;
+        break;
+    }
     #if (solve_result =="solved") then
 	#if (solve_result == "solved" or iterations>100) then
 	if (solve_result == "solved" or sameOpt>=10 or iterations>200) then
@@ -274,10 +282,10 @@ repeat
 	#let cutoff:= cutoff- 0.1*opt;
 
 }
-#"numero nodi","numero voli","tipologia","istanza", "risultato euristica","tempo euristica","optTime","numero iterazioni","iterazione dove trovo ottimo"
 while (found==0);
 param result_name symbolic;
 let result_name := sprintf("%s/results/heuristicnn%snf%s.csv",($absPath),($nNodes),($nFlights));
+#"numero nodi","numero voli","tipologia","istanza", "risultato euristica","tempo euristica","optTime","numero iterazioni","iterazione dove trovo ottimo"
 printf "%s,%s,%s,%d,%f,%f,%d,%d\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> (result_name);
 # Store the solution in a file
 printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
@@ -288,10 +296,10 @@ for {(i,j) in E, f in F}{
 }
 for {i in V,f in F}
 {
-	printf"t_ear[%d,%d] :=\t%f;\n",opt_t_ear[f,i]> (sol_name);															
-	printf"t_lat[%d,%d] :=\t%f;\n",opt_t_lat[f,i]> (sol_name);															
-	printf"t_down[%d,%d] :=\t%f;\n", opt_t_down[f,i] > (sol_name);
-	printf"t_up[%d,%d] :=\t%f;\n",opt_t_up[f,i]> (sol_name);
+	printf"t_ear[%d,%d] :=\t%f;\n",f,i,opt_t_ear[f,i]> (sol_name);															
+	printf"t_lat[%d,%d] :=\t%f;\n",f,i,opt_t_lat[f,i]> (sol_name);															
+	printf"t_down[%d,%d] :=\t%f;\n",f,i, opt_t_down[f,i] > (sol_name);
+	printf"t_up[%d,%d] :=\t%f;\n",f,i,opt_t_up[f,i]> (sol_name);
 }
 for {(i,j) in E, f in F}
 {

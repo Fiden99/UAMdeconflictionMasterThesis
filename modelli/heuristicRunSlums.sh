@@ -1,14 +1,14 @@
 #!/bin/bash
-#SBATCH --job-name=Airport_heuristicUAM_array_job       # Nome del job
-#SBATCH --output=/home/magi/UAMdeconflictionMasterThesis/modelli/out/nn3nf100/12/ampl_output_%A_%a.txt  # File di output per stdout (%A = job ID, %a = array task ID)
-#SBATCH --error=/home/magi/UAMdeconflictionMasterThesis/modelli/out/nn3nf100/12/ampl_error_%A_%a.txt    # File di output per stderr
+#SBATCH --job-name=heuristicUAM_array_job       # Nome del job
+#SBATCH --output=/home/magi/UAMdeconflictionMasterThesis/modelli/out/nn3nf100/14/ampl_output_%A_%a.txt  # File di output per stdout (%A = job ID, %a = array task ID)
+#SBATCH --error=/home/magi/UAMdeconflictionMasterThesis/modelli/out/nn3nf100/14/ampl_error_%A_%a.txt    # File di output per stderr
 #SBATCH --ntasks=1                      # Numero di task per job
 #SBATCH --cpus-per-task=1               # Numero di core per job
 #SBATCH --time=96:00:00                 # Tempo massimo per ogni job 
-#SBATCH --array=0-19
+#SBATCH --array=0-59
 
 # Crea una lista di tutti i file .dat nella directory "data/"
-FILES=($(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/airport*.dat))
+FILES=($(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat))
 # FILES=(/home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat)
 
 # Definisci il job array in base al numero di file presenti nella directory data/
@@ -24,4 +24,4 @@ datFile=${FILES[$SLURM_ARRAY_TASK_ID]}
 datFileBase=$(basename "$datFile" .dat)
 
 # Esegui AMPL con il file .dat corrente
-value="12" nNodes="3" nFlights="100" absPath=$PWD datFile=$datFileBase ampl /home/magi/UAMdeconflictionMasterThesis/modelli/reducedHeuristicAlgo.run
+value="14" nNodes="3" nFlights="100" absPath=$PWD datFile=$datFileBase ampl /home/magi/UAMdeconflictionMasterThesis/modelli/reducedHeuristicAlgo.run

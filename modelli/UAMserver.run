@@ -19,7 +19,7 @@ solve > (log_name);
 
 param results_name symbolic;
 let results_name :=sprintf("%s/results/exactResultsnn%snf%s.csv",($absPath),($nNodes),($nFlights));
-printf "%s,%s,%s,%d,%f\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time) > (results_name);
+printf "%s,%s,%s,%d,%f\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time) >> (results_name);
 printf "\n### solve_result = %s, _total_solve_time = %f\n\n", solve_result, _total_solve_time > (log_name);
 # Store the solution in a file
 printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
