@@ -1,0 +1,163 @@
+reset;
+option presolve 0;
+
+option solver gurobi;
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=300';
+param data_name symbolic;
+let data_name :=sprintf("%s/data/nn%snf%s/%s.dat",($absPath),($nNodes),($nFlights),($datFile));
+#let data_name :=sprintf("%s/data/nn10nf100/%s.dat",($absPath),($datFile));
+param model_name symbolic;
+let model_name :=sprintf("%s/quadraticHeuristic.mod",($absPath));
+model (model_name);
+data (data_name);
+param iterations;
+let iterations:=0;
+param alpha;
+let alpha:=4;
+param found default 0;
+param sol_name symbolic;
+let sol_name := sprintf("%s/heuristicOut/nn%snf%s/%s/%s.sol", ($absPath),($nNodes),($nFlights),($value),($datFile));
+#let sol_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.sol", ($absPath),($value),($datFile));
+# Define the name of the file where the log of the solver will be saved
+param log_name symbolic;
+let log_name := sprintf("%s/heuristicOut/nn%snf%s/%s/%s.log",($absPath),($nNodes),($nFlights),($value),($datFile));
+#let log_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.log",($absPath),($value),($datFile));
+display data_name;
+for {(i,j) in E}
+	let dMCF[i,j]:= d[i,j];
+
+param lastOpt default 0;
+param sameOpt default 0;
+#heuristic var
+param opt default Infinity;
+
+param opt_t_down{F,V} default Infinity;
+param opt_t_up{F,V} default Infinity;
+
+param opt_t_ear{F,V} default Infinity;															
+param opt_t_lat{F,V} default Infinity;		
+
+param opt_w{(i,j) in E,F} default Infinity;		
+
+param optTime default Infinity;
+param iteropt default Infinity;
+#param cutoff default Infinity;
+#trying to reduce dimension of let
+set F_pairs := {i in F, j in F: i<>j};
+set nodesM  := {x in V, (x1,x) in E, (x2,x) in E: x1<>x2};
+set nodesD  := {x in V, (x,x1) in E, (x2,x) in E: x1<>x2};
+set nodesS  := {x in V, (x,x1) in E, (x,x2) in E: x1<>x2};
+display nodesM,nodesS,nodesD;
+repeat
+{
+	printf "solving path in it %d\n\n",iterations> (log_name);
+	#capire perché inserisce troppe variablili
+	solve path >(log_name);
+	if solve_result <> "solved" then
+	{
+		printf "path not found in given time\n";
+        display solve_result, solve_result_num;
+		break;
+	}
+    printf("fixing variables\n");
+	for {(i,j) in E,f in F}
+		let w[i,j,f]:=wPath[i,j,f];
+    #display w;
+    printf "w with flight 0 and 1";
+    for {(i,j) in E}
+    {
+        printf "w[%d,%d,0] = %d\n",i,j,w[i,j,0];
+        printf "w[%d,%d,1] = %d\n",i,j,w[i,j,1];
+    }
+    printf "drop trail";
+    drop trail1;
+    drop trail2;
+    drop merge;
+    drop split;
+    drop diver;
+    printf "dropped all conflcits constrains %f",_ampl_elapsed_time;
+
+    restore {(i,j) in F_pairs, (x,y) in E : w[x,y,i]+ w[x,y,j] == 2} trail1[i,j,x,y];
+    restore {(i,j) in F_pairs, (x,y) in E : w[x,y,i]+ w[x,y,j] == 2} trail2[i,j,x,y];
+    printf "finish trail %f\n",_ampl_elapsed_time;
+    restore {(i,j) in F_pairs, (x,x1,x2) in nodesM: w[x1,x,i]+ w[x2,x,j] == 2} merge[i,j,x,x1,x2];
+    printf "finish restoring merge %f\n",_ampl_elapsed_time;
+    #restore diver
+    restore {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x,x1,i]+w[x2,x,j] == 2} diver[i,j,x,x1,x2];
+    printf "finish restoring diver %f\n",_ampl_elapsed_time;
+    #restore split
+    printf "fixing split %f\n",_ampl_elapsed_time;
+    restore {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x,x1,i]+w[x,x2,j] == 2} split[i,j,x,x1,x2];
+    printf "finish restoring split %f\n",_ampl_elapsed_time;
+
+    #solving with fixed variables
+	solve conflicts > (log_name);
+    #display 
+
+	display solve_result, solve_result_num;
+	if (solve_result == "solved" or 400<=solve_result_num or solve_result_num<=405) then
+	{
+        #update optimal solution
+		if (opt > UAM) then
+		{
+			let opt:=UAM;
+			let iteropt:=iterations;
+			let optTime:=(_ampl_elapsed_time + _total_solve_elapsed_time);
+			#let cutoff:=opt*2;
+			let {f in F,i in V} opt_t_ear[f,i]:=t_ear[f,i];															
+			let {f in F,i in V} opt_t_lat[f,i]:= t_lat[f,i];																					
+			let {(i,j) in E,f in F} opt_w[i,j,f]:= w[i,j,f];
+            let {f in F,i in V} opt_t_down[f,i]:=t_down[f,i];
+            let {f in F, in V} opt_t_up[f,i]:= t_up[f,i];
+		}
+	}
+    #if (solve_result =="solved") then
+	#if (solve_result == "solved" or iterations>100) then
+	if (solve_result == "solved" or sameOpt>=10 or iterations>200) then
+	{
+		let found:=1;
+	}
+	else 	
+	{
+		#come posso capire dove ci sono i conflitti se non ho una soluzione?
+		for { f1 in F, f2 in F,(i,j) in E: f1 <> f2 } 
+		{
+			  if (w[i,j,f1] + w[i,j,f2] == 2) then 
+			  {
+			  let dMCF[i,j] := min(sqrt(alpha) * dMCF[i,j],1e5);
+			  }
+		}
+	}
+    if (UAM == lastOpt) then
+    {
+        let sameOpt:=sameOpt+1;
+    }
+    else
+    {
+        let sameOpt:=0;
+    }
+	display dMCF;
+	let iterations:=iterations + 1;
+    let lastOpt:=UAM;
+	#let cutoff:= cutoff- 0.1*opt;
+
+}
+#"numero nodi","numero voli","tipologia","istanza", "risultato euristica","tempo euristica","optTime","numero iterazioni","iterazione dove trovo ottimo"
+while (found==0);
+param result_name symbolic;
+let result_name := sprintf("%s/results/heuristicnn%snf%s.csv",($absPath),($nNodes),($nFlights));
+printf "%s,%s,%s,%s,%d,%f,%f,%d,%d\n",($nNodes),($nFlights),($datFile),($value),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> (result_name);
+# Store the solution in a file
+printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
+display opt, iterations, optTime,iteropt>(sol_name);
+printf "variable\t\t value\n" >(sol_name);
+for {(i,j) in E, f in F}{
+	printf "w[%d,%d,%d] :=\t %d;\n", i,j,f, opt_w[i,j,f] > (sol_name);
+}
+for {i in V,f in F}
+{
+	printf"t_ear[%d,%d] :=\t%f;\n",opt_t_ear[f,i]> (sol_name);															
+	printf"t_lat[%d,%d] :=\t%f;\n",opt_t_lat[f,i]> (sol_name);															
+	printf"t_down[%d,%d] :=\t%f;\n", opt_t_down[f,i] > (sol_name);
+	printf"t_up[%d,%d] :=\t%f;\n",opt_t_up[f,i]> (sol_name);
+}
