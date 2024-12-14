@@ -11,7 +11,7 @@ param v_max{F,E};
 param v_min{F,E};
 param dMCF{E} >=0 default 0;
 #param v{F,V};																				#entering speed 
-param bigM:= 1000;	#bigM for linearizing purpose
+param bigM:=sum{f in F,(i,j) in E} d[i,j] * v_min[f,i,j];	#bigM for linearizing purpose
 param angleM{x in V, (x1,x) in E, (x2,x) in E: x1<>x2};							# angle-for merging
 param angleP{x in V, (x,x1) in E, (x,x2) in E: x1<>x2};							# angle+ for splitting
 param anglePM{x in V,(x,x1) in E, (x2,x) in E: x1<>x2};							#angle -+ divering
@@ -35,12 +35,23 @@ var t_lat{F,V} >=0;																		#variable time, undestand why is not intege
 var wPath{(i,j) in E, F} >=0, <=1;		
 var wConf{(i,j) in E, F} binary;
 
+#binary variables for linearization of conflicts
+var y1o1{i in F, j in F,(x,y) in E: i<>j} binary;
+var y1o2{i in F, j in F,(x,y) in E: i<>j} binary;
+
+var y2o1{i in F, j in F,(x,y) in E: i<>j} binary;
+var y2o2{i in F, j in F,(x,y) in E: i<>j} binary;
+
+var ymo1{i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2} binary;
+var ymo2{i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2} binary;
+
+var ydo1{i in F, j in F, x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2} binary;
+var ydo2{i in F, j in F, x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2} binary;
+ 
+var yso1{i in F, j in F, x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2} binary;
+var yso2{i in F, j in F, x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2} binary;
 
 var numConflicts{(x,y) in E,i in F, j in F : i<> j} >= 0, <=1;
-
-#var l{i in F, j in F, x in V: i<>j and ((sum{(x,x1) in E} w[x,x1,i] ==  1 and sum{(x,x1) in E} w[x,x1,j] == 1) or (sum{(x1,x) in E} w[x1,x,i] ==  1 and sum{(x1,x) in E} w[x1,x,j] == 1 ) or (sum{(x1,x) in E} w[x1,x,i] ==  1 and sum{(x,x1) in E} w[x,x1,j] == 1))} binary;
-#var l{i in F, j in F, x in V: i<>j and sum{(x,x1) in E} w[x,x1,i] ==  1 and sum{(x,x1) in E} w[x,x1,j] == 1 } binary;
-var l{i in F, j in F, x in V: i<>j } binary;
 
 #constrains
 
@@ -104,6 +115,78 @@ subject to linearizeUp3{f in F, (x,y) in E}:
 z_up[x,y,f] >=  t_ear[f,x] - bigM* (1- w[x,y,f]);
 
 # conflicts 
+
+subject to trail11{i in F, j in F,(x,y) in E: i<>j}:
+2*(1-y1t[i,j,x,y]) <= w[x,y,i]+w[x,y,j];
+subject to trail12{i in F, j in F,(x,y) in E: i<>j}: 
+w[x,y,i]+w[x,y,j] <= 2 -y1t[i,j,x,y];
+subject to trail13 {i in F, j in F,(x,y) in E: i<>j}:
+v_min[i,x,y]*(t_ear[j,x]-t_lat[i,x]) >= D-bigM*y1t[i,j,x,y] - y1o1[i,j,x,y]*bigM;
+#v[i,y]*(t[j,x]-t[i,x]) >= D-bigM*y1t[i,j,x,y] - y1o1[i,j,x,y]*bigM;
+subject to trail14 {i in F, j in F,(x,y) in E: i<>j}:
+v_min[j,x,y]*(t_ear[i,x]-t_lat[j,x])>=D-bigM*y1t[i,j,x,y] - bigM*y1o2[i,j,x,y];
+#v[j,y]*(t[i,x]-t[j,x])>=D-bigM*y1t[i,j,x,y] - bigM*y1o2[i,j,x,y];
+subject to trail15 {i in F, j in F,(x,y) in E: i<>j}:
+y1o1[i,j,x,y]+y1o2[i,j,x,y]<=1;
+
+subject to trail21{i in F, j in F,(x,y) in E: i<>j}:
+2*(1-y2t[i,j,x,y]) <= w[x,y,i]+w[x,y,j];
+subject to trail22{i in F, j in F,(x,y) in E: i<>j}: 
+w[x,y,i]+w[x,y,j] <= 2 -y2t[i,j,x,y];
+subject to trail23 {i in F, j in F,(x,y) in E: i<>j}:
+v_min[j,x,y]*(t_ear[j,y]-t_lat[i,y])>= D-bigM*y2t[i,j,x,y] - y2o1[i,j,x,y]*bigM;
+#v[i,y]*(t[j,y]-t[i,y])>= D-bigM*y2t[i,j,x,y] - y2o1[i,j,x,y]*bigM;
+subject to trail24 {i in F, j in F,(x,y) in E: i<>j}:
+v_min[i,x,y]*(t_ear[i,y]-t_lat[j,y])>= D-bigM*y2t[i,j,x,y] - y2o2[i,j,x,y] * bigM;
+#v[j,y]*(t[i,y]-t[j,y])>= D-bigM*y2t[i,j,x,y] - y2o2[i,j,x,y] * bigM;
+subject to trail25 {i in F, j in F,(x,y) in E: i<>j}:
+y2o1[i,j,x,y]+y2o2[i,j,x,y]<=1;
+
+subject to merge1{i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2}:
+2*(1-ym[i,j,x,x1,x2]) <= w[x1,x,i]+w[x2,x,j];
+subject to merge2{i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2}: 
+w[x1,x,i]+w[x2,x,j] <= 2 -ym[i,j,x,x1,x2];
+#TODO check if the speed parameter is correct for merge4
+subject to merge3 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2}: 
+t_ear[j,x]- t_lat[i,x]>=angleM[x,x1,x2]*D/v_min[j,x2,x]-bigM*ym[i,j,x,x1,x2] - ymo1[i,j,x,x1,x2]*bigM;
+#t[j,x]- t[i,x]>=angleM[i,j,x]*D/v[j,x]-bigM*ym[i,j,x,x1,x2] - ymo1[i,j,x,x1,x2]*bigM;
+subject to merge4 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2}: 
+t_ear[i,x]- t_lat[j,x]>=angleM[x,x1,x2]*D/v_min[i,x1,x]-bigM*ym[i,j,x,x1,x2] - ymo2[i,j,x,x1,x2]*bigM;
+#t[i,x]- t[j,x]>=angleM[i,j,x]*D/v[i,x]-bigM*ym[i,j,x,x1,x2] - ymo2[i,j,x,x1,x2]*bigM;
+subject to merge5{i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2}:
+ymo1[i,j,x,x1,x2]+ymo2[i,j,x,x1,x2]<=1;
+
+subject to diver1 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2}:
+2*(1-yd[i,j,x,x1,x2]) <= w[x,x1,i]+w[x2,x,j];
+subject to diver2 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2}: 
+w[x,x1,i]+w[x2,x,j] <= 2 -yd[i,j,x,x1,x2];
+#unica maniera che ha senso
+subject to diver3 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2}: #and x <>e[i]
+t_ear[j,x]- t_lat[i,x]>=anglePM[x,x1,x2]*(D/v_min[j,x2,x]+D/v_min[i,x,x1]) -bigM*yd[i,j,x,x1,x2] - ydo1[i,j,x,x1,x2]*bigM;
+#t[j,x]- t[i,x]>=anglePM[i,j,x]*(D/v[j,x]+D/v[i,x1]) -bigM*yd[i,j,x,x1,x2] - ydo1[i,j,x,x1,x2]*bigM;
+subject to diver4 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2}: #and x <> e[j]
+t_ear[i,x]- t_lat[j,x]>=anglePM[x,x1,x2]*(D/v_min[i,x2,x]+D/v_min[j,x,x1])-bigM*yd[i,j,x,x1,x2] - ydo2[i,j,x,x1,x2]*bigM;
+#t[i,x]- t[j,x]>=anglePM[i,j,x]*(D/v[i,x]+D/v[j,x1])-bigM*yd[i,j,x,x1,x2] - ydo2[i,j,x,x1,x2]*bigM;
+subject to diver5 {i in F, j in F, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2}:
+ydo1[i,j,x,x1,x2]+ydo2[i,j,x,x1,x2]<=1;
+#put ending cases
+
+
+#change xy with explicit values that I have
+subject to split1 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2}:
+2*(1-ys[i,j,x,x1,x2]) <= w[x,x1,i]+w[x,x2,j];
+subject to split2 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2}:
+w[x,x1,i]+w[x,x2,j] <= 2 -ys[i,j,x,x1,x2];
+#TODO check if the speed parameter is correct for split4
+subject to split3 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2}:
+t_ear[j,x]- t_lat[i,x]>=angleP[x,x1,x2]*D/v_min[i,x,x1]-bigM*ys[i,j,x,x1,x2] - yso1[i,j,x,x1,x2]*bigM;
+#t[j,x]- t[i,x]>=angleP[i,j,x]*D/v[i,x1]-bigM*ys[i,j,x,x1,x2] - yso1[i,j,x,x1,x2]*bigM;
+subject to split4 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2}:
+t_ear[i,x]- t_lat[j,x]>=angleP[x,x1,x2]*D/v_min[j,x,x2]-bigM*ys[i,j,x,x1,x2] - yso2[i,j,x,x1,x2]*bigM;
+#t[i,x]- t[j,x]>=angleP[i,j,x]*D/v[i,x2]-bigM*ys[i,j,x,x1,x2] - yso2[i,j,x,x1,x2]*bigM;
+subject to split5 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2}:
+yso1[i,j,x,x1,x2]+yso2[i,j,x,x1,x2]<=1;
+
 /*
 var l{i in F, j in F, x in V: i<>j and sum{(x,x1) in E} w[x,x1,i] ==  1 and sum{(x,x1) in E} w[x,x1,j] == 1 } binary;
 # l mi indica se nel nodo x i passa prima di j 
@@ -118,52 +201,6 @@ trail23 e trail24
 subject to split4 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2}:
 t_ear[i,x]- t_lat[j,x]>=angleP[x,x1,x2]*D/v_min[j,x,x2]* l[i,j,x] - bigM*(1-l[i,j,x]);
 */
-
-subject to trail13 {i in F, j in F,(x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2}:
-t_ear[j,x]-t_lat[i,x] >= D/v_min[i,x,y] * l[i,j,x ]- bigM*(1-l[i,j,x]);
-#v[i,y]*(t[j,x]-t[i,x]) >= D-bigM*y1t[i,j,x,y] - y1o1[i,j,x,y]*bigM;
-subject to trail14 {i in F, j in F,(x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2}:
-t_ear[i,x]-t_lat[j,x] >=D/v_min[j,x,y] * (1-l[i,j,x]) - bigM*l[i,j,x];
-#v[j,y]*(t[i,x]-t[j,x])>=D-bigM*y1t[i,j,x,y] - bigM*y1o2[i,j,x,y];
-
-
-
-#capire se qui mi devo riferire al nodo x o al nodo y
-subject to trail23 {i in F, j in F,(x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2}:
-t_ear[j,y]-t_lat[i,y]>= D/v_min[j,x,y]* l[i,j,x] - bigM*(1-l[i,j,x]);
-#v[i,y]*(t[j,y]-t[i,y])>= D-bigM*y2t[i,j,x,y] - y2o1[i,j,x,y]*bigM;
-subject to trail24 {i in F, j in F,(x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2}:
-t_ear[i,y]-t_lat[j,y]>= D/v_min[i,x,y] * (1-l[i,j,x]) - bigM*l[i,j,x];
-#v[j,y]*(t[i,y]-t[j,y])>= D-bigM*y2t[i,j,x,y] - y2o2[i,j,x,y] * bigM;
-
-
-#TODO check if the speed parameter is correct for merge4
-subject to merge3 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and w[x1,x,i]+w[x2,x,j]==2}: 
-t_ear[j,x]- t_lat[i,x]>=angleM[x,x1,x2]*D/v_min[j,x2,x] * l[i,j,x] - bigM*(1-l[i,j,x]);
-#t[j,x]- t[i,x]>=angleM[i,j,x]*D/v[j,x]-bigM*ym[i,j,x,x1,x2] - ymo1[i,j,x,x1,x2]*bigM;
-subject to merge4 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and w[x1,x,i]+w[x2,x,j]==2}: 
-t_ear[i,x]- t_lat[j,x]>=angleM[x,x1,x2]*D/v_min[i,x1,x]* (1-l[i,j,x]) - bigM*l[i,j,x];
-
-subject to diver3 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2 and w[x,x1,i] + w[x2,x,j]==2}: #and x <>e[i]
-t_ear[j,x]- t_lat[i,x]>=anglePM[x,x1,x2]*(D/v_min[j,x2,x]+D/v_min[i,x,x1])*l[i,j,x] - bigM*(1-l[i,j,x]);
-#t[j,x]- t[i,x]>=anglePM[i,j,x]*(D/v[j,x]+D/v[i,x1]) -bigM*yd[i,j,x,x1,x2] - ydo1[i,j,x,x1,x2]*bigM;
-subject to diver4 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2 and w[x,x1,i] + w[x2,x,j]==2}: #and x <> e[j]
-t_ear[i,x]- t_lat[j,x]>=anglePM[x,x1,x2]*(D/v_min[i,x2,x]+D/v_min[j,x,x1])* (1-l[i,j,x]) - bigM*l[i,j,x];
-#t[i,x]- t[j,x]>=anglePM[i,j,x]*(D/v[i,x]+D/v[j,x1])-bigM*yd[i,j,x,x1,x2] - ydo2[i,j,x,x1,x2]*bigM;
-#put ending cases
-
-
-#change xy with explicit values that I have
-#TODO check if the speed parameter is correct for split4
-subject to split3 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and w[x,x1,i]+w[x,x2,j]==2}:
-t_ear[j,x]- t_lat[i,x]>=angleP[x,x1,x2]*D/v_min[i,x,x1]*l[i,j,x] - bigM*(1-l[i,j,x]);
-#t[j,x]- t[i,x]>=angleP[i,j,x]*D/v[i,x1]-bigM*ys[i,j,x,x1,x2] - yso1[i,j,x,x1,x2]*bigM;
-subject to split4 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and w[x,x1,i]+w[x,x2,j]==2}:
-t_ear[i,x]- t_lat[j,x]>=angleP[x,x1,x2]*D/v_min[j,x,x2] * (1-l[i,j,x]) - bigM*l[i,j,x];
-#t[i,x]- t[j,x]>=angleP[i,j,x]*D/v[i,x2]-bigM*ys[i,j,x,x1,x2] - yso2[i,j,x,x1,x2]*bigM;
-
-
-
 
 #objective 49
 #minimize z: sum{i in F,x in V, y in V: (x,y) in E} w[x,y,i];
@@ -181,8 +218,9 @@ problem minCon: MinConf, wConf,numConflicts,startingPathConf,finishingPathConf,a
 #TOOD remove trail12, trail11, trail21, trail22, merge1, merge2, split1, split2, diver1, diver2
 problem conflicts: UAM,
 #variables
-    t_ear, t_lat, z_up, z_down, t_down, t_up, l,
+    t_ear, t_lat, z_up, z_down, t_down, t_up,
     #y1t,y2t,ym, yd, ys,
+    y1o1, y1o2,  y2o1, y2o2,  ymo1, ymo2, ydo1, ydo2, yso1, yso2,
     #w,
 #constrains
     afterprecalculated, calculateLat, 
@@ -191,17 +229,17 @@ problem conflicts: UAM,
     defineT_down, linearizeDown1, linearizeDown2, linearizeDown3,
     defineT_up, linearizeUp1, linearizeUp2, linearizeUp3,
     #trail11, trail12, 
-    trail13, trail14,
+    trail13, trail14, trail15,
     #trail21, trail22, 
-    trail23, trail24,
+    trail23, trail24, trail25,
     #merge1, merge2, 
-    merge3, merge4,
+    merge3, merge4, merge5,
     #diver1, diver2, 
-    diver3, diver4,
+    diver3, diver4, diver5,
     #split1, split2, 
-    split3, split4;
+    split3, split4, split5;
 
-/*
+
 problem wholeModel: UAM,
 #variables
     #w,
@@ -219,7 +257,7 @@ problem wholeModel: UAM,
     merge1, merge2, merge3, merge4, merge5,
     diver1, diver2, diver3, diver4, diver5,
     split1, split2, split3, split4, split5;
-*/
+
 /*
 subject to trail1{i in F,j in F, x in V, y in V:(x,y) in E}:
 (w[x,y,i]+ w[x,y,j]=2) ==> ((v[i,y]*(t[j,x]-t[i,x])>= D) or (v[j,y]*(t[i,x]-t[j,x]) >=D));

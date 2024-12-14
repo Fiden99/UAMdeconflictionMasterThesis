@@ -3,7 +3,7 @@ reset;
 option presolve 0;
 
 option solver gurobi;
-option gurobi_options 'timing=1 outlev=1 threads=1 timelim=300';
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=600';
 param data_name symbolic;
 let data_name :=sprintf("%s/data/nn%snf%s/%s.dat",($absPath),($nNodes),($nFlights),($datFile));
 #let data_name :=sprintf("%s/data/nn10nf100/%s.dat",($absPath),($datFile));
@@ -17,11 +17,11 @@ param alpha;
 let alpha:=4;
 param found default 0;
 param sol_name symbolic;
-let sol_name := sprintf("%s/heuristicOut/nn%snf%s/%s/%s.sol", ($absPath),($nNodes),($nFlights),($value),($datFile));
+let sol_name := sprintf("%s/heuristicOut/nn%snf%s/%s/600%s.sol", ($absPath),($nNodes),($nFlights),($value),($datFile));
 #let sol_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.sol", ($absPath),($value),($datFile));
 # Define the name of the file where the log of the solver will be saved
 param log_name symbolic;
-let log_name := sprintf("%s/heuristicOut/nn%snf%s/%s/%s.log",($absPath),($nNodes),($nFlights),($value),($datFile));
+let log_name := sprintf("%s/heuristicOut/nn%snf%s/%s/600%s.log",($absPath),($nNodes),($nFlights),($value),($datFile));
 #let log_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.log",($absPath),($value),($datFile));
 display data_name;
 for {(i,j) in E}
@@ -41,25 +41,7 @@ param opt_t_up{F,V} default Infinity;
 param opt_t_ear{F,V} default Infinity;															
 param opt_t_lat{F,V} default Infinity;		
 
-param opt_y1t{i in F, j in F,(x,y) in E : i<>j} default Infinity;
-param opt_y1o1{i in F, j in F,(x,y) in E : i<>j} default Infinity;
-param opt_y1o2{i in F, j in F,(x,y) in E : i<>j} default Infinity;
-
-param opt_y2t{i in F, j in F,(x,y) in E : i<>j} default Infinity;
-param opt_y2o1{i in F, j in F,(x,y) in E : i<>j} default Infinity;
-param opt_y2o2{i in F, j in F,(x,y) in E : i<>j} default Infinity;
-
-param opt_ym{i in F, j in F, x in V,  (x1,x) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
-param opt_ymo1{i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
-param opt_ymo2{i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
-
-param opt_yd{i in F, j in F, x in V, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
-param opt_ydo1{i in F, j in F, x in V, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
-param opt_ydo2{i in F, j in F, x in V, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
-
-param opt_ys{i in F, j in F, x in V, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
-param opt_yso1{i in F, j in F, x in V, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
-param opt_yso2{i in F, j in F, x in V, (x,x1) in E, (x2,x) in E: i<>j and x1<>x2} default Infinity;
+param opt_l{F,F,V} default Infinity;
 
 param opt_w{(i,j) in E,F} default Infinity;		
 
@@ -75,8 +57,8 @@ display nodesM,nodesS,nodesD;
 repeat
 {
 	printf "solving path in it %d\n\n",iterations> (log_name);
-	#capire perché inserisce troppe variablili
 	solve path >(log_name);
+    #solve minCon >(log_name);
 	if solve_result <> "solved" then
 	{
 		printf "path not found in given time\n";
@@ -87,109 +69,11 @@ repeat
     printf("fixing variables\n");
 	for {(i,j) in E,f in F}
 		let w[i,j,f]:=wPath[i,j,f];
-    printf "drop trail";
-    let {(i,j) in F_pairs,(x,y) in E: i<>j} y1t[i,j,x,y]:=1;
-    let {(i,j) in F_pairs,(x,y) in E: i<>j} y2t[i,j,x,y]:=1;
-    #drop trail11;
-    #drop trail12;
-    drop trail13;
-    drop trail14;
-    drop trail15;
-    #drop trail21;
-    #drop trail22;
-    drop trail23;
-    drop trail24;
-    drop trail25;
-    #restore constrains and fix y1t and y2t to 0 where it's needed
-    printf "dropped all trail %f\n",_ampl_elapsed_time;
-    let {(i,j) in F_pairs, (x,y) in E : w[x,y,i]+ w[x,y,j] == 2} y1t[i,j,x,y]:=0;
-    let {(i,j) in F_pairs, (x,y) in E : w[x,y,i]+ w[x,y,j] == 2} y2t[i,j,x,y]:=0;
-    #restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail11[i,j,x,y];
-    #restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail12[i,j,x,y];
-    restore {(i,j) in F_pairs, (x,y) in E : w[x,y,i]+ w[x,y,j] == 2} trail13[i,j,x,y];
-    restore {(i,j) in F_pairs, (x,y) in E : w[x,y,i]+ w[x,y,j] == 2} trail14[i,j,x,y];
-    restore {(i,j) in F_pairs, (x,y) in E : w[x,y,i]+ w[x,y,j] == 2} trail15[i,j,x,y];
-    #restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail21[i,j,x,y];
-    #restore {i in F, j in F, x in V, y in V:(x,y) in E and i<>j and w[x,y,i]+ w[x,y,j] == 2} trail22[i,j,x,y];
-    restore {(i,j) in F_pairs, (x,y) in E : w[x,y,i]+ w[x,y,j] == 2} trail23[i,j,x,y];
-    restore {(i,j) in F_pairs, (x,y) in E : w[x,y,i]+ w[x,y,j] == 2} trail24[i,j,x,y];
-    restore {(i,j) in F_pairs, (x,y) in E : w[x,y,i]+ w[x,y,j] == 2} trail25[i,j,x,y];
-    printf "finish trail %f\n",_ampl_elapsed_time;
-    #dropping and resetting merge variales
-
-    let {(i,j) in F_pairs, (x,x1,x2) in nodesM} ym[i,j,x,x1,x2]:=1;
-    #drop merge1;
-    #drop merge2;
-    drop merge3;
-    drop merge4;
-    drop merge5;
-    #dropping and resetting split variales
-    let {(i,j) in F_pairs, (x,x1,x2) in nodesS} ys[i,j,x,x1,x2]:=1;
-    #drop split1;
-    #drop split2;
-    drop split3;
-    drop split4;
-    drop split5;
-    #dropping and resetting diver variales
-    let {(i,j) in F_pairs, (x,x1,x2) in nodesD} yd[i,j,x,x1,x2]:=1;
-    #drop diver1;
-    #drop diver2;
-    drop diver3;
-    drop diver4;
-    drop diver5;
-    printf "dropped all conflcits constrains %f",_ampl_elapsed_time;
-    #restore merge
-
-    printf "fix merge %f\n",_ampl_elapsed_time;
-    let {(i,j) in F_pairs, (x,x1,x2) in nodesM: w[x1,x,i]+ w[x2,x,j] == 2} ym[i,j,x,x1,x2]:=0;
-    #printf "restore merge1 %f\n",_ampl_elapsed_time;
-    #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x1,x) in E and (x2,x) in E and w[x1,x,i]+ w[x2,x,j] == 2} merge1[i,j,x,x1,x2];
-    #printf "restore merge2 %f\n",_ampl_elapsed_time;
-    #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x1,x) in E and (x2,x) in E and w[x1,x,i]+ w[x2,x,j] == 2} merge2[i,j,x,x1,x2];
-    printf "restore merge3 %f\n",_ampl_elapsed_time; 
-    restore {(i,j) in F_pairs, (x,x1,x2) in nodesM: w[x1,x,i]+ w[x2,x,j] == 2} merge3[i,j,x,x1,x2];
-    printf "restore merge4 %f\n",_ampl_elapsed_time;
-    restore {(i,j) in F_pairs, (x,x1,x2) in nodesM: w[x1,x,i]+ w[x2,x,j] == 2} merge4[i,j,x,x1,x2];
-    printf "restore merge5 %f\n",_ampl_elapsed_time;
-    restore {(i,j) in F_pairs, (x,x1,x2) in nodesM: w[x1,x,i]+ w[x2,x,j] == 2} merge5[i,j,x,x1,x2];
-    printf "finish restoring merge %f\n",_ampl_elapsed_time;
-    #restore diver
-    printf "fixing diver %f\n",_ampl_elapsed_time;
-    let  {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x,x1,i]+w[x2,x,j] == 2} yd[i,j,x,x1,x2]:=0;
-    #printf "restore diver1 %f\n",_ampl_elapsed_time;
-    #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2} diver1[i,j,x,x1,x2];
-    #printf "restore diver2 %f\n",_ampl_elapsed_time;
-    #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x2,x) in E and w[x,x1,i]+w[x2,x,j] == 2} diver2[i,j,x,x1,x2];
-    printf "restore diver3 %f\n",_ampl_elapsed_time;        
-    restore {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x,x1,i]+w[x2,x,j] == 2} diver3[i,j,x,x1,x2];
-    printf "restore diver4 %f\n",_ampl_elapsed_time;
-    restore {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x,x1,i]+w[x2,x,j] == 2} diver4[i,j,x,x1,x2];
-    printf "restore diver5 %f\n",_ampl_elapsed_time;
-    restore {(i,j) in F_pairs, (x,x1,x2) in nodesD: w[x,x1,i]+w[x2,x,j] == 2} diver5[i,j,x,x1,x2];
-    printf "finish restoring diver %f\n",_ampl_elapsed_time;
-    #restore split
-    printf "fixing split %f\n",_ampl_elapsed_time;
-    let {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x,x1,i]+w[x,x2,j] == 2} ys[i,j,x,x1,x2]:=0;
-    #printf "restore split1 %f\n",_ampl_elapsed_time;
-    #restore {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2} split1[i,j,x,x1,x2];
-    #printf "restore split2 %f\n",_ampl_elapsed_time;
-    #restore  {i in F, j in F, x in V, x1 in V, x2 in V: i<>j and x1<>x2 and (x,x1) in E and (x,x2) in E and w[x,x1,i]+w[x,x2,j] ==2}split2[i,j,x,x1,x2];
-    printf "restore split3 %f\n",_ampl_elapsed_time;
-    restore  {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x,x1,i]+w[x,x2,j] == 2} split3[i,j,x,x1,x2];
-    printf "restore split4 %f\n",_ampl_elapsed_time;
-    restore  {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x,x1,i]+w[x,x2,j] == 2} split4[i,j,x,x1,x2];
-    printf "restore split5 %f\n",_ampl_elapsed_time;
-    restore  {(i,j) in F_pairs, (x,x1,x2) in nodesS: w[x,x1,i]+w[x,x2,j] == 2} split5[i,j,x,x1,x2];
-    printf "finish restoring split %f\n",_ampl_elapsed_time;
-
-    printf "fixed variables, solving conflicts\n";
-    display w,ym,yd,ys;
-
     #solving with fixed variables
 	solve conflicts > (log_name);
     #display 
 
-    display yso1,yso2,ydo1,ydo2,ymo1,ymo2,t_ear, t_lat;
+    display t_ear, t_lat;
 
 	display solve_result, solve_result_num;
 	if (solve_result == "solved" or (400<=solve_result_num and solve_result_num<=405)) then
@@ -209,40 +93,8 @@ repeat
 				let opt_t_ear[f,i]:=t_ear[f,i];															
 				let opt_t_lat[f,i]:= t_lat[f,i];															
 			}
-			for {(i,j) in E,f in F}
-			{
-				let opt_z_up[i,j,f]:= z_up[i,j,f];
-				let opt_z_down[i,j,f]:= z_down[i,j,f];									
-				let opt_w[i,j,f]:= w[i,j,f];
-			}
-			for {i in F, j in F,(x,y) in E : i<>j}
-			{
-				let opt_y1t[i,j,x,y]:=y1t[i,j,x,y];
-				let opt_y1o1[i,j,x,y]:=y1o1[i,j,x,y];
-				let opt_y1o2[i,j,x,y]:=y1o2[i,j,x,y];
-
-				let opt_y2t[i,j,x,y]:=y2t[i,j,x,y];
-				let opt_y2o1[i,j,x,y]:=y2o1[i,j,x,y];
-				let opt_y2o2[i,j,x,y]:=y2o2[i,j,x,y];
-			}
-			for {i in F, j in F,(x1,x) in E, (x2,x) in E:i<>j and x1<> x2}
-			{
-				let opt_ym[i,j,x,x1,x2]:=ym[i,j,x,x1,x2];
-				let opt_ymo1[i,j,x,x1,x2]:=ymo1[i,j,x,x1,x2];
-				let opt_ymo2[i,j,x,x1,x2]:=ymo2[i,j,x,x1,x2];
-			}
-			for {i in F, j in F, (x,x1) in E, (x2,x) in E:  i<>j and x1<> x2}
-			{
-				let opt_yd[i,j,x,x1,x2]:=yd[i,j,x,x1,x2];
-				let opt_ydo1[i,j,x,x1,x2]:=ydo1[i,j,x,x1,x2];
-				let opt_ydo2[i,j,x,x1,x2]:=ydo2[i,j,x,x1,x2];
-			}
-			for {i in F, j in F, (x,x1) in E, (x,x2) in E:  i<>j and x1<> x2}
-			{
-				let opt_ys[i,j,x,x1,x2]:=ys[i,j,x,x1,x2];
-				let opt_yso1[i,j,x,x1,x2]:=yso1[i,j,x,x1,x2];
-				let opt_yso2[i,j,x,x1,x2]:=yso2[i,j,x,x1,x2];
-			}
+            let {i in F, j in F, x in V: i<>j } opt_l[i,j,x]:=l[i,j,x];
+			let {(x,y) in E,f in F} opt_w[x,y,f]:=w[x,y,f];
 		}
 	}
     else
@@ -284,9 +136,12 @@ repeat
 }
 while (found==0);
 param result_name symbolic;
-let result_name := sprintf("%s/results/heuristicnn%snf%s.csv",($absPath),($nNodes),($nFlights));
+let result_name := sprintf("%s/results/%s_600_heuristicnn%snf%s.csv",($absPath),($value),($nNodes),($nFlights));
 #"numero nodi","numero voli","tipologia","istanza", "risultato euristica","tempo euristica","optTime","numero iterazioni","iterazione dove trovo ottimo"
-printf "%s,%s,%s,%d,%f,%f,%d,%d\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> (result_name);
+if (opt == Infinity) then
+	printf "%s,%s,%s,600,+Inf,%f,+Inf,%d,%d\n",($nNodes),($nFlights),($datFile),(_ampl_elapsed_time + _total_solve_elapsed_time),iterations,(iteropt+1) >> (result_name);
+else
+	printf "%s,%s,%s,600,%d,%f,%f,%d,%d\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> (result_name);
 # Store the solution in a file
 printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
 display opt, iterations, optTime,iteropt>(sol_name);
@@ -306,32 +161,9 @@ for {(i,j) in E, f in F}
 	printf"z_up[%d,%d,%d] :=\t%f;\n",i,j,f,opt_z_up[i,j,f]> (sol_name);
 	printf"z_down[%d,%d,%d] :=\t%f;\n",i,j,f,opt_z_down[i,j,f]> (sol_name);
 }
-for {i in F, j in F,(x,y) in E : i<>j}
+for {i in F, j in F, x in V: i<>j and sum{(x,x1) in E} w[x,x1,i] ==  1 and sum{(x,x1) in E} w[x,x1,j] == 1 }
 {
-	printf"y1t[%d,%d,%d,%d] :=\t%f;\n",i,j,x,y,opt_y1t[i,j,x,y]> (sol_name);
-	printf"y1o1[%d,%d,%d,%d] :=\t%f;\n",i,j,x,y,opt_y1o1[i,j,x,y]> (sol_name);
-	printf"y1o2[%d,%d,%d,%d] :=\t%f;\n",i,j,x,y,opt_y1o2[i,j,x,y]> (sol_name);
+    printf"l[%d,%d,%d] :=\t%f;\n",i,j,x,opt_l[i,j,x]> (sol_name);
+}
 
-	printf"y2t[%d,%d,%d,%d] :=\t%f;\n",i,j,x,y,opt_y2t[i,j,x,y]> (sol_name);
-	printf"y2o1[%d,%d,%d,%d] :=\t%f;\n",i,j,x,y,opt_y2o1[i,j,x,y]> (sol_name);
-	printf"y2o2[%d,%d,%d,%d] :=\t%f;\n",i,j,x,y,opt_y2o2[i,j,x,y]> (sol_name);
-}
-for {i in F, j in F,(x1,x) in E, (x2,x) in E:i<>j and x1<>x2}
-{
-	printf"ym[%d,%d,%d,%d,%d] :=\t%f;\n",i,j,x,x1,x2,opt_ym[i,j,x,x1,x2]> (sol_name);
-	printf"ymo1[%d,%d,%d,%d,%d] :=\t%f;\n",i,j,x,x1,x2,opt_ymo1[i,j,x,x1,x2]> (sol_name);
-	printf"ymo2[%d,%d,%d,%d,%d] :=\t%f;\n",i,j,x,x1,x2,opt_ymo2[i,j,x,x1,x2]> (sol_name);
-}
-for {i in F, j in F, (x,x1) in E, (x2,x) in E:  i<>j and x1<> x2}
-{
-	printf"yd[%d,%d,%d,%d,%d] :=\t%f;\n",i,j,x,x1,x2,opt_yd[i,j,x,x1,x2]> (sol_name);
-	printf"ydo1[%d,%d,%d,%d,%d] :=\t%f;\n",i,j,x,x1,x2,opt_ydo1[i,j,x,x1,x2]> (sol_name);
-	printf"ydo2[%d,%d,%d,%d,%d] :=\t%f;\n",i,j,x,x1,x2,opt_ydo2[i,j,x,x1,x2]> (sol_name);
-}
-for {i in F, j in F, (x,x1) in E, (x,x2) in E:  i<>j and x1<> x2}
-{
-	printf"ys[%d,%d,%d,%d,%d] :=\t%f;\n",i,j,x,x1,x2,opt_ys[i,j,x,x1,x2]> (sol_name);
-	printf"yso1[%d,%d,%d,%d,%d] :=\t%f;\n",i,j,x,x1,x2,opt_yso1[i,j,x,x1,x2]> (sol_name);
-	printf"yso2[%d,%d,%d,%d,%d] :=\t%f;\n",i,j,x,x1,x2,opt_yso2[i,j,x,x1,x2]> (sol_name);
-}
 

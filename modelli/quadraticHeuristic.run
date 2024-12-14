@@ -108,7 +108,7 @@ repeat
 			let {f in F,i in V} opt_t_lat[f,i]:= t_lat[f,i];																					
 			let {(i,j) in E,f in F} opt_w[i,j,f]:= w[i,j,f];
             let {f in F,i in V} opt_t_down[f,i]:=t_down[f,i];
-            let {f in F, in V} opt_t_up[f,i]:= t_up[f,i];
+            let {f in F,i in V} opt_t_up[f,i]:= t_up[f,i];
 		}
 	}
     #if (solve_result =="solved") then
