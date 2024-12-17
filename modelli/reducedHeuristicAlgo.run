@@ -32,9 +32,6 @@ param sameOpt default 0;
 #heuristic var
 param opt default Infinity;
 
-param opt_z_up{(i,j) in E,F} default Infinity;
-param opt_z_down{(i,j) in E,F}  default Infinity;	
-
 param opt_t_down{F,V} default Infinity;
 param opt_t_up{F,V} default Infinity;
 
@@ -47,6 +44,7 @@ param opt_w{(i,j) in E,F} default Infinity;
 
 param optTime default Infinity;
 param iteropt default Infinity;
+param obtainedSol binary default 0;
 #param cutoff default Infinity;
 #trying to reduce dimension of let
 set F_pairs := {i in F, j in F: i<>j};
@@ -66,9 +64,9 @@ repeat
 		break;
 	}
     # 
-    printf("fixing variables\n");
-	for {(i,j) in E,f in F}
-		let w[i,j,f]:=wPath[i,j,f];
+    printf("fixing w\n");
+	
+	let{(i,j) in E, f in F} w[i,j,f]:=wPath[i,j,f];
     #solving with fixed variables
 	solve conflicts > (log_name);
     #display 
@@ -78,6 +76,7 @@ repeat
 	display solve_result, solve_result_num;
 	if (solve_result == "solved" or (400<=solve_result_num and solve_result_num<=405)) then
 	{
+		let obtainedSol:=1;
         printf "solved conflicts\n";
         #update optimal solution
 		if (opt > UAM) then
@@ -93,7 +92,7 @@ repeat
 				let opt_t_ear[f,i]:=t_ear[f,i];															
 				let opt_t_lat[f,i]:= t_lat[f,i];															
 			}
-            let {i in F, j in F, x in V: i<>j } opt_l[i,j,x]:=l[i,j,x];
+            let {i in F, j in F, x in V: i<>j and (sum{(x,x1) in E} w[x,x1,i] + sum{(x1,x) in E} w[x1,x,i] >= 1) and (sum{(x,x1) in E} w[x,x1,j] + sum{(x1,x) in E} w[x1,x,j] >= 1)} opt_l[i,j,x]:=l[i,j,x];
 			let {(x,y) in E,f in F} opt_w[x,y,f]:=w[x,y,f];
 		}
 	}
@@ -138,32 +137,28 @@ while (found==0);
 param result_name symbolic;
 let result_name := sprintf("%s/results/%s_600_heuristicnn%snf%s.csv",($absPath),($value),($nNodes),($nFlights));
 #"numero nodi","numero voli","tipologia","istanza", "risultato euristica","tempo euristica","optTime","numero iterazioni","iterazione dove trovo ottimo"
-if (opt == Infinity) then
-	printf "%s,%s,%s,600,+Inf,%f,+Inf,%d,%d\n",($nNodes),($nFlights),($datFile),(_ampl_elapsed_time + _total_solve_elapsed_time),iterations,(iteropt+1) >> (result_name);
+if (obtainedSol == 0) then
+	printf "%s,%s,%s,600,+Inf,%f,+Inf,%d,+Inf\n",($nNodes),($nFlights),($datFile),(_ampl_elapsed_time + _total_solve_elapsed_time),iterations >> (result_name);
 else
+{
 	printf "%s,%s,%s,600,%d,%f,%f,%d,%d\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> (result_name);
-# Store the solution in a file
-printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
-display opt, iterations, optTime,iteropt>(sol_name);
-printf "variable\t\t value\n" >(sol_name);
-for {(i,j) in E, f in F}{
-	printf "w[%d,%d,%d] :=\t %d;\n", i,j,f, opt_w[i,j,f] > (sol_name);
+	# Store the solution in a file
+	printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
+	display opt, iterations, optTime,iteropt>(sol_name);
+	printf "variable\t\t value\n" >(sol_name);
+	for {(i,j) in E, f in F}{
+		printf "w[%d,%d,%d] :=\t %d;\n", i,j,f, opt_w[i,j,f] > (sol_name);
+	}
+	for {i in V,f in F}
+	{
+		printf"t_ear[%d,%d] :=\t%f;\n",f,i,opt_t_ear[f,i]> (sol_name);															
+		printf"t_lat[%d,%d] :=\t%f;\n",f,i,opt_t_lat[f,i]> (sol_name);															
+		printf"t_down[%d,%d] :=\t%f;\n",f,i, opt_t_down[f,i] > (sol_name);
+		printf"t_up[%d,%d] :=\t%f;\n",f,i,opt_t_up[f,i]> (sol_name);
+	}
+	for {i in F, j in F, x in V: i<j and (sum{(x,x1) in E} w[x,x1,i] + sum{(x1,x) in E} w[x1,x,i] >= 1) and (sum{(x,x1) in E} w[x,x1,j] + sum{(x1,x) in E} w[x1,x,j] >= 1)}
+	{
+		printf"l[%d,%d,%d] :=\t%f;\n",i,j,x,opt_l[i,j,x]> (sol_name);
+	}
 }
-for {i in V,f in F}
-{
-	printf"t_ear[%d,%d] :=\t%f;\n",f,i,opt_t_ear[f,i]> (sol_name);															
-	printf"t_lat[%d,%d] :=\t%f;\n",f,i,opt_t_lat[f,i]> (sol_name);															
-	printf"t_down[%d,%d] :=\t%f;\n",f,i, opt_t_down[f,i] > (sol_name);
-	printf"t_up[%d,%d] :=\t%f;\n",f,i,opt_t_up[f,i]> (sol_name);
-}
-for {(i,j) in E, f in F}
-{
-	printf"z_up[%d,%d,%d] :=\t%f;\n",i,j,f,opt_z_up[i,j,f]> (sol_name);
-	printf"z_down[%d,%d,%d] :=\t%f;\n",i,j,f,opt_z_down[i,j,f]> (sol_name);
-}
-for {i in F, j in F, x in V: i<>j and sum{(x,x1) in E} w[x,x1,i] ==  1 and sum{(x,x1) in E} w[x,x1,j] == 1 }
-{
-    printf"l[%d,%d,%d] :=\t%f;\n",i,j,x,opt_l[i,j,x]> (sol_name);
-}
-
 
