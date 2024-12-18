@@ -3,7 +3,7 @@ reset;
 option presolve 0;
 
 option solver gurobi;
-option gurobi_options 'timing=1 outlev=1 threads=1 timelim=600';
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=300';
 param data_name symbolic;
 let data_name :=sprintf("%s/data/nn%snf%s/%s.dat",($absPath),($nNodes),($nFlights),($datFile));
 #let data_name :=sprintf("%s/data/nn10nf100/%s.dat",($absPath),($datFile));
@@ -17,11 +17,11 @@ param alpha;
 let alpha:=4;
 param found default 0;
 param sol_name symbolic;
-let sol_name := sprintf("%s/heuristicOut/nn%snf%s/%s/600%s.sol", ($absPath),($nNodes),($nFlights),($value),($datFile));
+let sol_name := sprintf("%s/heuristicOut/nn%snf%s/%s/300%s.sol", ($absPath),($nNodes),($nFlights),($value),($datFile));
 #let sol_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.sol", ($absPath),($value),($datFile));
 # Define the name of the file where the log of the solver will be saved
 param log_name symbolic;
-let log_name := sprintf("%s/heuristicOut/nn%snf%s/%s/600%s.log",($absPath),($nNodes),($nFlights),($value),($datFile));
+let log_name := sprintf("%s/heuristicOut/nn%snf%s/%s/300%s.log",($absPath),($nNodes),($nFlights),($value),($datFile));
 #let log_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.log",($absPath),($value),($datFile));
 display data_name;
 for {(i,j) in E}
@@ -135,13 +135,13 @@ repeat
 }
 while (found==0);
 param result_name symbolic;
-let result_name := sprintf("%s/results/%s_600_heuristicnn%snf%s.csv",($absPath),($value),($nNodes),($nFlights));
+let result_name := sprintf("%s/results/%s_300_heuristicnn%snf%s.csv",($absPath),($value),($nNodes),($nFlights));
 #"numero nodi","numero voli","tipologia","istanza", "risultato euristica","tempo euristica","optTime","numero iterazioni","iterazione dove trovo ottimo"
 if (obtainedSol == 0) then
-	printf "%s,%s,%s,600,+Inf,%f,+Inf,%d,+Inf\n",($nNodes),($nFlights),($datFile),(_ampl_elapsed_time + _total_solve_elapsed_time),iterations >> (result_name);
+	printf "%s,%s,%s,300,+Inf,%f,+Inf,%d,+Inf\n",($nNodes),($nFlights),($datFile),(_ampl_elapsed_time + _total_solve_elapsed_time),iterations >> (result_name);
 else
 {
-	printf "%s,%s,%s,600,%d,%f,%f,%d,%d\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> (result_name);
+	printf "%s,%s,%s,300,%d,%f,%f,%d,%d\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> (result_name);
 	# Store the solution in a file
 	printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
 	display opt, iterations, optTime,iteropt>(sol_name);
