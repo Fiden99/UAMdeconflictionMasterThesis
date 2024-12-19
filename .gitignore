@@ -1303,6 +1303,7 @@ FodyWeavers.xsd
 profile_default/
 ipython_config.py
 
+ampl.*
 
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
