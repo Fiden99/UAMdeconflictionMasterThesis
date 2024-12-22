@@ -83,7 +83,7 @@ repeat
 				for {(tempNode,i) in E : w[tempNode,i,f] == 1}
 				{
 					# valutare d o dMCF
-					let t_hat_ear[f,i]:=t_hat_ear[f,tempNode] + (d[tempNode,i])/v_max[f,tempNode,i];
+					let t_hat_ear[f,i]:=t_hat_ear[f,tempNode] + d[tempNode,i]/v_min[f,tempNode,i];
 					printf"%d,t_hat_ear[%d,%d]:=%f\t t_hat_ear_backup:=%f;\n",tempNode,f,i, t_hat_ear[f,i], t_hat_ear_backup[f,i];
 					let t_hat_lat[f,i]:=t_hat_ear[f,i] + 2;
 					let tempNode:=i;
