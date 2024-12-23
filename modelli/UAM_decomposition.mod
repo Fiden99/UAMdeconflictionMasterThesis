@@ -89,14 +89,14 @@ subject to trail14 {i in F,j in F, (x,y) in E: i<>j and t_hat_ear[i,x] <= t_hat_
 t_ear[i,x]-t_lat[j,x]>=D/v_min[j,x,y]* (1-passFirst[i,j,x]) - bigM*passFirst[i,j,x] - bigM*y1t[i,j,x,y];
 #v[j,y]*(t[i,x]-t[j,x])>=D-bigM*y1t[i,j,x,y] - bigM*y1o2[i,j,x,y];
 
-subject to trail21{i in F, j in F,(x,y) in E: i<>j and t_hat_ear[i,y] < t_hat_ear[j,y]}:
+subject to trail21{i in F, j in F,(x,y) in E: i<>j and t_hat_ear[i,y] <= t_hat_ear[j,y]}:
 2*(1-y2t[i,j,x,y]) <= w[x,y,i]+w[x,y,j];
-subject to trail22{i in F,j in F, (x,y) in E: i<>j and t_hat_ear[i,y] < t_hat_ear[j,y]}:
+subject to trail22{i in F,j in F, (x,y) in E: i<>j and t_hat_ear[i,y] <= t_hat_ear[j,y]}:
 w[x,y,i]+w[x,y,j] <= 2 -y2t[i,j,x,y];
-subject to trail23 {i in F,j in F, (x,y) in E: i<>j and t_hat_ear[i,y] < t_hat_ear[j,y]}:
+subject to trail23 {i in F,j in F, (x,y) in E: i<>j and t_hat_ear[i,y] <= t_hat_ear[j,y]}:
 t_ear[j,y]-t_lat[i,y]>= D/v_min[j,x,y]* passFirst[i,j,x] - bigM*(1-passFirst[i,j,x]) - bigM*y2t[i,j,x,y];
 #v[i,y]*(t[j,y]-t[i,y])>= D-bigM*y2t[i,j,x,y] - y2o1[i,j,x,y]*bigM;
-subject to trail24 {i in F,j in F, (x,y) in E: i<>j and t_hat_ear[i,y] < t_hat_ear[j,y]}:
+subject to trail24 {i in F,j in F, (x,y) in E: i<>j and t_hat_ear[i,y] <= t_hat_ear[j,y]}:
 t_ear[i,y]-t_lat[j,y]>= D/v_min[i,x,y] * (1-passFirst[i,j,x]) - bigM*passFirst[i,j,x] - bigM*y2t[i,j,x,y];
 #v[j,y]*(t[i,y]-t[j,y])>= D-bigM*y2t[i,j,x,y] - y2o2[i,j,x,y] * bigM;
 
