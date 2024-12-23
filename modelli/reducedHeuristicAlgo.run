@@ -49,12 +49,12 @@ param t_hat_ear_backup{F,V} default Infinity;
 param t_hat_lat_backup{F,V} default Infinity;
 #param cutoff default Infinity;
 #trying to reduce dimension of let
-set F_pairs := {i in F, j in F: i<>j};
+/*set F_pairs := {i in F, j in F: i<>j};
 set nodesM  := {x in V, (x1,x) in E, (x2,x) in E: x1<>x2};
 set nodesD  := {x in V, (x,x1) in E, (x2,x) in E: x1<>x2};
 set nodesS  := {x in V, (x,x1) in E, (x,x2) in E: x1<>x2};
+*/
 param tempNode default Infinity;
-display nodesM,nodesS,nodesD;
 repeat
 {
 	printf "solving path in it %d\n\n",iterations> (log_name);
@@ -73,7 +73,7 @@ repeat
 	
 	let {f in F, i in V} t_hat_ear_backup[f,i]:=t_hat_ear[f,i];
 	let {f in F, i in V} t_hat_lat_backup[f,i]:=t_hat_lat[f,i];
-	if iterations > 0 then 
+	/*if iterations > 0 then 
 	{
 		for {f in F}
 		{
@@ -91,15 +91,14 @@ repeat
 				}
 			}
 		}
-	}
+	}*/
     #solving with fixed variables
-	display t_hat_ear, t_hat_lat;
+	#display t_hat_ear, t_hat_lat;
 	solve conflicts > (log_name);
 	
-	let {f in F, i in V} t_hat_ear[f,i]:=t_hat_ear_backup[f,i];
-	let {f in F, i in V} t_hat_lat[f,i]:=t_hat_lat_backup[f,i];
-    
-	display t_ear, t_lat;
+	#let {f in F, i in V} t_hat_ear[f,i]:=t_hat_ear_backup[f,i];
+	#let {f in F, i in V} t_hat_lat[f,i]:=t_hat_lat_backup[f,i];
+    printf "t_ear[%d,%d] = %f;\nt_ear[%d,%d] = %d\n",f,s[f],t_ear[f,s[f]],f,e[f],t_ear[f,e[f]];
 
 	display solve_result, solve_result_num;
 	if (solve_result == "solved" or (400<=solve_result_num and solve_result_num<=405)) then
