@@ -1,25 +1,26 @@
 #data
-param nf; #number of flights
 param nn; #number of nodes
-set F:= 0..nf-1; #set of flights
+set F; #set of flights
 set V:= 0..nn-1; #set of nodes
 set E within {V cross V}; #arcs
 param s{F}; #starting point for each flight
 param e{F}; #ending poitn for each flight
 param d{E}>=0; #distance for each pair of nodes
-param v_max{F, E};
+param v_max{F,E};
 param v_min{F,E}; #param v{F,V}; #entering speed
 param bigM:=1000; #bigM for linearizing purpose
-param angleM{x in V, (x1,x) in E, (x2,x) in E: x1<>x2};							# angle-for merging
-param angleP{x in V, (x,x1) in E, (x,x2) in E: x1<>x2};							# angle+ for splitting
-param anglePM{x in V,(x,x1) in E, (x2,x) in E: x1<>x2};							#angle -+ divering
+param angleM{x in V, (x1,x) in E, (x2,x) in E: x1<>x2} default 1;							# angle-for merging
+param angleP{x in V, (x,x1) in E, (x,x2) in E: x1<>x2} default 1;							# angle+ for splitting
+param anglePM{x in V,(x,x1) in E, (x2,x) in E: x1<>x2} default 1;							#angle -+ divering
 param D; # safety distance
-param t_hat_ear{F,V};
-param t_hat_lat{F,V};
-param drifted_flight;
-param drifted_wp;
-param drifted_t_ear_fix;
-param drifted_t_lat_fix;
+param t_hat_ear{F,V} default 997;
+param t_hat_lat{F,V} default 999;
+param drifted_flight default -1;
+param drifted_wp default -1;
+param drifted_t_ear_fix  default -1;
+param drifted_t_lat_fix  default -1;
+set fixedFlights within {F cross E};
+set conflictsNodes within {V cross V cross V};
 #variables
 var w{E,F} binary; #flight f pass through arc i,j
 var z_up{E,F} >=0 ; # variable for w*t, understand why is not integer
@@ -39,11 +40,11 @@ var ys{i in F, j in F, x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2} binary;
 var passFirst{i in F, j in F, x in V: i<>j} binary;
 
 #constrains
-subject to startIntegee{f in F}:
-t_ear[f,s[f]] >= t_ear_start[f];
+subject to startInteger{f in F}:
+t_ear[f,s[f]] = t_ear_start[f];
 
 subject to afterprecalculated{f in F}:
-t_hat_ear[f,s[f]]<= t_ear[f,s[f]];
+t_hat_ear[f,s[f]]<= t_ear_start[f];
 subject to calculateLat{i in F, x in V}:
 t_lat[i,x]=t_ear[i,x] + t_hat_lat[i,x] - t_hat_ear[i,x];
 
@@ -104,41 +105,41 @@ subject to trail24 {i in F,j in F, (x,y) in E: i<>j and t_hat_ear[i,y] < t_hat_e
 t_ear[i,y]-t_lat[j,y]>= D/v_min[i,x,y] * (1-passFirst[i,j,x]) - bigM*passFirst[i,j,x] - bigM*y2t[i,j,x,y];
 #v[j,y]*(t[i,y]-t[j,y])>= D-bigM*y2t[i,j,x,y] - y2o2[i,j,x,y] * bigM;
 
-subject to merge1{i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to merge1{i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: (x,x1,x2) in conflictsNodes and  i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
 2*(1-ym[i,j,x,x1,x2]) <= w[x1,x,i]+w[x2,x,j];
-subject to merge2{i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to merge2{i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
 w[x1,x,i]+w[x2,x,j] <= 2 -ym[i,j,x,x1,x2];
 #TODO check if the speed parameter is correct for merge4
-subject to merge3 {i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to merge3 {i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
 t_ear[j,x]- t_lat[i,x]>=angleM[x,x1,x2]*D/v_min[j,x2,x] * passFirst[i,j,x] - bigM*(1-passFirst[i,j,x]) - ym[i,j,x,x1,x2]*bigM;
 #t[j,x]- t[i,x]>=angleM[i,j,x]*D/v[j,x]-bigM*ym[i,j,x,x1,x2] - ymo1[i,j,x,x1,x2]*bigM;
-subject to merge4 {i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to merge4 {i in F, j in F, x in V,(x1,x) in E, (x2,x) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
 t_ear[i,x]- t_lat[j,x]>=angleM[x,x1,x2]*D/v_min[i,x1,x]* (1-passFirst[i,j,x]) - bigM*passFirst[i,j,x] - ym[i,j,x,x1,x2]*bigM;
 #t[i,x]- t[j,x]>=angleM[i,j,x]*D/v[i,x]-bigM*ym[i,j,x,x1,x2] - ymo2[i,j,x,x1,x2]*bigM;
 
-subject to diver1 {i in F, j in F, x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to diver1 {i in F, j in F, x in V,(x,x1) in E, (x2,x) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
 2*(1-yd[i,j,x,x1,x2]) <= w[x,x1,i]+w[x2,x,j];
-subject to diver2 {i in F, j in F, x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to diver2 {i in F, j in F, x in V,(x,x1) in E, (x2,x) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
 w[x,x1,i]+w[x2,x,j] <= 2 -yd[i,j,x,x1,x2];
 #unica maniera che ha senso
-subject to diver3 {i in F, j in F, x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}: #and x <>e[i]
+subject to diver3 {i in F, j in F, x in V,(x,x1) in E, (x2,x) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}: #and x <>e[i]
 t_ear[j,x]- t_lat[i,x]>=anglePM[x,x1,x2]*(D/v_min[j,x2,x]+D/v_min[i,x,x1])*passFirst[i,j,x] - bigM*(1-passFirst[i,j,x]) - yd[i,j,x,x1,x2]*bigM;
 #t[j,x]- t[i,x]>=anglePM[i,j,x]*(D/v[j,x]+D/v[i,x1]) -bigM*yd[i,j,x,x1,x2] - ydo1[i,j,x,x1,x2]*bigM;
-subject to diver4 {i in F, j in F, x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}: #and x <> e[j]
+subject to diver4 {i in F, j in F, x in V,(x,x1) in E, (x2,x) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}: #and x <> e[j]
 t_ear[i,x]- t_lat[j,x]>=anglePM[x,x1,x2]*(D/v_min[i,x2,x]+D/v_min[j,x,x1])* (1-passFirst[i,j,x]) - bigM*passFirst[i,j,x] - yd[i,j,x,x1,x2]*bigM;
 #t[i,x]- t[j,x]>=anglePM[i,j,x]*(D/v[i,x]+D/v[j,x1])-bigM*yd[i,j,x,x1,x2] - ydo2[i,j,x,x1,x2]*bigM;
 
 
 #change xy with explicit values that I have
-subject to split1 {i in F, j in F, x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to split1 {i in F, j in F, x in V,(x,x1) in E, (x,x2) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
 2*(1-ys[i,j,x,x1,x2]) <= w[x,x1,i]+w[x,x2,j];
-subject to split2 {i in F, j in F, x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to split2 {i in F, j in F, x in V,(x,x1) in E, (x,x2) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
 w[x,x1,i]+w[x,x2,j] <= 2 -ys[i,j,x,x1,x2];
 #TODO check if the speed parameter is correct for split4
-subject to split3 {i in F, j in F, x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to split3 {i in F, j in F, x in V,(x,x1) in E, (x,x2) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
 t_ear[j,x]- t_lat[i,x]>=angleP[x,x1,x2]*D/v_min[i,x,x1]*passFirst[i,j,x] - bigM*(1-passFirst[i,j,x]) - ys[i,j,x,x1,x2]*bigM;
 #t[j,x]- t[i,x]>=angleP[i,j,x]*D/v[i,x1]-bigM*ys[i,j,x,x1,x2] - yso1[i,j,x,x1,x2]*bigM;
-subject to split4 {i in F, j in F, x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to split4 {i in F, j in F, x in V,(x,x1) in E, (x,x2) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
 t_ear[i,x]- t_lat[j,x]>=angleP[x,x1,x2]*D/v_min[j,x,x2] * (1-passFirst[i,j,x]) - bigM*passFirst[i,j,x] -ys[i,j,x,x1,x2]*bigM;
 #t[i,x]- t[j,x]>=angleP[i,j,x]*D/v[i,x2]-bigM*ys[i,j,x,x1,x2] - yso2[i,j,x,x1,x2]*bigM;
 
@@ -149,6 +150,9 @@ subject to driftLat:
 t_ear[drifted_flight,drifted_wp] <= drifted_t_lat_fix;
 subject to driftWP:
 sum{(x,drifted_wp) in E} w[x,drifted_wp,drifted_flight] = 1;
+
+subject to fixFlights{(f,x,y) in fixedFlights}:
+w[x,y,f] = 1;
 
 
 

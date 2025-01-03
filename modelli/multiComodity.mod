@@ -35,7 +35,7 @@ subject to defDev2{i in F, x in V}:
 dev[i,x] >= t_hat_ear[i,x] - t_ear[i,x];
 */
 subject to afterprecalculated{f in F}:
-t_hat_ear[f,s[f]]<= t_ear[f,s[f]];
+t_hat_ear[f,s[f]] <= t_ear_start[f];
 subject to calculateLat{i in F, x in V}:
 t_lat[i,x]=t_ear[i,x] + t_hat_lat[i,x] - t_hat_ear[i,x];
 
@@ -80,8 +80,7 @@ subject to defineT_up{f in F,y in V}:
 t_up[f,y]=sum{(x,y) in E} (w[x,y,f] * (t_ear[f,x] + d[x,y]/v_min[f,x,y]));
 
 subject to startInt{f in F}:
-t_ear[f,s[f]] >= t_ear_start[f];
-
+t_ear_start[f] = t_ear[f,s[f]];
 #vedere come procedere: in mercedes viene detto che hat_t_ear[i,m] < (considerare anche =) t_hat_ear[j,m]
 #è possibile che il risultato ottenuto sia confrontabile con quello che ho ottenuto indicando che i < j
 
@@ -97,22 +96,23 @@ t_ear[i,y]-t_lat[j,y]>= D/v_min[i,x,y] * (1-l[i,j,x]) - bigM*l[i,j,x];
 
 
 #TODO check if the speed parameter is correct for merge4
-subject to merge3 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and w[x1,x,i]+w[x2,x,j]==2 and t_hat_ear[i,x] < t_hat_ear[j,x]}: 
+subject to merge3 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and (w[x1,x,i]+w[x2,x,j]==2 or w[x1,x,j] + w[x2,x,i] == 2) and t_hat_ear[i,x] < t_hat_ear[j,x]}: 
 t_ear[j,x]- t_lat[i,x]>=angleM[x,x1,x2]*D/v_min[j,x2,x] * l[i,j,x] - bigM*(1-l[i,j,x]);
-subject to merge4 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and w[x1,x,i]+w[x2,x,j]==2 and t_hat_ear[i,x] < t_hat_ear[j,x]}: 
+subject to merge4 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and( w[x1,x,i]+w[x2,x,j]==2 or w[x1,x,j] + w[x2,x,i] == 2) and t_hat_ear[i,x] < t_hat_ear[j,x]}: 
 t_ear[i,x]- t_lat[j,x]>=angleM[x,x1,x2]*D/v_min[i,x1,x]* (1-l[i,j,x]) - bigM*l[i,j,x];
 
-subject to diver3 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2 and w[x,x1,i] + w[x2,x,j]==2 and t_hat_ear[i,x] < t_hat_ear[j,x]}: #and x <>e[i]
+subject to diver3 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2 and (w[x,x1,i] + w[x2,x,j]==2 or w[x,x1,j]+w[x2,x,i] == 2) and t_hat_ear[i,x] < t_hat_ear[j,x]}: #and x <>e[i]
 t_ear[j,x]- t_lat[i,x]>=anglePM[x,x1,x2]*(D/v_min[j,x2,x]+D/v_min[i,x,x1])*l[i,j,x] - bigM*(1-l[i,j,x]);
-subject to diver4 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2 and w[x,x1,i] + w[x2,x,j]==2 and t_hat_ear[i,x] < t_hat_ear[j,x]}: #and x <> e[j]
+subject to diver4 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2 and (w[x,x1,i] + w[x2,x,j]==2 or w[x,x1,j]+w[x2,x,i] ==2) and t_hat_ear[i,x] < t_hat_ear[j,x]}: #and x <> e[j]
 t_ear[i,x]- t_lat[j,x]>=anglePM[x,x1,x2]*(D/v_min[i,x2,x]+D/v_min[j,x,x1])* (1-l[i,j,x]) - bigM*l[i,j,x];
 
 
 #change xy with explicit values that I have
 #TODO check if the speed parameter is correct for split4
-subject to split3 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and w[x,x1,i]+w[x,x2,j]==2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to split3 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and (w[x,x1,i]+w[x,x2,j]==2 or w[x,x1,j] + w[x,x2,i] == 2) and t_hat_ear[i,x] < t_hat_ear[j,x]}:
 t_ear[j,x]- t_lat[i,x]>=angleP[x,x1,x2]*D/v_min[i,x,x1]*l[i,j,x] - bigM*(1-l[i,j,x]);
-subject to split4 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and w[x,x1,i]+w[x,x2,j]==2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+#understand if we can change w[x,x1,i]+w[x,x2,j]==2 or w[x,x1,j] + w[x,x2,i] == 2 with w[x,x1,i]+w[x,x2,j] + w[x,x1,j] + w[x,x2,i] >= 2
+subject to split4 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and (w[x,x1,i]+w[x,x2,j]==2 or w[x,x1,j] + w[x,x2,i] == 2) and t_hat_ear[i,x] < t_hat_ear[j,x]}:
 t_ear[i,x]- t_lat[j,x]>=angleP[x,x1,x2]*D/v_min[j,x,x2] * (1-l[i,j,x]) - bigM*l[i,j,x];
 
 
@@ -128,13 +128,12 @@ problem path: MC, wPath,startingPath,finishingPath,allPath;
 
 problem conflicts: UAM,
 #variables
-    t_ear, t_lat, 
+    t_ear, t_lat, t_ear_start,
     t_down, t_up, l,
 #constrains
-    afterprecalculated, calculateLat, 
+    afterprecalculated, calculateLat, startInt,
     limitT_down, limitT_up, 
-    defineT_down, 
-    defineT_up,
+    defineT_down, defineT_up,
     trail13, trail14,
     trail23, trail24,
     merge3, merge4,

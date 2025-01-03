@@ -26,12 +26,6 @@ elif topology == "2":
 elif topology == "3":
 	input_file = "/home/magi/UAMdeconflictionMasterThesis/modelli/data/mercedesSD/metroplex" + used_seed + ".txt"
 output_file = "/home/magi/UAMdeconflictionMasterThesis/modelli/data/mercedesTD/"
-if topology == "1":
-	output_file += "grid" + used_seed + ".txt"
-elif topology == "2":
-	output_file += "airport" + used_seed + ".txt"
-elif topology == "3":
-	output_file += "metroplex" + used_seed + ".txt"
 random_seed = used_seed
 verbose = int("0")  # print outputs?
 compareWithLocal = int(
@@ -48,6 +42,13 @@ nNonColIntru = int(
 )  # scenario 3: if nNonColIntru>0 then non-collaborative intruder.   --> 1
 max_acceler = float("5")  # % max acceleration, affects q_max  + 5, -5
 max_deceler = float("5")  # % max deceleration, affects q_min  + 5, -5
+
+if topology == "1":
+	output_file += "grid" + used_seed +"nDr"+ str(nDrift)+"nDe"+str(nDelay)+".dat"
+elif topology == "2":
+	output_file += "airport" + used_seed +"nDr"+ str(nDrift)+"nDe"+str(nDelay)+".dat"
+elif topology == "3":
+	output_file += "metroplex" + used_seed +"nDr"+ str(nDrift)+"nDe"+str(nDelay)+".dat"
 random.seed(random_seed)
 # parameters from SD
 D = 0
@@ -747,31 +748,39 @@ file = open(output_file, "w")
 # network details
 nf = len(schedule["trips"])
 #print nf and nn
-file.write("param nf:=" + str(nf)+ ";\n") #da capire che parametro usa
 file.write("param nn:= " + str(nNodes) +";\n" )
+file.write("set F:=\n")
+for trip in schedule["trips"]:
+	file.write(str(trip["uid"]) + "\n")
 #print arcs and distances
-file.write("param: E: d:=\n")
+file.write(";\nparam: E: d:=\n")
 for i in range(nEdges):
     file.write(
         "%i %i %f\n" % (edges[i][0], edges[i][1], dist[edges[i][0], edges[i][1]])
     )
+for i in range(nEdges):
+    file.write(
+        "%i %i %f\n" % (edges[i][1], edges[i][0], dist[edges[i][0], edges[i][1]])
+    )
 #print starting points
 file.write(";\nparam s:=\n" )
 for i in range(nf):
-    file.write(str(i) + " "+ str(schedule["trips"][i]["waypoints"][0])+ "\n")
+    file.write(str(schedule["trips"][i]["uid"]) + " "+ str(schedule["trips"][i]["waypoints"][0])+ "\n")
 #print ending points
 file.write(";\nparam e:=\n" )
 for i in range(nf):
-    file.write(str(i) + " "+ str(schedule["trips"][i]["waypoints"][-1])+ "\n")
+    file.write(str(schedule["trips"][i]["uid"]) + " "+ str(schedule["trips"][i]["waypoints"][-1])+ "\n")
 #print speed
-file.write(";\nparam v_min:= %f\n")
+file.write(";\nparam v_min:= \n")
 for i in range(nf):
   for j in range(nEdges):
-    file.write(str(i) + " " + str(edges[j][0]) + " " + str(edges[j][1]) + " " + str(vmin))
-file.write(";\nparam v_max:= %f\n")
+    file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][0]) + " " + str(edges[j][1]) + " " + str(vmin)+ "\n")
+    file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][1]) + " " + str(edges[j][0]) + " " + str(vmin)+ "\n")
+file.write(";\nparam v_max:= \n")
 for i in range(nf):
   for j in range(nEdges):
-    file.write(str(i) + " " + str(edges[j][0]) + " " + str(edges[j][1]) + " " + str(vmax))
+    file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][0]) + " " + str(edges[j][1]) + " " + str(vmax) +"\n")
+    file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][1]) + " " + str(edges[j][0]) + " " + str(vmax) +"\n")
 
 #print angles
 file.write(";\nparam angleM:=\n")
@@ -784,7 +793,7 @@ file.write(";\nparam anglePM:=\n")
 for i, j, k in angleJunc:
     file.write("%i %i %i %f\n" % (i, j, k, angleJunc[i, j, k]))
 #print D
-file.write("\;D: %f;\n" % D)
+file.write(";\nparam D:=" + str(D) +";\n")
 #print t_hat_ear
 file.write("param t_hat_ear:=\n")
 for trip in schedule["trips"]:
@@ -815,3 +824,15 @@ if nDrift > 0:
                     break
                 i +=1
             break
+file.write("set fixedFlights :=\n")
+for trip in schedule["trips"]:
+  if (trip["uid"] in delayed) : 
+    continue
+  for i in range(len(trip["waypoints"])):
+    if (i==0):
+      continue
+    file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i-1]) + " "+ str(trip["waypoints"][i]) + "\n")
+file.write(";\nset conflictsNodes:=\n")
+for i,j,k in angleJunc:
+	file.write(str(i) + " " + str(j) + " " + str(k) + "\n")
+file.write(";\n")
