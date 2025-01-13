@@ -771,33 +771,12 @@ file.write(";\nparam e:=\n" )
 for i in range(nf):
     file.write(str(schedule["trips"][i]["uid"]) + " "+ str(schedule["trips"][i]["waypoints"][-1])+ "\n")
 #print speed
-file.write(";\nparam v_min:= \n")
-for i in range(nf):
-  for j in range(nEdges):
-    file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][0]) + " " + str(edges[j][1]) + " " + str(vmin)+ "\n")
-    #file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][1]) + " " + str(edges[j][0]) + " " + str(vmin)+ "\n")
-file.write(";\nparam v_max:= \n")
-for i in range(nf):
-  for j in range(nEdges):
-    file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][0]) + " " + str(edges[j][1]) + " " + str(vmax) +"\n")
-    #file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][1]) + " " + str(edges[j][0]) + " " + str(vmax) +"\n")
+file.write(";\nparam v_min:="+str(vmin) + "\n")
+file.write(";\nparam v_max:=" +str(vmax) +" \n")
 
 #print angles
 
-file.write(";\nparam angleM:=\n")
-for i, j, k in angleJunc:
-	if angleJunc[i, j, k] >= math.pi/2:
-		file.write("%i %i %i %f\n" % (i, j, k, 1))
-	else:
-		file.write("%i %i %i %f\n" % (i, j, k,1/math.sin( angleJunc[i, j, k])))
-    
-file.write(";\nparam angleP:=\n")
-for i, j, k in angleJunc:
-	if angleJunc[i, j, k] >= math.pi/2:
-		file.write("%i %i %i %f\n" % (i, j, k, 1))
-	else:
-		file.write("%i %i %i %f\n" % (i, j, k,1/math.sin( angleJunc[i, j, k])))
-file.write(";\nparam anglePM:=\n")
+file.write(";\nparam angle:=\n")
 for i, j, k in angleJunc:
 	if angleJunc[i, j, k] >= math.pi/2:
 		file.write("%i %i %i %f\n" % (i, j, k, 1))
