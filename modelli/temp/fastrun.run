@@ -1,0 +1,31 @@
+
+reset;
+model multiComodity.mod;
+data data/nn3nf100/metroplex1.dat;
+option solver gurobi;
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=1200';
+let {x in V,(x,x1) in E, (x2,x) in E : x1==x2} anglePM[x,x1,x2]:=1;
+let {(i,j) in E} dMCF[i,j]:= d[i,j];
+solve path;
+let {(i,j) in E, f in F} w[i,j,f]:= wPath[i,j,f];
+solve conflicts;
+
+param csvName symbolic;
+
+let csvName := sprintf("temp/t_ear.csv");
+
+printf "nodes," > (csvName);
+for {x in V}
+{
+        printf "%d,",x > (csvName);
+}
+printf "\n" > (csvName);
+for {f in F}
+{
+    printf "%d,",f > (csvName);
+    for {x in V}
+    {
+            printf "%d,",t_ear[f,x] > (csvName);
+    }
+    printf "\n" > (csvName);
+}

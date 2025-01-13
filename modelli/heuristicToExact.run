@@ -18,11 +18,11 @@ let alpha:=4;
 param found default 0;
 param sol_name symbolic;
 param nFixed default 3;
-let sol_name := sprintf("%s/heuristicOut/nn%snf%s/%s/60%s.sol", ($absPath),($nNodes),($nFlights),($value),($datFile));
+let sol_name := sprintf("%s/heurToExact/nn%snf%s/%s/60%s.sol", ($absPath),($nNodes),($nFlights),($value),($datFile));
 #let sol_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.sol", ($absPath),($value),($datFile));
 # Define the name of the file where the log of the solver will be saved
 param log_name symbolic;
-let log_name := sprintf("%s/heuristicOut/nn%snf%s/%s/60%s.log",($absPath),($nNodes),($nFlights),($value),($datFile));
+let log_name := sprintf("%s/heurToExact/nn%snf%s/%s/60%s.log",($absPath),($nNodes),($nFlights),($value),($datFile));
 #let log_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.log",($absPath),($value),($datFile));
 param result_name symbolic;
 let result_name := sprintf("%s/results/%s_heurToExact%snf%s.csv",($absPath),($value),($nNodes),($nFlights));
@@ -33,8 +33,6 @@ display data_name;
 for {(i,j) in E}
 	let dMCF[i,j]:= d[i,j];
 
-param lastOpt default 0;
-param sameOpt default 0;
 #heuristic var
 param opt default Infinity;
 
@@ -110,6 +108,7 @@ if (solve_result == "solved")
 		printf"l[%d,%d,%d] :=\t%f;\n",i,j,x,opt_l[i,j,x]> (sol_name);
 	}
 }
+#understand if 400 or 401 (https://www.netlib.org/ampl/solvers/gurobi/README.gurobi)
 else if (400<=solve_result_num and solve_result_num<=405) then
 {
     #print the data
@@ -159,23 +158,23 @@ else if (400<=solve_result_num and solve_result_num<=405) then
     {
         for {f1 in F,x in V,(x1,x) in E, (x2,x) in E: f<>f1 and x1<>x2 and (w[x1,x,f]+w[x2,x,f1]==2 or w[x1,x,f1] + w[x2,x,f] == 2) and t_hat_ear[f,x] < t_hat_ear[f1,x] }
         {
-            if merge3[f,f1,x,x1,x2].slack == 0 then
+            if merge3[f,f1,x,x1,x2].slack <0 then
                 let maxConflicts[f]:=maxConflicts[f]+1;
-            if merge4[f,f1,x,x1,x2].slack == 0 then
+            if merge4[f,f1,x,x1,x2].slack <0 then
                 let maxConflicts[f]:=maxConflicts[f]+1;
         }
         for {f1 in F,x in V,(x,x1) in E, (x2,x) in E: f<>f1 and x1<>x2 and (w[x,x1,f] + w[x2,x,f1]==2 or w[x,x1,f1]+w[x2,x,f] == 2) and t_hat_ear[f,x] < t_hat_ear[f1,x]}
         {
-            if diver3[f,f1,x,x1,x2].slack == 0 then
+            if diver3[f,f1,x,x1,x2].slack <0 then
                 let maxConflicts[f]:=maxConflicts[f]+1;
-            if diver4[f,f1,x,x1,x2].slack == 0 then
+            if diver4[f,f1,x,x1,x2].slack <0 then
                 let maxConflicts[f]:=maxConflicts[f]+1;
         }
         for { f1 in F,x in V,(x,x1) in E, (x,x2) in E: f<>f1 and x1<>x2 and (w[x,x1,f]+w[x,x2,f1]==2 or w[x,x1,f1] + w[x,x2,f] == 2) and t_hat_ear[f,x] < t_hat_ear[f1,x]}
         {
-            if split3[f,f1,x,x1,x2].slack == 0 then
+            if split3[f,f1,x,x1,x2].slack <0 then
                 let maxConflicts[f]:=maxConflicts[f]+1;
-            if split4[f,f1,x,x1,x2].slack == 0 then
+            if split4[f,f1,x,x1,x2].slack <0 then
                 let maxConflicts[f]:=maxConflicts[f]+1;
         }
     }
