@@ -21,6 +21,11 @@ param drifted_t_ear_fix  default -1;
 param drifted_t_lat_fix  default -1;
 set fixedFlights within {F cross E};
 set conflictsNodes within {V cross V cross V};
+
+#capire come ottenere solo i voli fissati
+set fixedF = setof {(f,x,y) in fixedFlights} f;
+
+set fixedToZero := {f in fixedF,(x,y) in E: (f,x,y) not in fixedFlights};
 #variables
 var w{E,F} binary; #flight f pass through arc i,j
 var z_up{E,F} >=0 ; # variable for w*t, understand why is not integer
@@ -30,6 +35,7 @@ var t_up {F,V} >= 0;
 var t_ear{F,V} >=0 ; #variable time, understand why is not integer
 var t_lat{F,V} >=0; #variable time, understand why is not integer
 var t_ear_start{F} integer >=0;
+var abs_t_ear{F} >=0;
 
 #binary variables for linearization of conflicts
 var y1t{i in F, j in F,(x,y) in E: i<>j} binary;
@@ -44,7 +50,7 @@ subject to startInteger{f in F}:
 t_ear[f,s[f]] = t_ear_start[f];
 
 subject to afterprecalculated{f in F}:
-t_hat_ear[f,s[f]]<= t_ear_start[f];
+t_hat_ear[f,s[f]] <= t_ear_start[f];
 subject to calculateLat{i in F, x in V}:
 t_lat[i,x]=t_ear[i,x] + t_hat_lat[i,x] - t_hat_ear[i,x];
 
@@ -153,15 +159,19 @@ sum{(x,drifted_wp) in E} w[x,drifted_wp,drifted_flight] = 1;
 
 subject to fixFlights{(f,x,y) in fixedFlights}:
 w[x,y,f] = 1;
-subject to fixToZeroFlights{(a,b) in E, (f,x,y) in fixedFlights: x <> a and y <> b}:
-w[a,b,f] = 0;
+subject to fixToZero{(f,x,y) in fixedToZero}:
+w[x,y,f] = 0;
 
+subject to abs1{f in F}:
+abs_t_ear[f] >= t_ear[f,e[f]] - t_hat_ear[f,e[f]];
+subject to abs2{f in F}:
+abs_t_ear[f] >= t_hat_ear[f,e[f]] - t_ear[f,e[f]];
 
 
 #objective 49
 #minimize z: sum{i in F,x in V, y in V: (x,y) in E} w[x,y,i];
 #objective 50
-minimize opt: sum{i in F} t_ear[i,e[i]];
+minimize opt: sum{i in F} abs_t_ear[i];
 
 
 /*

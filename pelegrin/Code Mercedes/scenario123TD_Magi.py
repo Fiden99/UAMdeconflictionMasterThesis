@@ -758,10 +758,10 @@ for i in range(nEdges):
     file.write(
         "%i %i %f\n" % (edges[i][0], edges[i][1], dist[edges[i][0], edges[i][1]])
     )
-for i in range(nEdges):
-    file.write(
-        "%i %i %f\n" % (edges[i][1], edges[i][0], dist[edges[i][0], edges[i][1]])
-    )
+#for i in range(nEdges):
+#    file.write(
+#        "%i %i %f\n" % (edges[i][1], edges[i][0], dist[edges[i][0], edges[i][1]])
+#    )
 #print starting points
 file.write(";\nparam s:=\n" )
 for i in range(nf):
@@ -775,23 +775,34 @@ file.write(";\nparam v_min:= \n")
 for i in range(nf):
   for j in range(nEdges):
     file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][0]) + " " + str(edges[j][1]) + " " + str(vmin)+ "\n")
-    file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][1]) + " " + str(edges[j][0]) + " " + str(vmin)+ "\n")
+    #file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][1]) + " " + str(edges[j][0]) + " " + str(vmin)+ "\n")
 file.write(";\nparam v_max:= \n")
 for i in range(nf):
   for j in range(nEdges):
     file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][0]) + " " + str(edges[j][1]) + " " + str(vmax) +"\n")
-    file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][1]) + " " + str(edges[j][0]) + " " + str(vmax) +"\n")
+    #file.write(str(schedule["trips"][i]["uid"]) + " " + str(edges[j][1]) + " " + str(edges[j][0]) + " " + str(vmax) +"\n")
 
 #print angles
+
 file.write(";\nparam angleM:=\n")
 for i, j, k in angleJunc:
-    file.write("%i %i %i %f\n" % (i, j, k, angleJunc[i, j, k]))
+	if angleJunc[i, j, k] >= math.pi/2:
+		file.write("%i %i %i %f\n" % (i, j, k, 1))
+	else:
+		file.write("%i %i %i %f\n" % (i, j, k,1/math.sin( angleJunc[i, j, k])))
+    
 file.write(";\nparam angleP:=\n")
 for i, j, k in angleJunc:
-    file.write("%i %i %i %f\n" % (i, j, k, angleJunc[i, j, k]))
+	if angleJunc[i, j, k] >= math.pi/2:
+		file.write("%i %i %i %f\n" % (i, j, k, 1))
+	else:
+		file.write("%i %i %i %f\n" % (i, j, k,1/math.sin( angleJunc[i, j, k])))
 file.write(";\nparam anglePM:=\n")
 for i, j, k in angleJunc:
-    file.write("%i %i %i %f\n" % (i, j, k, angleJunc[i, j, k]))
+	if angleJunc[i, j, k] >= math.pi/2:
+		file.write("%i %i %i %f\n" % (i, j, k, 1))
+	else:
+		file.write("%i %i %i %f\n" % (i, j, k,1/math.sin( angleJunc[i, j, k])))
 #print D
 file.write(";\nparam D:=" + str(D) +";\n")
 #print t_hat_ear

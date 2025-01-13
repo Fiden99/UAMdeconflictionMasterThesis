@@ -5,7 +5,7 @@ option gurobi_options 'timing=1 outlev=1 threads=1 timelim=431900';
 param data_name symbolic;
 let data_name :=sprintf("%s/data/mercedesTD/%s.dat",($absPath),($datFile));
 param model_name symbolic;
-let model_name :=sprintf("%s/UAM_tactical.mod",($absPath));
+let model_name :=sprintf("%s/UAM_tactical_NL.mod",($absPath));
 param sol_name symbolic;
 let sol_name := sprintf("%s/output/mercedes/%s.sol", ($absPath),($datFile));
 param log_name symbolic;

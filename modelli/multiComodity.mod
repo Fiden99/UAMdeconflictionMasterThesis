@@ -13,7 +13,7 @@ param dMCF{E} >=0 default 0;
 param bigM:= 1000;	                                                            #bigM for linearizing purpose
 param angleM{x in V, (x1,x) in E, (x2,x) in E: x1<>x2};							# angle-for merging
 param angleP{x in V, (x,x1) in E, (x,x2) in E: x1<>x2};							# angle+ for splitting
-param anglePM{x in V,(x,x1) in E, (x2,x) in E: x1<>x2};							#angle -+ divering
+param anglePM{x in V,(x,x1) in E, (x2,x) in E/*: x1<>x2*/};							#angle -+ divering
 param D;																		# safety distance
 param t_hat_ear{F,V} default 0;
 param t_hat_lat{F,V} default 0;
@@ -84,35 +84,59 @@ t_ear_start[f] = t_ear[f,s[f]];
 #vedere come procedere: in mercedes viene detto che hat_t_ear[i,m] < (considerare anche =) t_hat_ear[j,m]
 #è possibile che il risultato ottenuto sia confrontabile con quello che ho ottenuto indicando che i < j
 
-subject to trail13 {i in F, j in F,(x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to trail13 {i in F, j in F,(x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2 and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}:
 t_ear[j,x]-t_lat[i,x] >= D/v_min[i,x,y] * l[i,j,x]- bigM*(1-l[i,j,x]);
-subject to trail14 {i in F, j in F,(x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2 and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to trail14 {i in F, j in F,(x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2 and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}:
 t_ear[i,x]-t_lat[j,x] >=D/v_min[j,x,y] * (1-l[i,j,x]) - bigM*l[i,j,x];
 
-subject to trail23 {i in F, j in F,(x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2 and t_hat_ear[i,y] < t_hat_ear[j,y]}:
+subject to trail23 {i in F, j in F,(x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2 and (t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j))}:
 t_ear[j,y]-t_lat[i,y]>= D/v_min[j,x,y]* l[i,j,x] - bigM*(1-l[i,j,x]);
-subject to trail24 {i in F, j in F,(x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2 and t_hat_ear[i,y] < t_hat_ear[j,y]}:
+subject to trail24 {i in F, j in F,(x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2 and (t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j))}:
 t_ear[i,y]-t_lat[j,y]>= D/v_min[i,x,y] * (1-l[i,j,x]) - bigM*l[i,j,x];
 
 
 #TODO check if the speed parameter is correct for merge4
-subject to merge3 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and (w[x1,x,i]+w[x2,x,j]==2 or w[x1,x,j] + w[x2,x,i] == 2) and t_hat_ear[i,x] < t_hat_ear[j,x]}: 
+subject to merge3 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and (w[x1,x,i]+w[x2,x,j]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: 
 t_ear[j,x]- t_lat[i,x]>=angleM[x,x1,x2]*D/v_min[j,x2,x] * l[i,j,x] - bigM*(1-l[i,j,x]);
-subject to merge4 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and( w[x1,x,i]+w[x2,x,j]==2 or w[x1,x,j] + w[x2,x,i] == 2) and t_hat_ear[i,x] < t_hat_ear[j,x]}: 
+subject to merge4 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and( w[x1,x,i]+w[x2,x,j]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: 
 t_ear[i,x]- t_lat[j,x]>=angleM[x,x1,x2]*D/v_min[i,x1,x]* (1-l[i,j,x]) - bigM*l[i,j,x];
 
-subject to diver3 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2 and (w[x,x1,i] + w[x2,x,j]==2 or w[x,x1,j]+w[x2,x,i] == 2) and t_hat_ear[i,x] < t_hat_ear[j,x]}: #and x <>e[i]
+
+subject to diver3 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j /*and x1<>x2*/ and (w[x,x1,i] + w[x2,x,j]== 2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: #and x <>e[i]
 t_ear[j,x]- t_lat[i,x]>=anglePM[x,x1,x2]*(D/v_min[j,x2,x]+D/v_min[i,x,x1])*l[i,j,x] - bigM*(1-l[i,j,x]);
-subject to diver4 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1<>x2 and (w[x,x1,i] + w[x2,x,j]==2 or w[x,x1,j]+w[x2,x,i] ==2) and t_hat_ear[i,x] < t_hat_ear[j,x]}: #and x <> e[j]
+
+subject to diver3_1 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j /*and x1<>x2*/ and (w[x,x1,j]+w[x2,x,i]== 2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: #and x <>e[i]
+t_ear[j,x]- t_lat[i,x]>=anglePM[x,x1,x2]*(D/v_min[j,x2,x]+D/v_min[i,x,x1])* l[i,j,x] - bigM*(1-l[i,j,x]);
+
+subject to diver4 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j /*and x1<>x2*/ and (w[x,x1,i] + w[x2,x,j]== 2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: #and x <> e[j]
 t_ear[i,x]- t_lat[j,x]>=anglePM[x,x1,x2]*(D/v_min[i,x2,x]+D/v_min[j,x,x1])* (1-l[i,j,x]) - bigM*l[i,j,x];
 
+subject to diver4_1 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j /*and x1<>x2*/ and (w[x,x1,j]+w[x2,x,i]== 2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: #and x <> e[j]
+t_ear[i,x]- t_lat[j,x]>=anglePM[x,x1,x2]*(D/v_min[i,x2,x]+D/v_min[j,x,x1])* (1-l[i,j,x]) - bigM*l[i,j,x];
+
+/*
+subject to diver3SameNode {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1==x2 and (w[x,x1,i] + w[x2,x,j]== 2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: #and x <>e[i]
+t_ear[j,x]- t_lat[i,x]>=(D/v_min[j,x2,x]+D/v_min[i,x,x1])*l[i,j,x] - bigM*(1-l[i,j,x]);
+
+subject to diver3_1SameNode {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1==x2 and (w[x,x1,j]+w[x2,x,i]== 2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: #and x <>e[i]
+t_ear[j,x]- t_lat[i,x]>=(D/v_min[j,x2,x]+D/v_min[i,x,x1])* l[i,j,x] - bigM*(1-l[i,j,x]);
+
+subject to diver4SameNode {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1==x2 and (w[x,x1,i] + w[x2,x,j]== 2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: #and x <> e[j]
+t_ear[i,x]- t_lat[j,x]>=(D/v_min[i,x2,x]+D/v_min[j,x,x1])* (1-l[i,j,x]) - bigM*l[i,j,x];
+
+subject to diver4_1SameNode {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j and x1==x2 and (w[x,x1,j]+w[x2,x,i]== 2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: #and x <> e[j]
+t_ear[i,x]- t_lat[j,x]>=(D/v_min[i,x2,x]+D/v_min[j,x,x1])* (1-l[i,j,x]) - bigM*l[i,j,x];
+
+subject to limitL{i in F, j in F, x in V: i<>j and (sum{(x,x1) in E} w[x,x1,i] + sum{(x1,x) in E} w[x1,x,i] >= 1) and (sum{(x,x1) in E} w[x,x1,j] + sum{(x1,x) in E} w[x1,x,j] >= 1)}:
+l[i,j,x] + l[j,i,x] = 1;
+*/
 
 #change xy with explicit values that I have
 #TODO check if the speed parameter is correct for split4
-subject to split3 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and (w[x,x1,i]+w[x,x2,j]==2 or w[x,x1,j] + w[x,x2,i] == 2) and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to split3 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and (w[x,x1,i]+w[x,x2,j]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}:
 t_ear[j,x]- t_lat[i,x]>=angleP[x,x1,x2]*D/v_min[i,x,x1]*l[i,j,x] - bigM*(1-l[i,j,x]);
 #understand if we can change w[x,x1,i]+w[x,x2,j]==2 or w[x,x1,j] + w[x,x2,i] == 2 with w[x,x1,i]+w[x,x2,j] + w[x,x1,j] + w[x,x2,i] >= 2
-subject to split4 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and (w[x,x1,i]+w[x,x2,j]==2 or w[x,x1,j] + w[x,x2,i] == 2) and t_hat_ear[i,x] < t_hat_ear[j,x]}:
+subject to split4 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and (w[x,x1,i]+w[x,x2,j]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}:
 t_ear[i,x]- t_lat[j,x]>=angleP[x,x1,x2]*D/v_min[j,x,x2] * (1-l[i,j,x]) - bigM*l[i,j,x];
 
 
@@ -138,4 +162,8 @@ problem conflicts: UAM,
     trail23, trail24,
     merge3, merge4,
     diver3, diver4,
+    diver3_1, diver4_1,
+    #limitL,
+    #diver3SameNode,diver3_1SameNode,
+    #diver4SameNode,diver4_1SameNode,
     split3, split4;
