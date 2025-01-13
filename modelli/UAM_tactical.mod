@@ -4,14 +4,14 @@ set F; #set of flights
 set V:= 0..nn-1; #set of nodes
 set E within {V cross V}; #arcs
 param s{F}; #starting point for each flight
-param e{F}; #ending poitn for each flight
+param e{F}; #ending point for each flight
 param d{E}>=0; #distance for each pair of nodes
 param v_max{F,E};
 param v_min{F,E}; #param v{F,V}; #entering speed
-param bigM:=1000; #bigM for linearizing purpose
+param bigM:=1000; #bigM for linearization
 param angleM{x in V, (x1,x) in E, (x2,x) in E: x1<>x2} default 1;							# angle-for merging
 param angleP{x in V, (x,x1) in E, (x,x2) in E: x1<>x2} default 1;							# angle+ for splitting
-param anglePM{x in V,(x,x1) in E, (x2,x) in E: x1<>x2} default 1;							#angle -+ divering
+param anglePM{x in V,(x,x1) in E, (x2,x) in E: x1<>x2} default 1;							#angle -+ diverging
 param D; # safety distance
 param t_hat_ear{F,V} default 997;
 param t_hat_lat{F,V} default 999;
@@ -28,7 +28,7 @@ var z_down{E,F} >=0; #variable for w*t
 var t_down{F,V} >=0;
 var t_up {F,V} >= 0;
 var t_ear{F,V} >=0 ; #variable time, understand why is not integer
-var t_lat{F,V} >=0; #variable time, undestand why is not integer
+var t_lat{F,V} >=0; #variable time, understand why is not integer
 var t_ear_start{F} integer >=0;
 
 #binary variables for linearization of conflicts
@@ -153,6 +153,8 @@ sum{(x,drifted_wp) in E} w[x,drifted_wp,drifted_flight] = 1;
 
 subject to fixFlights{(f,x,y) in fixedFlights}:
 w[x,y,f] = 1;
+subject to fixToZeroFlights{(a,b) in E, (f,x,y) in fixedFlights: x <> a and y <> b}:
+w[a,b,f] = 0;
 
 
 
