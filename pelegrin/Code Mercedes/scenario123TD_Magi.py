@@ -776,7 +776,7 @@ file.write(";\nparam v_max:=" +str(vmax) +" \n")
 
 #print angles
 
-file.write(";\nparam angle:=\n")
+file.write(";\nparam :conflictsNodes: angle:=\n")
 for i, j, k in angleJunc:
 	if angleJunc[i, j, k] >= math.pi/2:
 		file.write("%i %i %i %f\n" % (i, j, k, 1))
@@ -822,7 +822,5 @@ for trip in schedule["trips"]:
     if (i==0):
       continue
     file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i-1]) + " "+ str(trip["waypoints"][i]) + "\n")
-file.write(";\nset conflictsNodes:=\n")
-for i,j,k in angleJunc:
-	file.write(str(i) + " " + str(j) + " " + str(k) + "\n")
+
 file.write(";\n")
