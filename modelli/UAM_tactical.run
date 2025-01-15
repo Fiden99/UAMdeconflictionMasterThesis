@@ -1,7 +1,7 @@
 reset;
-option presolve 0;
 option solver gurobi;
-option gurobi_options 'timing=1 outlev=1 threads=1 timelim=431900 seed=1';
+option presolve 0;
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=431900 seed=4';
 param data_name symbolic;
 let data_name :=sprintf("%s/data/mercedesTD/%s.dat",($absPath),($datFile));
 param model_name symbolic;
@@ -12,22 +12,29 @@ param log_name symbolic;
 let log_name := sprintf("%s/output/mercedes/%s.log", ($absPath),($datFile));
 model (model_name);
 data (data_name);
+
 if drifted_flight == -1 then
 {
    drop driftEar;
    drop driftLat;
-   drop driftWP;
 }
+display data_name, _nvars, _ncons;
 solve > (log_name);
 param results_name symbolic;
 let results_name :=sprintf("%s/results/mercedes.csv",($absPath));
+param elapsedTime;
+let elapsedTime:= _ampl_elapsed_time;
+param totalSolveTime;
+let totalSolveTime:= _total_solve_elapsed_time;
+param totalTime;
+let totalTime:= totalSolveTime +elapsedTime;
 if (solve_result <> "solved" or (solve_result_num <= 405 and solve_result_num >= 400)) then
 {
-printf "%s,+Inf,%f\n",($datFile),(_ampl_elapsed_time + _total_solve_elapsed_time) >> (results_name);
+printf "%s,+Inf,%f,%f,%f\n",($datFile),elapsedTime,totalSolveTime,totalTime >> (results_name);
 }
 else
 {
-   printf "%s,%f,%f\n",($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time) >> (results_name);
+   printf "%s,%f,%f,%f,%f\n",($datFile),opt,elapsedTime,totalSolveTime,totalTime >> (results_name);
 }
 printf "\n### solve_result = %s, _total_solve_time = %f\n\n", solve_result, _total_solve_time > (log_name);
 # Store the solution in a file
