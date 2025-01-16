@@ -268,8 +268,9 @@ t_ear[i,x]- t_lat_fixed[j,x]>=angle[x,x1,x2]*D/v_min * (1-passJ[i,j,x]) - bigM*p
 
 subject to driftEar:
 t_ear_fixed[drifted_flight,drifted_wp] >= drifted_t_ear_fix;
+#TODO controllare se devo inserire t_ear o t_lat
 subject to driftLat:
-t_ear_fixed[drifted_flight,drifted_wp] <= drifted_t_lat_fix;
+t_lat_fixed[drifted_flight,drifted_wp] <= drifted_t_lat_fix;
 /*subject to driftWP:
 sum{(x,drifted_wp) in E} w[x,drifted_wp,drifted_flight] = 1;
 */
