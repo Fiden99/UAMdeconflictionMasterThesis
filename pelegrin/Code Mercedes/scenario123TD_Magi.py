@@ -789,31 +789,35 @@ file.write("param t_hat_ear:=\n")
 for trip in schedule["trips"]:
   for i in range(len(trip["tEarliest"])):
     if trip["uid"] in delayed and i == 0:
-      file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(timeTD) + "\n")
+        file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(timeTD) + "\n")
+    elif trip["uid"] in drifted and trip["waypoints"][i] == wpDrift:
+        file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(trip["tEarliest"][i] + timeDrifted) + "\n")
     else :
-      file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(trip["tEarliest"][i]) + "\n")
+        file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(trip["tEarliest"][i]) + "\n")
 file.write(";\nparam t_hat_lat:=\n")
 for trip in schedule["trips"]:
   for i in range(len(trip["tLatest"])):
     if trip["uid"] in delayed and i == 0:
-      file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(timeTD + trip["tLatest"][i] - trip["tEarliest"][i]) + "\n")
+            file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(timeTD + trip["tLatest"][i] - trip["tEarliest"][i]) + "\n")
+    elif trip["uid"] in drifted and trip["waypoints"][i] == wpDrift:
+        file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(trip["tLatest"][i] + timeDrifted) + "\n")
     else :
-      file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(trip["tLatest"][i]) + "\n")
+        file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(trip["tLatest"][i]) + "\n")
 file.write(";\n")
-if nDrift > 0:
-    file.write("param drifted_flight:= " + str(drifted[0]) + ";\n")
-    file.write("param drifted_wp:= " + str(wpDrift) + ";\n")
-    for trip in schedule["trips"]:
-        if trip["uid"] in drifted:
-            uid = trip["uid"]
-            i = 0
-            for wp in trip["waypoints"]:
-                if wp == wpDrift:
-                    file.write("param drifted_t_ear_fix:= " + str(trip["tEarliest"][i] + timeDrifted) + ";\n")
-                    file.write("param drifted_t_lat_fix:= " + str(trip["tLatest"][i] + timeDrifted) + ";\n")
-                    break
-                i +=1
-            break
+#if nDrift > 0:
+#    file.write("param drifted_flight:= " + str(drifted[0]) + ";\n")
+#    file.write("param drifted_wp:= " + str(wpDrift) + ";\n")
+#    for trip in schedule["trips"]:
+#        if trip["uid"] in drifted:
+#            uid = trip["uid"]
+#            i = 0
+#            for wp in trip["waypoints"]:
+#                if wp == wpDrift:
+#                    file.write("param drifted_t_ear_fix:= " + str(trip["tEarliest"][i] + timeDrifted) + ";\n")
+#                    file.write("param drifted_t_lat_fix:= " + str(trip["tLatest"][i] + timeDrifted) + ";\n")
+#                    break
+#                i +=1
+#            break
 file.write("set fixedFlights :=\n")
 for trip in schedule["trips"]:
   if (trip["uid"] in delayed) : 
