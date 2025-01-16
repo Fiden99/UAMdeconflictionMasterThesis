@@ -1,7 +1,7 @@
 reset;
 option solver gurobi;
 option presolve 0;
-option gurobi_options 'timing=1 outlev=1 threads=1 timelim=431900 seed=4';
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=431900 seed=0';
 param data_name symbolic;
 let data_name :=sprintf("%s/data/mercedesTD/%s.dat",($absPath),($datFile));
 param model_name symbolic;
@@ -13,11 +13,7 @@ let log_name := sprintf("%s/output/mercedes/%s.log", ($absPath),($datFile));
 model (model_name);
 data (data_name);
 
-if drifted_flight == -1 then
-{
-   drop driftEar;
-   drop driftLat;
-}
+
 display data_name, _nvars, _ncons;
 solve > (log_name);
 param results_name symbolic;
