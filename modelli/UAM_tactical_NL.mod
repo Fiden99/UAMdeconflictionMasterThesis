@@ -121,7 +121,6 @@ subject to trail24 {i in freeF,j in freeF, (x,y) in E: i<>j and (t_hat_ear[i,y] 
 
 subject to trail23Fixed {i in fixedF,j in fixedF, (x,y) in E: i<>j and(wFixed[x,y,i] + wFixed[x,y,j] == 2) and  (t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j))}:
 t_ear_fixed[j,y]-t_lat_fixed[i,y]>= D/v_min* passFixed[i,j,x] - bigM*(1-passFixed[i,j,x]);
-#v[i,y]*(t[j,y]-t[i,y])>= D-bigM*y2t[i,j,x,y] - y2o1[i,j,x,y]*bigM;
 subject to trail24Fixed {i in fixedF,j in fixedF, (x,y) in E: i<>j and (wFixed[x,y,i] + wFixed[x,y,j] == 2) and(t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j))}:
 t_ear_fixed[i,y]-t_lat_fixed[j,y]>= D/v_min * (1-passFixed[i,j,x]) - bigM*passFixed[i,j,x];
 
@@ -267,7 +266,6 @@ subject to split4_1FixedJ {i in freeF, j in fixedF, x in V,(x,x1) in E, (x,x2) i
 t_ear[i,x]- t_lat_fixed[j,x]>=angle[x,x1,x2]*D/v_min * (1-passJ[i,j,x]) - bigM*passJ[i,j,x] - bigM*(1-w[x,x2,i]);
 
 
-
 subject to driftEar:
 t_ear_fixed[drifted_flight,drifted_wp] >= drifted_t_ear_fix;
 subject to driftLat:
@@ -286,6 +284,13 @@ subject to abs1Fixed{f in fixedF}:
 abs_t_ear[f] >= t_ear_fixed[f,e[f]] - t_hat_ear[f,e[f]];
 subject to abs2Fixed{f in fixedF}:
 abs_t_ear[f] >= t_hat_ear[f,e[f]] - t_ear_fixed[f,e[f]];
+
+subject to cutL1{i in fixedF, j in freeF, x in V: (i,x) in fixedFNodes}:
+passI[i,j,x] + passJ[j,i,x] = 1;
+
+subject to cutL2{i in freeF, j in fixedF, x in V: (j,x) in fixedFNodes}:
+passI[j,i,x] + passJ[i,j,x] = 1;
+
 
 #objective 49
 #minimize z: sum{i in F,x in V, y in V: (x,y) in E} w[x,y,i];
