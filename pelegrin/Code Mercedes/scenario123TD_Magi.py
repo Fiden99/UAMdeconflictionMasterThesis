@@ -750,8 +750,8 @@ nf = len(schedule["trips"])
 #print nf and nn
 file.write("param nn:= " + str(nNodes) +";\n" )
 file.write("set F:=\n")
-for trip in schedule["trips"]:
-	file.write(str(trip["uid"]) + "\n")
+for trip in A:
+	file.write(str(trip) + "\n")
 #print arcs and distances
 file.write(";\nparam: E: d:=\n")
 for i in range(nEdges):
@@ -765,11 +765,13 @@ for i in range(nEdges):
 #print starting points
 file.write(";\nparam s:=\n" )
 for i in range(nf):
-    file.write(str(schedule["trips"][i]["uid"]) + " "+ str(schedule["trips"][i]["waypoints"][0])+ "\n")
+    if (schedule["trips"][i]["uid"] in A):
+        file.write(str(schedule["trips"][i]["uid"]) + " "+ str(schedule["trips"][i]["waypoints"][0])+ "\n")
 #print ending points
 file.write(";\nparam e:=\n" )
 for i in range(nf):
-    file.write(str(schedule["trips"][i]["uid"]) + " "+ str(schedule["trips"][i]["waypoints"][-1])+ "\n")
+    if (schedule["trips"][i]["uid"] in A):
+        file.write(str(schedule["trips"][i]["uid"]) + " "+ str(schedule["trips"][i]["waypoints"][-1])+ "\n")
 #print speed
 file.write(";\nparam v_min:="+str(vmin) + "\n")
 file.write(";\nparam v_max:=" +str(vmax) +" \n")
@@ -788,25 +790,25 @@ file.write(";\nparam D:=" + str(D) +";\n")
 file.write("param t_hat_ear:=\n")
 for trip in schedule["trips"]:
   for i in range(len(trip["tEarliest"])):
-    if trip["uid"] in delayed and i == 0:
+    if trip["uid"] in A and trip["uid"] in delayed and i == 0:
         file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(timeTD) + "\n")
-    elif trip["uid"] in drifted and trip["waypoints"][i] == wpDrift:
+    elif trip["uid"] in A and trip["uid"] in drifted and trip["waypoints"][i] == wpDrift:
         file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(trip["tEarliest"][i] + timeDrifted) + "\n")
-    else :
+    elif trip["uid"] in A:
         file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(trip["tEarliest"][i]) + "\n")
 file.write(";\nparam t_hat_lat:=\n")
 for trip in schedule["trips"]:
   for i in range(len(trip["tLatest"])):
-    if trip["uid"] in delayed and i == 0:
+    if trip["uid"] in A and trip["uid"] in delayed and i == 0:
             file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(timeTD + trip["tLatest"][i] - trip["tEarliest"][i]) + "\n")
-    elif trip["uid"] in drifted and trip["waypoints"][i] == wpDrift:
+    elif trip["uid"] in A and trip["uid"] in drifted and trip["waypoints"][i] == wpDrift:
         file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(trip["tLatest"][i] + timeDrifted) + "\n")
-    else :
+    elif trip["uid"] in A :
         file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i]) + " " + str(trip["tLatest"][i]) + "\n")
 file.write(";\n")
-#if nDrift > 0:
-#    file.write("param drifted_flight:= " + str(drifted[0]) + ";\n")
-#    file.write("param drifted_wp:= " + str(wpDrift) + ";\n")
+if nDrift > 0:
+    file.write("param drifted_flight:= " + str(drifted[0]) + ";\n")
+    file.write("param drifted_wp:= " + str(wpDrift) + ";\n")
 #    for trip in schedule["trips"]:
 #        if trip["uid"] in drifted:
 #            uid = trip["uid"]
@@ -820,11 +822,14 @@ file.write(";\n")
 #            break
 file.write("set fixedFlights :=\n")
 for trip in schedule["trips"]:
-  if (trip["uid"] in delayed) : 
+  if (trip["uid"] not in A or trip["uid"] in delayed) : 
     continue
   for i in range(len(trip["waypoints"])):
     if (i==0):
       continue
     file.write(str(trip["uid"]) + " " + str(trip["waypoints"][i-1]) + " "+ str(trip["waypoints"][i]) + "\n")
-
-file.write(";\n")
+file.write(";\nset inFlight:=\n")
+for trip in schedule["trips"]:
+  if (trip["uid"] in A and trip["uid"] in inflight):
+    file.write(str(trip["uid"]) + "\n")
+file.write(";\nparam tini := " + str(timeTD) + ";\n")
