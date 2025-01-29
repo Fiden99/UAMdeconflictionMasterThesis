@@ -30,7 +30,7 @@ v_default = 2.5
 v_climb = 1.5
 # schedule parameters:
 numBatches = int(5)
-tripsPerBatch = int("20")
+tripsPerBatch = int(sys.argv[3])//numBatches
 timeBatch = float("10")
 min_trip_duration = 7
 max_trip_duration = 25
@@ -69,8 +69,8 @@ with open(input_file) as openfileobject:
                 isFATO[nNodes] = False
                 # nodesCoord[nNodes]=[float(vector_coord[0]),float(vector_coord[1]),0.284091] # cruise level set to 0.284091 miles=1500 ft
                 nodesCoord[nNodes] = [
-                    float(vector_coord[0]),
-                    float(vector_coord[1]),
+                    np.double(vector_coord[0]),
+                    np.double(vector_coord[1]),
                     1,
                 ]  # cruise level set to 1 min
             else:  # FATO
@@ -80,8 +80,8 @@ with open(input_file) as openfileobject:
                 # height=height*0.000189394
                 # nodesCoord[nNodes]=[float(vector_coord[0]),float(vector_coord[1]),height]
                 nodesCoord[nNodes] = [
-                    float(vector_coord[0]),
-                    float(vector_coord[1]),
+                    np.double(vector_coord[0]),
+                    np.double(vector_coord[1]),
                     0,
                 ]  # FATO level set to 0
             # node type
@@ -120,15 +120,15 @@ with open(input_file) as openfileobject:
                 for node in range(nNodes):
                     if (
                         found_u == False
-                        and math.isclose(nodesCoord[node][0], float(vector_coord[0]))
-                        and math.isclose(nodesCoord[node][1], float(vector_coord[1]))
+                        and math.isclose(nodesCoord[node][0], np.double(vector_coord[0]))
+                        and math.isclose(nodesCoord[node][1], np.double(vector_coord[1]))
                     ):
                         found_u = True
                         u = node
                     elif (
                         found_v == False
-                        and math.isclose(nodesCoord[node][0], float(vector_coord[2]))
-                        and math.isclose(nodesCoord[node][1], float(vector_coord[3]))
+                        and math.isclose(nodesCoord[node][0], np.double(vector_coord[2]))
+                        and math.isclose(nodesCoord[node][1], np.double(vector_coord[3]))
                     ):
                         found_v = True
                         v = node
@@ -150,10 +150,10 @@ with open(input_file) as openfileobject:
             else:  # skylane
                 skylanes.append(
                     (
-                        float(vector_coord[0]),
-                        float(vector_coord[1]),
-                        float(vector_coord[2]),
-                        float(vector_coord[3]),
+                        np.double(vector_coord[0]),
+                        np.double(vector_coord[1]),
+                        np.double(vector_coord[2]),
+                        np.double(vector_coord[3]),
                     )
                 )
 
@@ -718,25 +718,26 @@ file.write("nFatos: %i\n" % nFatos)
 file.write("node list:\n")
 for i in range(nNodes):
     file.write(
-        "\t%i %i %f %f\n" % (i, nodeType[i], nodesCoord[i][0], nodesCoord[i][1])
+        #capire se trasformare in \t%i %i %.10f %.10f\n
+        "\t%i %i %.15f %.15f\n" % (i, nodeType[i], nodesCoord[i][0], nodesCoord[i][1])
     )
 file.write("nEdges: %i\n" % nEdges)
 file.write("edge list:\n")
 for i in range(nEdges):
     file.write(
-        "\t%i %i %f\n" % (edges[i][0], edges[i][1], dist[edges[i][0], edges[i][1]])
+        "\t%i %i %.15f\n" % (edges[i][0], edges[i][1], dist[edges[i][0], edges[i][1]])
     )
 file.write("nSkylanes: %i\n" % len(skylanes))
 file.write("skylanes list:\n")
 for i in range(len(skylanes)):
     file.write(
-        "\t%f %f %f %f\n"
+        "\t%.15f %.15f %.15f %.15f\n"
          % (skylanes[i][0], skylanes[i][1], skylanes[i][2], skylanes[i][3])
     )
 file.write("nAngles: %i\n" % len(angleJunc))
 file.write("angle junction list:\n")
 for i, j, k in angleJunc:
-    file.write("\t%i %i %i %f\n" % (i, j, k, angleJunc[i, j, k]))
+    file.write("\t%i %i %i %.15f\n" % (i, j, k, angleJunc[i, j, k]))
 # deconf details
 file.write("D: %f\n" % D)
 file.write("v_default: %f\n" % v_default)

@@ -25,7 +25,7 @@ elif topology == "2":
 	input_file = "/home/magi/UAMdeconflictionMasterThesis/modelli/data/mercedesSD/airport" + used_seed + ".txt"
 elif topology == "3":
 	input_file = "/home/magi/UAMdeconflictionMasterThesis/modelli/data/mercedesSD/metroplex" + used_seed + ".txt"
-output_file = "/home/magi/UAMdeconflictionMasterThesis/modelli/data/mercedesTD/"
+output_file = "/home/magi/UAMdeconflictionMasterThesis/modelli/data/mercedesTDFixed/"
 random_seed = used_seed
 verbose = int("0")  # print outputs?
 compareWithLocal = int(
@@ -783,48 +783,7 @@ if nIntru>0:
   intruder_scenario2(int(math.floor(latestArrival_nominal)))
 if nNonColIntru>0:
   intruder_scenario3(int(math.floor(latestArrival_nominal)))
-#obtain notFixedFlights
-if nIntru>0:
-  tripAP = []
-  for ap in AP:
-    for trip in reversed(schedule["trips"]):
-      if trip["uid"] == ap:
-        tripAP.append(trip)
-        if len(tripAP) == nIntru:
-          break
-    for intruder in range (nIntru):
-      for trip in schedule["trips"]:
-        if trip["uid"] != ap and trip["uid"] in A:
-          sameNodes = set(trip["waypoints"]).intersection(set(tripAP[intruder]["waypoints"]))
-          usedAngle = 1
-          for sameNode in sameNodes:
-            for i,j,k in angleJunc:
-              if i == sameNode and j in trip["waypoints"] and k in tripAP[intruder]["waypoints"] and 1/angleJunc[i,j,k] > usedAngle:
-                usedAngle = 1/angleJunc[i,j,k]
-            #capire se inserire 2*usedAngle, per simulare lo split
-            if abs(trip["tEarliest"][trip["waypoints"].index(sameNode)] - tripAP[intruder]["tLatest"][tripAP[intruder]["waypoints"].index(sameNode)]) < 2*usedAngle*D/vmin or abs(tripAP[intruder]["tEarliest"][tripAP[intruder]["waypoints"].index(sameNode)]-trip["tLatest"][trip["waypoints"].index(sameNode)]) < 2*usedAngle*D/vmin:
-              notFixedFlights.append(trip["uid"])
-              break
-if nNonColIntru>0:
-  tripAP = []
-  for ap in AP_NC:
-    for trip in reversed(schedule["trips"]):
-      if trip["uid"] == ap:
-        tripAP.append(trip)
-        if len(tripAP) == nNonColIntru:
-          break
-    for intruder in range (nNonColIntru):
-      for trip in schedule["trips"]:
-        if trip["uid"] != ap and trip["uid"] in A:
-          sameNodes = set(trip["waypoints"]).intersection(set(tripAP[intruder]["waypoints"]))
-          usedAngle = 1
-          for sameNode in sameNodes:
-            for i,j,k in angleJunc:
-              if i == sameNode and j in trip["waypoints"] and k in tripAP[intruder]["waypoints"] and 1/angleJunc[i,j,k] > usedAngle:
-                usedAngle = 1/angleJunc[i,j,k]
-            if abs(trip["tEarliest"][trip["waypoints"].index(sameNode)] - tripAP[intruder]["tLatest"][tripAP[intruder]["waypoints"].index(sameNode)]) < 2*usedAngle*D/vmin or abs(tripAP[intruder]["tEarliest"][tripAP[intruder]["waypoints"].index(sameNode)]-trip["tLatest"][trip["waypoints"].index(sameNode)]) < 2*usedAngle*D/vmin:
-              notFixedFlights.append(trip["uid"])
-              break
+
 print("file",output_file,"notFixedFlights: ", notFixedFlights)
 file = open(output_file, "w")
 # network details
@@ -912,7 +871,7 @@ if nDrift > 0:
 #            break
 file.write("set fixedFlights :=\n")
 for trip in schedule["trips"]:
-  if (trip["uid"] not in A or trip["uid"] in delayed or trip["uid"] in notFixedFlights) : 
+  if (trip["uid"] not in A) : 
     continue
   for i in range(len(trip["waypoints"])):
     if (i==0):

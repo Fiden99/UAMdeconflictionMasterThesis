@@ -1,0 +1,56 @@
+reset;
+option solver gurobi;
+option presolve 0;
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=431900 seed=0';
+option show_stats 1 ;
+param data_name symbolic;
+let data_name :=sprintf("%s/data/mercedesTDFixed/%s.dat",($absPath),($datFile));
+param model_name symbolic;
+let model_name :=sprintf("%s/UAM_tactical_NL.mod",($absPath));
+param sol_name symbolic;
+let sol_name := sprintf("%s/output/mercedes/%sFixed.sol", ($absPath),($datFile));
+param log_name symbolic;
+let log_name := sprintf("%s/output/mercedes/%Fixed.log", ($absPath),($datFile));
+model (model_name);
+data (data_name);
+
+
+display data_name, _nvars, _ncons;
+solve > (log_name);
+param results_name symbolic;
+let results_name :=sprintf("%s/results/mercedes_Fixed_nvar_ncon.csv",($absPath));
+param elapsedTime;
+let elapsedTime:= _ampl_elapsed_time;
+param totalSolveTime;
+let totalSolveTime:= _total_solve_elapsed_time;
+param totalTime;
+let totalTime:= totalSolveTime +elapsedTime;
+if (solve_result <> "solved" or (solve_result_num <= 405 and solve_result_num >= 400)) then
+{
+printf "%s,+Inf,%f,%f,%f\n",($datFile),elapsedTime,totalSolveTime,totalTime >> (results_name);
+}
+else
+{
+   printf "%s,%f,%f,%f,%f,%d,%d,%d,%d\n",($datFile),opt,elapsedTime,totalSolveTime,totalTime,_nvars,_snvars,_ncons,_sncons >> (results_name);
+}
+printf "\n### solve_result = %s, _total_solve_time = %f\n\n", solve_result, _total_solve_time > (log_name);
+# Store the solution in a file
+printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
+display opt >(sol_name);
+printf "variable\t\t value\tLB\t\t\tUB \n" >(sol_name);
+for { j in 1.._nvars} {
+   printf "let %s :=\t %d\t %f\t %f;\n", _varname[j], _var[j] , _var[j].lb, _var[j].ub > (sol_name);
+}
+
+/*
+param FreePath symbolic;
+let FreePath :=sprintf("%s/temp/mercedes_PathFixed.csv",($absPath));
+
+for {f in fixedF, (i,j) in E}
+   if (wFixed[i,j,f] ==  1) then 
+      printf "%s,%d,%d,%d,0\n",($datFile),i,j,f >> (FreePath); 
+for {f in freeF, (i,j) in E}
+   if (w[i,j,f] ==  1) then 
+      printf "%s,%d,%d,%d,1\n",($datFile),i,j,f >> (FreePath); 
+
+*/

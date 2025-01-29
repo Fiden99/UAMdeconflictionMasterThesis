@@ -18,4 +18,9 @@ datFile=${FILES[$SLURM_ARRAY_TASK_ID]}
 datFileBase=$(basename "$datFile" .dat)
 
 # Esegui AMPL con il file .dat corrente
-absPath=$PWD datFile=$datFileBase ampl /home/magi/UAMdeconflictionMasterThesis/modelli/UAM_tactical.run
+absPath=$PWD datFile=$datFileBase ampl /home/magi/UAMdeconflictionMasterThesis/modelli/UAM_mercedes_run/UAM_tactical.run
+absPath=$PWD datFile=$datFileBase ampl /home/magi/UAMdeconflictionMasterThesis/modelli/UAM_mercedes_run/UAM_tactical_Fixed.run
+
+
+
+
