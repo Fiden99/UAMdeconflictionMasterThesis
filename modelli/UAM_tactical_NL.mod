@@ -169,7 +169,6 @@ subject to trail24FixedJ {i in freeF,j in fixedF, (x,y) in E: i<>j and (wFixed[x
 t_ear[i,y]-t_lat_fixed[j,y]>= D/v_min * (1-pass1Fixed[j,i,x]) - bigM*pass1Fixed[j,i,x] - bigM*(1-w[x,y,i]);
 
 
-#TODO check if the speed parameter is correct for merge4
 subject to merge3 {i in freeF, j in freeF, x in V,(x1,x) in E, (x2,x) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}:
 (w[x1,x,i]+w[x2,x,j] == 2) ==> (t_ear[j,x]- t_lat[i,x]>=angle[x,x1,x2]*D/v_min * passFirst[i,j,x] - bigM*(1-passFirst[i,j,x]));
 subject to merge3_1 {i in freeF, j in freeF, x in V,(x1,x) in E, (x2,x) in E: (x,x1,x2) in conflictsNodes and i<>j and x1<>x2 and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}:
@@ -352,7 +351,8 @@ subject to fixFreeEar{(f,x) in timeFixedFree}:
 t_ear[f,x] = t_hat_ear[f,x];
 subject to fixFreeLat{(f,x) in timeFixedFree}:
 t_lat[f,x] = t_hat_lat[f,x];
-subject to fixFreePath{(f,x) in timeFixedFree, y in V : (f,x,y) in passedFreeF}:
+#subject to fixFreePath{(f,x) in timeFixedFree, y in V : (f,x,y) in passedFreeF}:
+subject to fixFreePath{(f,y) in timeFixedFree, x in V : (f,x,y) in passedFreeF}:
 w[x,y,f] = 1;
 
 subject to priority1{(f,x) in fixedFNodes : f in AP}:
@@ -360,6 +360,8 @@ t_ear_fixed[f,x] = t_hat_ear[f,x] + delayPriority[f];
 subject to priority2{(f,x) in fixedFNodes : f in AP}:
 t_lat_fixed[f,x] = t_hat_lat[f,x] + delayPriority[f];
 
+
+#capire se tenere o meno
 subject to fixpass2Fixeds{i in fixedF, j in fixedF, x in V: i<>j and (i,x) in fixedFNodes and (j,x) in fixedFNodes}:
 pass2Fixeds[i,j,x] + pass2Fixeds[j,i,x] <= 1;
 
