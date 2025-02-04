@@ -337,15 +337,6 @@ t_ear_fixed[f,x] = t_hat_ear[f,x];
 subject to fixPassedLat{(f,x) in timeFixed diff {(drifted_flight,drifted_wp)}}:
 t_lat_fixed[f,x] = t_hat_lat[f,x];
 
-/*
-
-set passedFreeF within {freeF cross E};
-set passedFN := {setof {(f,x,y) in passedFreeF} (f,x)} union {setof {(f,x,y) in passedFreeF} (f,y)};
-set passedFreeNode within passedFN:= {(f,x) in passedFN: f in inFlight and t_hat_ear[f,x] <= tini};
-set notPassedFreeNode within passedFN := passedFN diff passedFreeNode;
-set firstNotPassedFree within notPassedFreeNode:={(f,x) in notPassedFreeNode: f in inFlight and 
-    not exists {(j,r) in notPassedFreeNode} (j == f and t_hat_ear[j,r] < t_hat_ear[f,x])};
-*/
 
 subject to fixFreeEar{(f,x) in timeFixedFree}:
 t_ear[f,x] = t_hat_ear[f,x];
