@@ -1,4 +1,4 @@
-instance,resultFixed,elapsedTimeFixed,totalSolveTimeFixed,totalTimeFixed,nvarsFixed,snvarsFixed,nconsFixed,snconsFixed
+instance,result,elapsedTime,totalSolveTime,totalTime,nvars,snvars,ncons,sncons
 metroplex11nDr1nDe0,2.105263,0.684920,0.106665,0.791585,3340,3330,10344,10344
 metroplex10nDr1nDe1,2.040100,0.661214,0.525266,1.186480,4682,4631,16284,16284
 metroplex0nDr1nDe0,2.052632,1.282004,0.252002,1.534006,8176,8118,27873,27873

@@ -1,4 +1,4 @@
-instance,resultFixed,elapsedTimeFixed,totalSolveTimeFixed,totalTimeFixed,nvarsFixed,snvarsFixed,nconsFixed,snconsFixed,reduceTini
+instance,result,elapsedTime,totalSolveTime,totalTime,nvars,snvars,ncons,sncons,reduceTini
 airport13,1001.578947,1.730098,1.416335,3.146433,14052,13992,50539,50539,0
 airport2,1001.473684,1.437841,1.654752,3.092593,12878,12822,45809,45809,0
 airport42,1001.631579,1.449603,1.308547,2.758150,11462,11408,39957,39957,0
