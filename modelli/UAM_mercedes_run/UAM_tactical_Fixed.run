@@ -1,7 +1,7 @@
 reset;
 option solver gurobi;
 option presolve 0;
-option gurobi_options 'timing=1 outlev=1 threads=1 timelim=431900 seed=0';
+option gurobi_options 'timing=1 outlev=1 threads=1 timelim=431900 seed=0 intFocus=1 mipgap=1e-5';
 option show_stats 1 ;
 param data_name symbolic;
 let data_name :=sprintf("%s/data/mercedesTDFixed/%s.dat",($absPath),($datFile));
@@ -18,7 +18,7 @@ data (data_name);
 display data_name, _nvars, _ncons;
 solve > (log_name);
 param results_name symbolic;
-let results_name :=sprintf("%s/results/mercedes_Fixed_nvar_ncon.csv",($absPath));
+let results_name :="/home/magi/UAMdeconflictionMasterThesis/risultati/mercedes/times/mercedes_Fixed_nvar_ncon.csv";
 param elapsedTime;
 let elapsedTime:= _ampl_elapsed_time;
 param totalSolveTime;
