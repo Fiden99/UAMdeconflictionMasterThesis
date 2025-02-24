@@ -1,0 +1,229 @@
+reset;
+#to evaluate 
+#option presolve 0;
+
+option solver gurobi;
+option gurobi_options 'timing=1 outlev=1 threads=1 MIPFocus=1 timelim=300 seed=1 mipstart=2 mipgap=1e-5' ;
+option show_stats 1;
+param data_name symbolic;
+let data_name :=sprintf("%s/data/mercedesTD/%s.dat",($absPath),($datFile));
+param model_name symbolic;
+let model_name :=sprintf("%s/MercedesHeuristic.mod",($absPath));
+param sol_name symbolic;
+let sol_name := sprintf("%s/heuristicOut/mercedes/%s.sol", ($absPath),($datFile));
+param log_name symbolic;
+let log_name := sprintf("%s/heuristicOut/mercedes/%s.log", ($absPath),($datFile));
+model (model_name);
+data (data_name);
+let {x in V,(x,x1) in E, (x2,x) in E : x1==x2} anglePM[x,x1,x2]:=1;
+param iterations;
+let iterations:=0;
+param alpha;
+let alpha:=4;
+param found default 0;
+param sol_name symbolic;
+let sol_name := sprintf("%s/heuristicOut/mercedes/300%s.sol", ($absPath),($datFile));
+#let sol_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.sol", ($absPath),($value),($datFile));
+# Define the name of the file where the log of the solver will be saved
+param log_name symbolic;
+let log_name := sprintf("%s/heuristicOut/mercedes/300%s.log",($absPath),($datFile));
+#let log_name := sprintf("%s/heuristicOut/nn10nf100/%s%s.log",($absPath),($value),($datFile));
+display data_name;
+for {f in F,(i,j) in E}
+	let dMCF[f,i,j]:= d[i,j];
+
+param lastOpt default 0;
+param sameOpt default 0;
+#heuristic var
+param opt default Infinity;
+
+param opt_t_down{F,V} default Infinity;
+param opt_t_up{F,V} default Infinity;
+
+param opt_t_ear{F,V} default Infinity;															
+param opt_t_lat{F,V} default Infinity;		
+
+param opt_l{F,F,V} default Infinity;
+
+param opt_w{E,F} default Infinity;		
+
+param optTime default Infinity;
+param iteropt default Infinity;
+param obtainedSol binary default 0;
+param t_hat_ear_backup{F,V} default Infinity;
+param t_hat_lat_backup{F,V} default Infinity;
+#param cutoff default Infinity;
+#trying to reduce dimension of let
+/*set F_pairs := {i in F, j in F: i<>j};
+set nodesM  := {x in V, (x1,x) in E, (x2,x) in E: x1<>x2};
+set nodesD  := {x in V, (x,x1) in E, (x2,x) in E: x1<>x2};
+set nodesS  := {x in V, (x,x1) in E, (x,x2) in E: x1<>x2};
+*/
+param tempNode default Infinity;
+#salvo w per AP e NC
+
+
+repeat
+{
+	printf "solving path in it %d\n\n",iterations> (log_name);
+	solve path >(log_name);
+    #solve minCon >(log_name);
+	if solve_result <> "solved" then
+	{
+		printf "path not found in given time\n";
+        display solve_result, solve_result_num;
+		break;
+	}
+    # 
+    printf("fixing w\n");
+	
+	let{(i,j) in E, f in F} w[i,j,f]:=wPath[i,j,f];
+	
+	let {(f,i) in FV} t_hat_ear_backup[f,i]:=t_hat_ear[f,i];
+	let {(f,i) in FV} t_hat_lat_backup[f,i]:=t_hat_lat[f,i];
+
+	for {f in F}
+	{
+		let tempNode := s[f];
+		repeat while (tempNode <> e[f])
+		{
+			for {(tempNode,i) in E : w[tempNode,i,f] == 1}
+			{
+				let t_hat_ear[f,i]:=t_hat_ear[f,tempNode] + d[tempNode,i]/v_min[f,tempNode,i];
+				#printf"%d,t_hat_ear[%d,%d]:=%f\t t_hat_ear_backup:=%f;\n",tempNode,f,i, t_hat_ear[f,i], t_hat_ear_backup[f,i];
+				let t_hat_lat[f,i]:=t_hat_ear[f,i] + 2;
+				let tempNode:=i;
+				break;
+			}
+		}
+	}
+
+    #solving with fixed variables
+	#display t_hat_ear, t_hat_lat;
+	solve conflicts > (log_name);
+	
+	let {(f,i) in FV} t_hat_ear[f,i]:=t_hat_ear_backup[f,i];
+    let {(f,i) in FV} t_hat_lat[f,i]:=t_hat_lat_backup[f,i];
+	/*if (iterations == 0) then
+		for {f in F}
+			if (t_ear[f,s[f]] - t_hat_ear[f,s[f]] >= 10 ) then
+    			printf "starting t_ear[%d,%d] = %f;\t ending t_ear[%d,%d] = %f\n",f,s[f],t_ear[f,s[f]],f,e[f],t_ear[f,e[f]];
+	*/
+	display solve_result, solve_result_num;
+	if (solve_result == "solved" or (400<=solve_result_num and solve_result_num<=405)) then
+	{
+		let obtainedSol:=1;
+        printf "solved conflicts\n";
+        #update optimal solution
+		if (opt > UAM) then
+		{
+			let opt:=UAM;
+			let iteropt:=iterations;
+			let optTime:=(_ampl_elapsed_time + _total_solve_elapsed_time);
+			#let cutoff:=opt*2;
+			for {(f,i) in FV: i<>s[f]}
+			{
+				let opt_t_down[f,i]:= t_down[f,i];
+				let opt_t_up[f,i]:= t_up[f,i];
+			}
+			for {(f,i) in FV}
+			{
+				let opt_t_ear[f,i]:=t_ear[f,i];															
+				let opt_t_lat[f,i]:= t_lat[f,i];															
+			}
+            let {i in F, j in F, x in V: (i,x) in FV and (j,x) in FV and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))} opt_l[i,j,x]:=l[i,j,x];
+			let {(x,y) in E,f in F} opt_w[x,y,f]:=w[x,y,f];
+		}
+	}
+    else
+    {
+        printf "conflicts not solved\n, exit";
+        let iterations:=iterations + 1;
+        break;
+    }
+    #if (solve_result =="solved") then
+	#if (solve_result == "solved" or iterations>100) then
+	if (solve_result == "solved" or sameOpt>=3 or iterations>20) then
+	{
+		let found:=1;
+	}
+	else 	
+	{
+		for { f1 in F, f2 in F,x in V: f1 <> f2 and (f1,x) in FV and (f2,x) in FV }
+		{
+			for {(fl1,fl2,a,b) in trail1 : a==x and fl1==f1 and fl2==f2 and (trail13[f1,f2,a,b].slack == 0 or trail14[f1,f2,a,b].slack==0)}
+			{
+				let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
+				let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
+			}
+			for {(fl1,fl2,a,b) in trail2 : b==x and fl1==f1 and fl2==f2 and (trail23[f1,f2,a,b].slack==0 or trail24[f1,f2,a,b].slack==0)}
+			{
+				let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
+				let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
+			}
+			for {(fl1,fl2,a,b,c) in (merge1 union merge2) : a==x and fl1==f1 and fl2==f2 and (merge3_1[f1,f2,a,b,c].slack==0 or merge4_1[f1,f2,a,b,c].slack==0 or merge3_2[f1,f2,a,b,c].slack==0 or merge4_2[f1,f2,a,b,c].slack==0)}
+			{
+				let dMCF[fl1,b,a] := min(sqrt(alpha) * dMCF[fl1,b,a],1e5);
+				let dMCF[fl1,c,a] := min(sqrt(alpha) * dMCF[fl1,c,a],1e5);
+				let dMCF[fl2,b,a] := min(sqrt(alpha) * dMCF[fl2,b,a],1e5);
+				let dMCF[fl2,c,a] := min(sqrt(alpha) * dMCF[fl2,c,a],1e5);
+			}
+			for {(fl1,fl2,a,b,c) in (split1 union split2) : a==x and fl1==f1 and fl2==f2 and (split3_1[f1,f2,a,b,c].slack==0 or split4_1[f1,f2,a,b,c].slack==0 or split3_2[f1,f2,a,b,c].slack==0 or split4_2[f1,f2,a,b,c].slack==0)}
+			{
+				let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
+				let dMCF[fl1,a,c] := min(sqrt(alpha) * dMCF[fl1,a,c],1e5);
+				let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
+				let dMCF[fl2,a,c] := min(sqrt(alpha) * dMCF[fl2,a,c],1e5);
+			}
+			for {(fl1,fl2,a,b,c) in (diver1 unione diver2) : a==x and fl1==f1 and fl2==f2 and (diver3_1[f1,f2,a,b,c].slack==0 or diver4_1[f1,f2,a,b,c].slack==0 or diver3_2[f1,f2,a,b,c].slack==0 or diver4_2[f1,f2,a,b,c].slack==0)}
+			{
+				let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
+				let dMCF[fl1,c,a] := min(sqrt(alpha) * dMCF[fl1,c,a],1e5);
+				let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
+				let dMCF[fl2,c,a] := min(sqrt(alpha) * dMCF[fl2,c,a],1e5);
+			}
+		}
+	}
+    if (UAM == lastOpt) then
+    {
+        let sameOpt:=sameOpt+1;
+    }
+    else
+    {
+        let sameOpt:=0;
+    }
+	display dMCF;
+	let iterations:=iterations + 1;
+    let lastOpt:=UAM;
+	#let cutoff:= cutoff- 0.1*opt;
+
+}
+while (found==0);
+param result_name symbolic;
+let result_name := sprintf("%s/results/%s_300_heuristicnn%snf%s.csv",($absPath),($value),($nNodes),($nFlights));
+#"numero nodi","numero voli","tipologia","istanza", "risultato euristica","tempo euristica","optTime","numero iterazioni","iterazione dove trovo ottimo"
+if (obtainedSol == 0) then
+	printf "%s,%s,%s,300,+Inf,%f,+Inf,%d,+Inf\n",($nNodes),($nFlights),($datFile),(_ampl_elapsed_time + _total_solve_elapsed_time),iterations >> (result_name);
+else
+{
+	printf "%s,%s,%s,300,%d,%f,%f,%d,%d\n",($nNodes),($nFlights),($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> (result_name);
+	# Store the solution in a file
+	printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
+	display opt, iterations, optTime,iteropt>(sol_name);
+	printf "variable\t\t value\n" >(sol_name);
+	for {(i,j) in E, f in F}{
+		printf "w[%d,%d,%d] :=\t %d;\n", i,j,f, opt_w[i,j,f] > (sol_name);
+	}
+	for {f in F, i in V}
+	{
+		printf"t_ear[%d,%d] :=\t%f;\n",f,i,opt_t_ear[f,i]> (sol_name);															
+		printf"t_lat[%d,%d] :=\t%f;\n",f,i,opt_t_lat[f,i]> (sol_name);															
+		printf"t_down[%d,%d] :=\t%f;\n",f,i, opt_t_down[f,i] > (sol_name);
+		printf"t_up[%d,%d] :=\t%f;\n",f,i,opt_t_up[f,i]> (sol_name);
+	}
+	for {i in F, j in F, x in V: (i,x) in FV and (j,x) in FV and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))} 
+	{
+		printf"l[%d,%d,%d] :=\t%f;\n",i,j,x,opt_l[i,j,x]> (sol_name);
+	}
+}
+

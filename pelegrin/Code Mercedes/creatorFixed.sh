@@ -1,5 +1,10 @@
+#!/bin/bash
+#SBATCH --job-name=createInstace
+#SBATCH --output=out/output_%j.log   # Log output con job ID
+#SBATCH --error=out/error_%j.log     # Log errori
+
 for topology in {1..3}; do
-    for seed in {0..5}; do
+    for seed in {00..99}; do
         #python3 /home/magi/UAMdeconflictionMasterThesis/pelegrin/Code\ Mercedes/parser_Magi.py $topology $seed 100
         nDrift=0
         for nDelay in {1..3}; do

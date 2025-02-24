@@ -6,7 +6,7 @@ option show_stats 1 ;
 param data_name symbolic;
 let data_name :=sprintf("%s/data/mercedesTD/NC/%s.dat",($absPath),($datFile));
 param model_name symbolic;
-let model_name :=sprintf("%s/UAM_tactical_NL.mod",($absPath));
+let model_name :=sprintf("%s/UAM_tactical_Set.mod",($absPath));
 param sol_name symbolic;
 let sol_name := sprintf("%s/output/mercedes/NC/%s.sol", ($absPath),($datFile));
 param log_name symbolic;

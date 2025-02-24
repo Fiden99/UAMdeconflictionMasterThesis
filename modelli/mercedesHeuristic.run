@@ -1,0 +1,194 @@
+reset;
+#to evaluate 
+#option presolve 0;
+
+option solver gurobi;
+option gurobi_options 'timing=1 outlev=1 threads=1 MIPFocus=1 timelim=120 mipstart=2 intfocus=1 mipgap=1e-5' ;
+model MercedesHeuristic.mod;
+data data/mercedesTDHeur/AP/grid10.dat;
+param iterations default 0;
+param alpha default 4;
+param found default 0;
+param sol_name symbolic;
+for {f in F,(i,j) in E}
+	let dMCF[f,i,j]:= d[i,j];
+
+param lastOpt default 0;
+param sameOpt default 0;
+#heuristic var
+param obtainedSol binary default 0;
+param t_hat_ear_backup{F,V} default Infinity;
+param t_hat_lat_backup{F,V} default Infinity;
+
+for {f in AP, (x,y) in E}
+	let w[x,y,f]:=0;
+for {(f,x,y) in PathAP}
+	let w[x,y,f]:=1;
+
+for {f in NC, (x,y) in E}
+	let w[x,y,f]:=0;
+for {(f,x,y) in PathNC}
+	let w[x,y,f]:=1; 	
+#TODO capire perché non funziona fix
+/*
+#probabile errore qui, fare debug qui
+for {(i,x) in timeFixed}
+#controllare se sia effettivamente giusto avere x==b 
+	for {(f,a,b) in passedF: f==i and b==x}
+	{
+		if (f==7) then 
+			printf "fix wPath[%d,%d,%d]:=1\n",a,b,f;
+		fix wPath[a,b,f]:=1;
+	}
+*/
+param tempNode default Infinity;
+repeat
+{
+	printf "solving path in it %d\n\n",iterations;
+	solve path;
+	if solve_result <> "solved" then
+	{
+		printf "path not found in given time\n";
+        display solve_result, solve_result_num;
+		break;
+	}
+    printf("fixing w\n");
+	
+	let{(i,j) in E, f in F diff (AP union NC)} w[i,j,f]:=wPath[i,j,f];
+	
+	let {(f,i) in FV} t_hat_ear_backup[f,i]:=t_hat_ear[f,i];
+	let {(f,i) in FV} t_hat_lat_backup[f,i]:=t_hat_lat[f,i];
+
+# da capire se va mantenuto
+/*
+	for {f in F}
+	{
+		let tempNode := s[f];
+		repeat while (tempNode <> e[f])
+		{
+			for {(tempNode,i) in E : w[tempNode,i,f] == 1}
+			{
+				if (f,tempNode) not in timeFixed then
+				{
+					let t_hat_ear[f,i]:=t_hat_ear[f,tempNode] + d[tempNode,i]/v_min;
+					let t_hat_lat[f,i]:=t_hat_ear[f,i] + 1;
+				}
+				let tempNode:=i;
+				break;
+			}
+		}
+	}
+*/
+	printf("start solve conflicts\n");
+	solve conflicts;
+	let {(f,i) in FV} t_hat_ear[f,i]:=t_hat_ear_backup[f,i];
+    let {(f,i) in FV} t_hat_lat[f,i]:=t_hat_lat_backup[f,i];
+	display solve_result, solve_result_num;
+	if (solve_result == "solved" or (400<=solve_result_num and solve_result_num<=405)) then
+	{
+		let obtainedSol:=1;
+        printf "solved conflicts\n";
+	}
+    else
+    {
+        printf "conflicts not solved\n, exit";
+		if card(NC)== 0 then 
+		{
+        	let iterations:=iterations + 1;
+        	break;
+		}
+    }
+	#if (solve_result == "solved" or iterations>100) then
+	if (/*solve_result == "solved" or*/ sameOpt>=3 or iterations>20) then
+	{
+		let found:=1;
+	}
+	else 
+	{
+		if solve_result=="infeasible" and card(NC)<> 0 then
+		{
+			for{f1 in F, f2 in F,x in V: f1 <> f2 and (f1,x) in FV and (f2,x) in FV and f1 in NC or f2 in NC }
+			{
+				for {(a,b) in E: a==x or b==x}
+				{
+					let dMCF[f1,a,b] := min(alpha * dMCF[f1,a,b],1e5);
+					let dMCF[f2,a,b] := min(alpha * dMCF[f2,a,b],1e5);
+				}
+			}
+		}
+		else
+		{
+			for { f1 in F, f2 in F,x in V: f1 <> f2 and (f1,x) in FV and (f2,x) in FV }
+			{
+				for {(fl1,fl2,a,b) in trail1 : a==x and fl1==f1 and fl2==f2 and (trail13[f1,f2,a,b].slack == 0 or trail14[f1,f2,a,b].slack==0)}
+				{
+
+					let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
+					let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
+				}
+				for {(fl1,fl2,a,b) in trail2 : b==x and fl1==f1 and fl2==f2 and (trail23[f1,f2,a,b].slack==0 or trail24[f1,f2,a,b].slack==0)}
+				{
+					let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
+					let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
+				}
+				for {(fl1,fl2,a,b,c) in merge1 : a==x and fl1==f1 and fl2==f2 and (merge3_1[f1,f2,a,b,c].slack==0 or merge4_1[f1,f2,a,b,c].slack==0)}
+				{
+					let dMCF[fl1,b,a] := min(sqrt(alpha) * dMCF[fl1,b,a],1e5);
+					let dMCF[fl1,c,a] := min(sqrt(alpha) * dMCF[fl1,c,a],1e5);
+					let dMCF[fl2,b,a] := min(sqrt(alpha) * dMCF[fl2,b,a],1e5);
+					let dMCF[fl2,c,a] := min(sqrt(alpha) * dMCF[fl2,c,a],1e5);
+				}
+				for {(fl1,fl2,a,b,c) in merge2 : a==x and fl1==f1 and fl2==f2 and (merge3_2[f1,f2,a,b,c].slack==0 or merge4_2[f1,f2,a,b,c].slack==0)}
+				{
+					let dMCF[fl1,b,a] := min(sqrt(alpha) * dMCF[fl1,b,a],1e5);
+					let dMCF[fl1,c,a] := min(sqrt(alpha) * dMCF[fl1,c,a],1e5);
+					let dMCF[fl2,b,a] := min(sqrt(alpha) * dMCF[fl2,b,a],1e5);
+					let dMCF[fl2,c,a] := min(sqrt(alpha) * dMCF[fl2,c,a],1e5);
+				}
+				for {(fl1,fl2,a,b,c) in split1 : a==x and fl1==f1 and fl2==f2 and (split3_1[f1,f2,a,b,c].slack==0 or split4_1[f1,f2,a,b,c].slack==0)}
+				{
+					let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
+					let dMCF[fl1,a,c] := min(sqrt(alpha) * dMCF[fl1,a,c],1e5);
+					let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
+					let dMCF[fl2,a,c] := min(sqrt(alpha) * dMCF[fl2,a,c],1e5);
+				}
+				for {(fl1,fl2,a,b,c) in split2 : a==x and fl1==f1 and fl2==f2 and (split3_2[f1,f2,a,b,c].slack==0 or split4_2[f1,f2,a,b,c].slack==0)}
+				{
+					let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
+					let dMCF[fl1,a,c] := min(sqrt(alpha) * dMCF[fl1,a,c],1e5);
+					let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
+					let dMCF[fl2,a,c] := min(sqrt(alpha) * dMCF[fl2,a,c],1e5);
+				}			
+				for {(fl1,fl2,a,b,c) in diver1: a==x and fl1==f1 and fl2==f2 and (diver3_1[f1,f2,a,b,c].slack==0 or diver4_1[f1,f2,a,b,c].slack==0)}
+				{
+					let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
+					let dMCF[fl1,c,a] := min(sqrt(alpha) * dMCF[fl1,c,a],1e5);
+					let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
+					let dMCF[fl2,c,a] := min(sqrt(alpha) * dMCF[fl2,c,a],1e5);
+				}
+				for {(fl1,fl2,a,b,c) in diver2: a==x and fl1==f1 and fl2==f2 and (diver3_2[f1,f2,a,b,c].slack==0 or diver4_2[f1,f2,a,b,c].slack==0)}
+				{
+					let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
+					let dMCF[fl1,c,a] := min(sqrt(alpha) * dMCF[fl1,c,a],1e5);
+					let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
+					let dMCF[fl2,c,a] := min(sqrt(alpha) * dMCF[fl2,c,a],1e5);
+				}
+			}
+		}
+	}
+    if (UAM == lastOpt) then
+    {
+        let sameOpt:=sameOpt+1;
+    }
+    else
+    {
+        let sameOpt:=0;
+    }
+	display {f in F,(x,y) in E:dMCF[f,x,y] <> d[x,y]} dMCF[f,x,y];
+	let iterations:=iterations + 1;
+    let lastOpt:=UAM;
+	#let cutoff:= cutoff- 0.1*opt;
+
+}
+while (found==0);
+display found, iterations, sameOpt;
