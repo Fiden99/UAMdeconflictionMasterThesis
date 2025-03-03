@@ -62,20 +62,29 @@ set diver2Conf={(i,j,x,dA) in allConf,(x,x1) in E, (x2,x) in E: i<>j and w[x,x1,
 set diver1SetOf=setof{(i,j,x,dA,x1,x2) in diver1Conf} (i,j,x,dA);
 set diver2SetOf=setof{(i,j,x,dA,x1,x2) in diver2Conf} (i,j,x,dA);
 
-set trailConf={(i,j,x,dA) in allConf, (x,y) in E: i<>j and w[x,y,i]+w[x,y,j]==2};
+set trailConf={(i,j,x,dA) in allConf, (i,j,y,dA) in allConf: (x,y) in E and i<>j and w[x,y,i]+w[x,y,j]==2};
+#set trail2Conf={i in F,j in F, x in V,dA in differentAngle, (i,j,y,dA) in allConf: (x,y) in E and  i<>j and w[x,y,i]+w[x,y,j]==2};
 set trail1SetOf=setof{(i,j,x,dA,y) in trailConf} (i,j,x,dA);
 set trail2SetOf=setof{(i,j,x,dA,y) in trailConf} (i,j,y,dA);
 
-set split1Conf={(i,j,x,dA) in allConf,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and w[x,x1,i]+w[x,x2,j]==2 and (x,x1,x2) in conflictsNodes and angle[x,x1,x2]==dA};
-set split2Conf={(i,j,x,dA) in allConf,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and w[x,x1,j]+w[x,x2,i]==2 and (x,x1,x2) in conflictsNodes and angle[x,x1,x2]==dA};
-set split1SetOf=setof{(i,j,x,dA,x1,x2) in split1Conf} (i,j,x,dA);
-set split2SetOf=setof{(i,j,x,dA,x1,x2) in split2Conf} (i,j,x,dA);
+set splitConf={(i,j,x,dA) in allConf,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and w[x,x1,i]+w[x,x2,j]==2 and (x,x1,x2) in conflictsNodes and angle[x,x1,x2]==dA};
+#set split2Conf={(i,j,x,dA) in allConf,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and w[x,x1,j]+w[x,x2,i]==2 and (x,x1,x2) in conflictsNodes and angle[x,x1,x2]==dA};
+set splitSetOf=setof{(i,j,x,dA,x1,x2) in splitConf} (i,j,x,dA);
+#set split2SetOf=setof{(i,j,x,dA,x1,x2) in split2Conf} (i,j,x,dA);
 
-set merge1Conf={(i,j,x,dA) in allConf,(x1,x) in E, (x2,x) in E: x1<>x2 and i<>j and w[x1,x,i]+w[x2,x,j]==2  and (x,x1,x2) in conflictsNodes and angle[x,x1,x2]==dA};
-set merge2Conf={(i,j,x,dA) in allConf,(x1,x) in E, (x2,x) in E: x1<>x2 and i<>j and w[x1,x,j]+w[x2,x,i]==2  and (x,x1,x2) in conflictsNodes and angle[x,x1,x2]==dA};
-set merge1SetOf=setof{(i,j,x,dA,x1,x2) in merge1Conf} (i,j,x,dA);
-set merge2SetOf=setof{(i,j,x,dA,x1,x2) in merge2Conf} (i,j,x,dA);
+set mergeConf={(i,j,x,dA) in allConf,(x1,x) in E, (x2,x) in E: x1<>x2 and i<>j and w[x1,x,i]+w[x2,x,j]==2  and (x,x1,x2) in conflictsNodes and angle[x,x1,x2]==dA};
+#set merge2Conf={(i,j,x,dA) in allConf,(x1,x) in E, (x2,x) in E: x1<>x2 and i<>j and w[x1,x,j]+w[x2,x,i]==2  and (x,x1,x2) in conflictsNodes and angle[x,x1,x2]==dA};
+set mergeSetOf=setof{(i,j,x,dA,x1,x2) in mergeConf} (i,j,x,dA);
+#set merge2SetOf=setof{(i,j,x,dA,x1,x2) in merge2Conf} (i,j,x,dA);
 
+set diver1 = setof{(i,j,x,dA,x1,x2) in diver1Conf} (i,j,x,x1,x2);
+set diver2 = setof{(i,j,x,dA,x1,x2) in diver2Conf diff diver1Conf} (i,j,x,x1,x2);
+set merge  = setof{(i,j,x,dA,x1,x2) in mergeConf: (i,j,x,dA) not in (diver1SetOf union diver2SetOf)} (i,j,x,x1,x2);
+set split  = setof{(i,j,x,dA,x1,x2) in splitConf: (i,j,x,dA) not in (diver1SetOf union diver2SetOf union mergeSetOf)} (i,j,x,x1,x2);
+set trail1 = setof{(i,j,x,dA,y) in trailConf:(i,j,x,dA) not in (diver1SetOf union diver2SetOf union mergeSetOf union splitSetOf )} (i,j,x,y);
+set trail2 = setof{(i,j,x,dA,y) in trailConf:(i,j,y,dA) not in (diver1SetOf union diver2SetOf union mergeSetOf union splitSetOf/*  union trail1SetOf */)} (i,j,x,y);
+
+/*
 set diver1 = setof{(i,j,x,dA,x1,x2) in diver1Conf} (i,j,x,x1,x2);
 set diver2 = setof{(i,j,x,dA,x1,x2) in diver2Conf diff diver1Conf} (i,j,x,x1,x2);
 set merge1 = setof{(i,j,x,dA,x1,x2) in merge1Conf: (i,j,x,dA) not in (diver1SetOf union diver2SetOf)} (i,j,x,x1,x2);
@@ -84,7 +93,7 @@ set split1 = setof{(i,j,x,dA,x1,x2) in split1Conf: (i,j,x,dA) not in (diver1SetO
 set split2 = setof{(i,j,x,dA,x1,x2) in split2Conf: (i,j,x,dA) not in (diver1SetOf union diver2SetOf union merge1SetOf union merge2SetOf union split1SetOf)} (i,j,x,x1,x2);
 set trail1 = setof{(i,j,x,dA,y) in trailConf:(i,j,x,dA) not in (diver1SetOf union diver2SetOf union merge1SetOf union merge2SetOf union split1SetOf union split2SetOf)} (i,j,x,y);
 set trail2 = setof{(i,j,x,dA,y) in trailConf:(i,j,y,dA) not in (diver1SetOf union diver2SetOf union merge1SetOf union merge2SetOf union split1SetOf union split2SetOf)} (i,j,x,y);
-
+*/
 
 #constrains
 
@@ -121,18 +130,18 @@ subject to trail14 {(i,j,x,y) in trail1}:
 t_ear[i,x]-t_lat[j,x] >= D/v_min * (1-l[i,j,x]) - bigM*l[i,j,x];
 
 subject to trail23 {(i,j,x,y) in trail2}:
-t_ear[j,y]-t_lat[i,y]>= D/v_min* l[i,j,x] - bigM*(1-l[i,j,x]);
+t_ear[j,y]-t_lat[i,y]>= D/v_min* l[i,j,y] - bigM*(1-l[i,j,y]);
 subject to trail24 {(i,j,x,y) in trail2}:
-t_ear[i,y]-t_lat[j,y]>= D/v_min * (1-l[i,j,x]) - bigM*l[i,j,x];
+t_ear[i,y]-t_lat[j,y]>= D/v_min * (1-l[i,j,y]) - bigM*l[i,j,y];
 
-subject to merge3_1{(i,j,x,x1,x2) in merge1}:
+subject to merge3{(i,j,x,x1,x2) in merge}:
 t_ear[j,x]- t_lat[i,x]>=angle[x,x1,x2]*D/v_min * l[i,j,x] - bigM*(1-l[i,j,x]);
-subject to merge3_2{(i,j,x,x1,x2) in merge2}:
-t_ear[j,x]- t_lat[i,x]>=angle[x,x1,x2]*D/v_min * l[i,j,x] - bigM*(1-l[i,j,x]);
-subject to merge4_1{(i,j,x,x1,x2) in merge1}:
+#subject to merge3_2{(i,j,x,x1,x2) in merge2}:
+#t_ear[j,x]- t_lat[i,x]>=angle[x,x1,x2]*D/v_min * l[i,j,x] - bigM*(1-l[i,j,x]);
+subject to merge4{(i,j,x,x1,x2) in merge}:
 t_ear[i,x]- t_lat[j,x]>=angle[x,x1,x2]*D/v_min* (1-l[i,j,x]) - bigM*l[i,j,x];
-subject to merge4_2{(i,j,x,x1,x2) in merge2}:
-t_ear[i,x]- t_lat[j,x]>=angle[x,x1,x2]*D/v_min* (1-l[i,j,x]) - bigM*l[i,j,x];
+#subject to merge4_2{(i,j,x,x1,x2) in merge2}:
+#t_ear[i,x]- t_lat[j,x]>=angle[x,x1,x2]*D/v_min* (1-l[i,j,x]) - bigM*l[i,j,x];
 
 subject to diver3_1 {(i,j,x,x1,x2) in diver1}:
 t_ear[j,x]- t_lat[i,x]>=angle[x,x1,x2]*2*D/v_min* l[i,j,x] - bigM*(1-l[i,j,x]);
@@ -143,14 +152,14 @@ t_ear[i,x]- t_lat[j,x]>=angle[x,x1,x2]*2*D/v_min* (1-l[i,j,x]) - bigM*l[i,j,x];
 subject to diver4_2 {(i,j,x,x1,x2) in diver2}:
 t_ear[i,x]- t_lat[j,x]>=angle[x,x1,x2]*2*D/v_min* (1-l[i,j,x]) - bigM*l[i,j,x];
 
-subject to split3_1 {(i,j,x,x1,x2) in split1}:
+subject to split3 {(i,j,x,x1,x2) in split}:
 t_ear[j,x]- t_lat[i,x]>=angle[x,x1,x2]*D/v_min*l[i,j,x] - bigM*(1-l[i,j,x]);
-subject to split3_2 {(i,j,x,x1,x2) in split2}:
-t_ear[j,x]- t_lat[i,x]>=angle[x,x1,x2]*D/v_min*l[i,j,x] - bigM*(1-l[i,j,x]);
-subject to split4_1{(i,j,x,x1,x2) in split1}: 
+#subject to split3_2 {(i,j,x,x1,x2) in split2}:
+#t_ear[j,x]- t_lat[i,x]>=angle[x,x1,x2]*D/v_min*l[i,j,x] - bigM*(1-l[i,j,x]);
+subject to split4{(i,j,x,x1,x2) in split}: 
 t_ear[i,x]- t_lat[j,x]>=angle[x,x1,x2]*D/v_min * (1-l[i,j,x]) - bigM*l[i,j,x];
-subject to split4_2{(i,j,x,x1,x2) in split2}: 
-t_ear[i,x]- t_lat[j,x]>=angle[x,x1,x2]*D/v_min * (1-l[i,j,x]) - bigM*l[i,j,x];
+#subject to split4_2{(i,j,x,x1,x2) in split2}: 
+#t_ear[i,x]- t_lat[j,x]>=angle[x,x1,x2]*D/v_min * (1-l[i,j,x]) - bigM*l[i,j,x];
 
 #constrain added for mercedes dat
 subject to fixPassedEar{(f,x) in timeFixed}:
@@ -173,7 +182,7 @@ subject to abs2{f in F diff (AP union NC)}:
 abs_t_ear[f] >= t_hat_ear[f,e[f]] - t_ear[f,e[f]];
 
 #minimize UAM: sum {i in AP} W*delayPriority[i] + sum{i in F diff (AP union NC)} abs_t_ear[i];
-minimize UAM: sum {i in AP} W*t_ear[i,e[i]] + sum{i in F diff (AP union NC)} t_ear[i,e[i]];
+minimize UAM: sum {i in AP} W*delayPriority[i] + sum{i in F diff (AP union NC)} abs_t_ear[i];
 minimize MC: sum{f in F diff (AP union NC), (x,y) in E} wPath[x,y,f] * dMCF[f,x,y];
 
 #l'ordine è obj, variabili, vincoli
@@ -195,13 +204,13 @@ problem conflicts: UAM,
     defineT_down, defineT_up,
     trail13, trail14,
     trail23, trail24,
-    merge3_1, merge3_2,
-    merge4_1, merge4_2,
+    merge3, #merge3_2,
+    merge4, #merge4_2,
     diver3_1, diver3_2,
     diver4_1, diver4_2,
-    split3_1, split4_1,
-    split3_2, split4_2,
-    fixPassedEar,fixPassedLat;
-    #abs1,abs2,
-    #priority1, priority2;
+    split3, #split3_2,
+    split4, #split4_2,
+    fixPassedEar,fixPassedLat,
+    abs1,abs2,
+    priority1, priority2;
 
