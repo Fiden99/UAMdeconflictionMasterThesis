@@ -3,7 +3,7 @@ reset;
 #option presolve 0;
 
 option solver gurobi;
-option gurobi_options 'timing=1 outlev=1 threads=1 MIPFocus=1 timelim=60 mipstart=2 mipgap=1e-5' ;
+option gurobi_options 'timing=1 outlev=1 threads=1 MIPFocus=1 timelim=30 mipstart=2 mipgap=1e-5' ;
 #option show_stats 1;
 param data_name symbolic;
 let data_name :=sprintf("%s/data/mercedesTDHeur/%s.dat",($absPath),($datFile));
@@ -24,6 +24,8 @@ let iterations:=0;
 param alpha default 4;				#fattore moltiplicativo della distanza in caso di conflitto
 param localMinParam default 3;		#dopo quante volte che trovo la stessa soluzione mi fermo
 param maxIteration default 20;		#numero massimo iterazioni dell'euristica
+param eps default 1e-4;				# valore che mi definse "l'errore" permesso per confrontare l'uguaglianza
+
 
 param found default 0;
 param lastOpt default 0;
@@ -54,6 +56,10 @@ set nodesD  := {x in V, (x,x1) in E, (x2,x) in E: x1<>x2};
 set nodesS  := {x in V, (x,x1) in E, (x,x2) in E: x1<>x2};
 */
 param tempNode default Infinity;
+param t_ear_temp{F,V} default 0;
+let {f in F} t_ear_temp[f,s[f]]:=t_hat_ear[f,s[f]];
+set tempSet within {E} default {};
+param gapUnf default 5;
 
 for {f in F,(i,j) in E}
 	let dMCF[f,i,j]:= d[i,j];
@@ -107,15 +113,33 @@ repeat
 	#display t_hat_ear, t_hat_lat;
 	solve conflicts > (log_name);
 	
-	#let {(f,i) in FV} t_hat_ear[f,i]:=t_hat_ear_backup[f,i];
-    #let {(f,i) in FV} t_hat_lat[f,i]:=t_hat_lat_backup[f,i];
-	/*if (iterations == 0) then
-		for {f in F}
-			if (t_ear[f,s[f]] - t_hat_ear[f,s[f]] >= 10 ) then
-    			printf "starting t_ear[%d,%d] = %f;\t ending t_ear[%d,%d] = %f\n",f,s[f],t_ear[f,s[f]],f,e[f],t_ear[f,e[f]];
-	*/
+	for {f in F}
+	{
+		let tempSet := {(x,y) in E: w[x,y,f] == 1};
+		let tempNode := s[f];
+		repeat while (tempNode <> e[f])
+		{
+			for {(tempNode,i) in tempSet}
+			{
+				let t_ear_temp[f,i]:=t_ear_temp[f,tempNode] + d[tempNode,i]/v_min;
+				#display f,i,tempNode;
+				let tempSet:=tempSet diff {(tempNode,i)};
+				#if (f==4 or f==14) then
+				#	display f,tempNode,i,t_ear_temp[f,i];
+				let tempNode:=i;
+				break;
+			}
+		}
+	}
+
 	display solve_result, solve_result_num;
-	if solve_result == "solved" or solve_result == "solved?" or  (400<=solve_result_num and solve_result_num<=405) then
+	if solve_result_num == 472 and obtainedSol==0 then
+	{
+		option gurobi_options ('timing=1 outlev=1 threads=1 MIPFocus=1 mipstart=2 mipgap=1e-5 timelim=' & (120*(1+iterations))) ;
+		solve conflicts > (log_name);
+		option gurobi_options 'timing=1 outlev=1 threads=1 MIPFocus=1 timelim=30 mipstart=2 mipgap=1e-5' ;
+	}
+	else if solve_result == "solved" or  (400<=solve_result_num and solve_result_num<=405) then
 	{
 		let obtainedSol:=1;
 		if (opt > UAM) then
@@ -149,7 +173,7 @@ repeat
 		*/
 	}
 
-	if (UAM == lastOpt) then
+	if solve_result<>"infeasible" and abs(lastOpt - UAM) < eps then
     {
         let sameOpt:=sameOpt+1;
     }
@@ -168,14 +192,14 @@ repeat
 	}
     else
 	{
-		if solve_result=="infeasible" /*and card(NC)<> 0*/ then
+		if solve_result=="infeasible" or solve_result_num==472/*and card(NC)<> 0*/ then
 		{
-			for{f1 in F, f2 in F,x in V: f1 <> f2 and (f1,x) in FV and (f2,x) in FV/* and f1 in NC or f2 in NC */}
+			for{f1 in F, f2 in F,x in V: f1 <> f2 and (f1,x) in FV and (f2,x) in FV and (abs(t_ear_temp[f1,x] - t_ear_temp[f2,x]) <= gapUnf or abs(t_hat_ear[f1,x]-t_hat_ear[f2,x]) <= gapUnf)/* and f1 in NC or f2 in NC */}
 			{
 				for {(a,b) in E: a==x or b==x}
 				{
-					let dMCF[f1,a,b] := (1+ max(0,10-abs(t_hat_ear[f1,x] - t_hat_ear[f2,x]))) * min(sqrt(alpha) * dMCF[f1,a,b],1e5);
-					let dMCF[f2,a,b] := (1+ max(0,10-abs(t_hat_ear[f1,x] - t_hat_ear[f2,x]))) * min(sqrt(alpha) * dMCF[f2,a,b],1e5);
+					let dMCF[f1,a,b] := min(sqrt(alpha) * dMCF[f1,a,b],1e5);
+					let dMCF[f2,a,b] := min(sqrt(alpha) * dMCF[f2,a,b],1e5);
 				}
 			}
 		}
@@ -247,13 +271,13 @@ repeat
 }
 while (found==0);
 param result_name symbolic;
-let result_name := sprintf("%s/results/60_heurMercedes.csv",($absPath));
+let result_name := sprintf("%s/results/30_heurMercedes.csv",($absPath));
 #"numero nodi","numero voli","tipologia","istanza", "risultato euristica","tempo euristica","optTime","numero iterazioni","iterazione dove trovo ottimo"
 if (obtainedSol == 0) then
-	printf "%s,60,+Inf,%f,+Inf,%d,+Inf\n",($datFile),(_ampl_elapsed_time + _total_solve_elapsed_time),iterations >> (result_name);
+	printf "%s,30,+Inf,%f,+Inf,%d,+Inf\n",($datFile),(_ampl_elapsed_time + _total_solve_elapsed_time),iterations >> (result_name);
 else
 {
-	printf "%s,60,%d,%f,%f,%d,%d\n",($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> (result_name);
+	printf "%s,30,%f,%f,%f,%d,%d\n",($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> (result_name);
 	# Store the solution in a file
 	printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
 	display opt, iterations, optTime,iteropt>(sol_name);
