@@ -1,14 +1,14 @@
 #!/bin/bash
-#SBATCH --job-name=metroplexMercedesInstances       # Nome del job
+#SBATCH --job-name=airportMercedesInstances       # Nome del job
 #SBATCH --output=/home/magi/UAMdeconflictionMasterThesis/modelli/out/mercedesSet/ampl_output_%A_%a.txt  # File di output per stdout (%A = job ID, %a = array task ID)
 #SBATCH --error=/home/magi/UAMdeconflictionMasterThesis/modelli/out/mercedesSet/ampl_error_%A_%a.txt    # File di output per stderr
 #SBATCH --ntasks=1                      # Numero di task per job
 #SBATCH --cpus-per-task=1               # Numero di core per job
 #SBATCH --time=96:00:00                 # Tempo massimo per ogni job 
-#SBATCH --array=0-500%20                # Numero di job da eseguire
+#SBATCH --array=0-500%10                # Numero di job da eseguire
 
 # Crea una lista di tutti i file .dat nella directory "data/"
-FILES=($(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/mercedesTD/metroplex*.dat))
+FILES=($(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/mercedesTD/airport*.dat))
 # FILES=(/home/magi/UAMdeconflictionMasterThesis/modelli/data/*.dat)
 
 # Seleziona il file corrispondente all'indice dell'array di Slurm

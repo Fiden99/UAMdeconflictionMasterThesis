@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1                      # Numero di task per job
 #SBATCH --cpus-per-task=1               # Numero di core per job
 #SBATCH --time=96:00:00                 # Tempo massimo per ogni job 
-#SBATCH --array=0-300%20                # Numero di job da eseguire
+#SBATCH --array=0-300%10                # Numero di job da eseguire
 
 # Crea una lista di tutti i file .dat nella directory "data/"
 FILES=($(ls /home/magi/UAMdeconflictionMasterThesis/modelli/data/mercedesTD/AP/*.dat))

@@ -1,26 +1,33 @@
 reset;
 #to evaluate 
-option presolve 0;
+#option presolve 0;
 
 option solver gurobi;
-option gurobi_options 'timing=1 outlev=1 threads=1 MIPFocus=1 timelim=30 mipstart=2 intfocus=1 mipgap=1e-5' ;
+option gurobi_options 'timing=1 outlev=1 threads=1 MIPFocus=1 timelim=30 mipstart=2 mipgap=1e-5' ;
+#option show_stats 1;
 model MercedesHeuristic.mod;
 data data/mercedesTDHeur/metroplex63nDr0nDe3.dat;
 param iterations default 0;
-param alpha default 4;
-param found default 0;
-param eps default 1e-4;
-param sol_name symbolic;
-for {f in F,(i,j) in E}
-	let dMCF[f,i,j]:= d[i,j];
+#parametri d
+param alpha default 4;				#fattore moltiplicativo della distanza in caso di conflitto
+param localMinParam default 3;		#dopo quante volte che trovo la stessa soluzione mi fermo
+param maxIteration default 20;		#numero massimo iterazioni dell'euristica
+param eps default 1e-4;				# valore che mi definse "l'errore" permesso per confrontare l'uguaglianza
 
+param found default 0;
 param lastOpt default 0;
 param sameOpt default 0;
 #heuristic var
-param obtainedSol binary default 0;
-#param t_hat_ear_backup{F,V} default Infinity;
-#param t_hat_lat_backup{F,V} default Infinity;
+param timeLimit default 30;
+param tempNode default Infinity;
+param t_ear_temp{F,V} default 0;
+let {f in F} t_ear_temp[f,s[f]]:=t_hat_ear[f,s[f]];
+set tempSet within {E} default {};
+param gapUnf default 5;
 
+for {f in F,(i,j) in E}
+	let dMCF[f,i,j]:= d[i,j];
+#salvo w per AP e NC
 for {f in AP, (x,y) in E}
 	let w[x,y,f]:=0;
 for {(f,x,y) in PathAP}
@@ -31,10 +38,6 @@ for {f in NC, (x,y) in E}
 for {(f,x,y) in PathNC}
 	let w[x,y,f]:=1; 	
 
-param tempNode default Infinity;
-param t_ear_temp{F,V} default 0;
-let {f in F} t_ear_temp[f,s[f]]:=t_hat_ear[f,s[f]];
-set tempSet within {E} default {};
 repeat
 {
 	printf "solving path in it %d\n\n",iterations;
@@ -48,16 +51,7 @@ repeat
     printf("fixing w\n");
 	
 	let{(i,j) in E, f in F diff (AP union NC)} w[i,j,f]:=wPath[i,j,f];
-	
-	#let {(f,i) in FV} t_hat_ear_backup[f,i]:=t_hat_ear[f,i];
-	#let {(f,i) in FV} t_hat_lat_backup[f,i]:=t_hat_lat[f,i];
-
-# da capire se va mantenuto
-/*
-*/
-	printf("start solve conflicts\n");
 	solve conflicts;
-	#if iterations > 0 then
 	for {f in F}
 	{
 		let tempSet := {(x,y) in E: w[x,y,f] == 1};
@@ -67,41 +61,30 @@ repeat
 			for {(tempNode,i) in tempSet}
 			{
 				let t_ear_temp[f,i]:=t_ear_temp[f,tempNode] + d[tempNode,i]/v_min;
-				#display f,i,tempNode;
 				let tempSet:=tempSet diff {(tempNode,i)};
-				#if (f==4 or f==14) then
-				#	display f,tempNode,i,t_ear_temp[f,i];
 				let tempNode:=i;
 				break;
 			}
 		}
 	}
 
-
-
-	#let {(f,i) in FV} t_hat_ear[f,i]:=t_hat_ear_backup[f,i];
-    #let {(f,i) in FV} t_hat_lat[f,i]:=t_hat_lat_backup[f,i];
-	#print {i in 1.._ncons:_con[i].iis <> "non"}: _conname[i];
-	#break;
 	display solve_result, solve_result_num;
-	if (solve_result == "solved" or (400<=solve_result_num and solve_result_num<=405)) then
+	if solve_result_num == 472 and obtainedSol==0 then
+	{
+		let timeLimit := 120*(1+iterations);
+		option gurobi_options ('timing=1 outlev=1 threads=1 MIPFocus=1 mipstart=2 mipgap=1e-5 timelim=' & timeLimit) ;
+		solve conflicts > (log_name);
+		option gurobi_options 'timing=1 outlev=1 threads=1 MIPFocus=1 timelim=30 mipstart=2 mipgap=1e-5' ;
+	}
+	else if solve_result == "solved" or (400<=solve_result_num and solve_result_num<=405) then
 	{
 		let obtainedSol:=1;
-        printf "solved conflicts\n";
 	}
-    else
-    {
-        printf "conflicts not solved\n, exit";
-		/*if card(NC)== 0 then 
-		{
-        	let iterations:=iterations + 1;
-        	break;
-		}
-		*/
-    }
-	#if (solve_result == "solved" or iterations>100) then
-
-	if solve_result<>"infeasible" and (UAM - lastOpt < eps or lastOpt - UAM < eps) then
+	else
+	{
+		printf "conflicts not solved\n, exit";
+	}
+	if solve_result<>"infeasible" and abs(UAM - lastOpt) < eps then
     {
         let sameOpt:=sameOpt+1;
     }
@@ -109,19 +92,17 @@ repeat
     {
         let sameOpt:=0;
     }
-	#display {f in F,(x,y) in E:dMCF[f,x,y] <> d[x,y]} dMCF[f,x,y];
 	let iterations:=iterations + 1;
     let lastOpt:=UAM;
-	#break;
-	if (/*solve_result == "solved" or*/ sameOpt>=3 or iterations>20) then
+	if(sameOpt >= localMinParam or iterations > maxIteration) then
 	{
 		let found:=1;
 	}
-	else 
+    else
 	{
-		if solve_result=="infeasible" /*and card(NC)<> 0*/ then
+		if solve_result=="infeasible" or solve_result_num==472/*and card(NC)<> 0*/ then
 		{
-			for{f1 in F, f2 in F,x in V: f1 <> f2 and (f1,x) in FV and (f2,x) in FV and (abs(t_ear_temp[f1,x] - t_ear_temp[f2,x]) <= 5 or abs(t_hat_ear[f1,x]-t_hat_ear[f2,x]) <= 5)/*and f1 in NC or f2 in NC*/ }
+			for{f1 in F, f2 in F,x in V: f1 <> f2 and (f1,x) in FV and (f2,x) in FV and (abs(t_ear_temp[f1,x] - t_ear_temp[f2,x]) <= gapUnf or abs(t_hat_ear[f1,x]-t_hat_ear[f2,x]) <= gapUnf)/* and f1 in NC or f2 in NC */}
 			{
 				for {(a,b) in E: a==x or b==x}
 				{
@@ -136,19 +117,19 @@ repeat
 			{
 				for {(fl1,fl2,a,b) in trail1 : a==x and fl1==f1 and fl2==f2 and (trail13[f1,f2,a,b].slack == 0 or trail14[f1,f2,a,b].slack==0)}
 				{
-					print "trail1";
+					print "trail1,%d,%d,%d,%d",fl1,fl2,a,b;
 					let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
 					let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
 				}
 				for {(fl1,fl2,a,b) in trail2 : b==x and fl1==f1 and fl2==f2 and (trail23[f1,f2,a,b].slack==0 or trail24[f1,f2,a,b].slack==0)}
 				{
-					print "trail2";
+					print "trail2, %d,%d,%d,%d",fl1,fl2,a,b;
 					let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
 					let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
 				}
 				for {(fl1,fl2,a,b,c) in merge : a==x and fl1==f1 and fl2==f2 and (merge3[f1,f2,a,b,c].slack==0 or merge4[f1,f2,a,b,c].slack==0)}
 				{
-					print "merge";
+					print"merge, %d,%d,%d,%d,%d",fl1,fl2,a,b,c;
 					let dMCF[fl1,b,a] := min(sqrt(alpha) * dMCF[fl1,b,a],1e5);
 					let dMCF[fl1,c,a] := min(sqrt(alpha) * dMCF[fl1,c,a],1e5);
 					let dMCF[fl2,b,a] := min(sqrt(alpha) * dMCF[fl2,b,a],1e5);
@@ -163,7 +144,7 @@ repeat
 				}*/
 				for {(fl1,fl2,a,b,c) in split : a==x and fl1==f1 and fl2==f2 and (split3[f1,f2,a,b,c].slack==0 or split4[f1,f2,a,b,c].slack==0)}
 				{
-					print"split";
+					print "split,%d,%d,%d,%d,%d",fl1,fl2,a,b,c;
 					let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
 					let dMCF[fl1,a,c] := min(sqrt(alpha) * dMCF[fl1,a,c],1e5);
 					let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
@@ -178,7 +159,7 @@ repeat
 				}*/			
 				for {(fl1,fl2,a,b,c) in diver1: a==x and fl1==f1 and fl2==f2 and (diver3_1[f1,f2,a,b,c].slack==0 or diver4_1[f1,f2,a,b,c].slack==0)}
 				{
-					print"diver1";
+					print"diver1,%d,%d,%d,%d,%d",fl1,fl2,a,b,c;
 					let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
 					let dMCF[fl1,c,a] := min(sqrt(alpha) * dMCF[fl1,c,a],1e5);
 					let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
@@ -186,7 +167,7 @@ repeat
 				}
 				for {(fl1,fl2,a,b,c) in diver2: a==x and fl1==f1 and fl2==f2 and (diver3_2[f1,f2,a,b,c].slack==0 or diver4_2[f1,f2,a,b,c].slack==0)}
 				{
-					print"diver2";
+					print "diver2,%d,%d,%d,%d,%d",fl1,fl2,a,b,c;
 					let dMCF[fl1,a,b] := min(sqrt(alpha) * dMCF[fl1,a,b],1e5);
 					let dMCF[fl1,c,a] := min(sqrt(alpha) * dMCF[fl1,c,a],1e5);
 					let dMCF[fl2,a,b] := min(sqrt(alpha) * dMCF[fl2,a,b],1e5);
@@ -196,8 +177,6 @@ repeat
 		}
 	}
 
-	#let cutoff:= cutoff- 0.1*opt;
 
 }
 while (found==0);
-display found, iterations, sameOpt;

@@ -18,6 +18,8 @@ param D;																		# safety distance
 param t_hat_ear{F,V} default 0;
 param t_hat_lat{F,V} default 0;
 param w{(i,j) in E,F} binary;													#flight f pass through arc i,j
+#set UniqueValues = setof{f in F, v in V} t_hat_ear[f,v];
+#param costConf default 1;
 #variables
 var t_down{F,V} >=0;
 var t_up {F,V} >= 0;
@@ -25,6 +27,7 @@ var t_ear{F,V} >=0 ;														    #variable time
 var t_lat{F,V} >=0 ;                                                            #variable time                                  
 var t_ear_start{F} >=0 integer;			                                        #variable to make the first flight starting at integer time													
 var l{i in F, j in F, x in V: i<>j and (sum{(x,x1) in E} w[x,x1,i] + sum{(x1,x) in E} w[x1,x,i] >= 1) and (sum{(x,x1) in E} w[x,x1,j] + sum{(x1,x) in E} w[x1,x,j] >= 1)} binary;
+
 #heuristic var
 var wPath{(i,j) in E, F} >=0, <=1;		
 /*
@@ -98,19 +101,21 @@ t_ear[i,y]-t_lat[j,y]>= D/v_min[i,x,y] * (1-l[i,j,x]) - bigM*l[i,j,x];
 #TODO check if the speed parameter is correct for merge4
 subject to merge3 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and (w[x1,x,i]+w[x2,x,j]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: 
 t_ear[j,x]- t_lat[i,x]>=angleM[x,x1,x2]*D/v_min[j,x2,x] * l[i,j,x] - bigM*(1-l[i,j,x]);
-subject to merge4 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and( w[x1,x,i]+w[x2,x,j]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: 
-t_ear[i,x]- t_lat[j,x]>=angleM[x,x1,x2]*D/v_min[i,x1,x]* (1-l[i,j,x]) - bigM*l[i,j,x];
+#subject to merge3_1 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and (w[x1,x,j]+w[x2,x,i]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: 
+#t_ear[j,x]- t_lat[i,x]>=angleM[x,x1,x2]*D/v_min[i,x2,x] * l[i,j,x] - bigM*(1-l[i,j,x]);
 
+subject to merge4 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and (w[x1,x,i]+w[x2,x,j]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: 
+t_ear[i,x]- t_lat[j,x]>=angleM[x,x1,x2]*D/v_min[i,x1,x]* (1-l[i,j,x]) - bigM*l[i,j,x];
+#subject to merge4_1 {i in F, j in F,x in V,(x1,x) in E, (x2,x) in E: i<>j and x1<>x2 and (w[x1,x,j]+w[x2,x,i]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: 
+#t_ear[i,x]- t_lat[j,x]>=angleM[x,x1,x2]*D/v_min[j,x1,x]* (1-l[i,j,x]) - bigM*l[i,j,x];
 
 subject to diver3 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j /*and x1<>x2*/ and (w[x,x1,i] + w[x2,x,j]== 2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: #and x <>e[i]
 t_ear[j,x]- t_lat[i,x]>=anglePM[x,x1,x2]*(D/v_min[j,x2,x]+D/v_min[i,x,x1])*l[i,j,x] - bigM*(1-l[i,j,x]);
-
 subject to diver3_1 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j /*and x1<>x2*/ and (w[x,x1,j]+w[x2,x,i]== 2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: #and x <>e[i]
-t_ear[j,x]- t_lat[i,x]>=anglePM[x,x1,x2]*(D/v_min[j,x2,x]+D/v_min[i,x,x1])* l[i,j,x] - bigM*(1-l[i,j,x]);
+t_ear[j,x]- t_lat[i,x]>=anglePM[x,x1,x2]*(D/v_min[i,x2,x]+D/v_min[j,x,x1])* l[i,j,x] - bigM*(1-l[i,j,x]);
 
 subject to diver4 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j /*and x1<>x2*/ and (w[x,x1,i] + w[x2,x,j]== 2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: #and x <> e[j]
-t_ear[i,x]- t_lat[j,x]>=anglePM[x,x1,x2]*(D/v_min[i,x2,x]+D/v_min[j,x,x1])* (1-l[i,j,x]) - bigM*l[i,j,x];
-
+t_ear[i,x]- t_lat[j,x]>=anglePM[x,x1,x2]*(D/v_min[j,x2,x]+D/v_min[i,x,x1])* (1-l[i,j,x]) - bigM*l[i,j,x];
 subject to diver4_1 {i in F, j in F,x in V,(x,x1) in E, (x2,x) in E: i<>j /*and x1<>x2*/ and (w[x,x1,j]+w[x2,x,i]== 2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}: #and x <> e[j]
 t_ear[i,x]- t_lat[j,x]>=anglePM[x,x1,x2]*(D/v_min[i,x2,x]+D/v_min[j,x,x1])* (1-l[i,j,x]) - bigM*l[i,j,x];
 
@@ -135,16 +140,25 @@ l[i,j,x] + l[j,i,x] = 1;
 #TODO check if the speed parameter is correct for split4
 subject to split3 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and (w[x,x1,i]+w[x,x2,j]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}:
 t_ear[j,x]- t_lat[i,x]>=angleP[x,x1,x2]*D/v_min[i,x,x1]*l[i,j,x] - bigM*(1-l[i,j,x]);
-#understand if we can change w[x,x1,i]+w[x,x2,j]==2 or w[x,x1,j] + w[x,x2,i] == 2 with w[x,x1,i]+w[x,x2,j] + w[x,x1,j] + w[x,x2,i] >= 2
+#subject to split3_1 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and (w[x,x1,j]+w[x,x2,i]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}:
+#t_ear[j,x]- t_lat[i,x]>=angleP[x,x1,x2]*D/v_min[j,x,x1]*l[i,j,x] - bigM*(1-l[i,j,x]);
 subject to split4 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and (w[x,x1,i]+w[x,x2,j]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}:
 t_ear[i,x]- t_lat[j,x]>=angleP[x,x1,x2]*D/v_min[j,x,x2] * (1-l[i,j,x]) - bigM*l[i,j,x];
+#subject to split4_1 {i in F, j in F,x in V,(x,x1) in E, (x,x2) in E: i<>j and x1<>x2 and (w[x,x1,j]+w[x,x2,i]==2) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j))}:
+#t_ear[i,x]- t_lat[j,x]>=angleP[x,x1,x2]*D/v_min[i,x,x2] * (1-l[i,j,x]) - bigM*l[i,j,x];
 
 
 
 
 minimize UAM: sum{i in F} t_ear[i,e[i]];
 minimize MC: sum{f in F, (x,y) in E} wPath[x,y,f] * dMCF[x,y];
-
+#minimize MC: sum{f in F, (x,y) in E} wPath[x,y,f] * dMCF[x,y] + 
+#sum{uValue in UniqueValues}sum{i in F, j in F: t_hat_ear[i,s[i]]==uValue and t_hat_ear[j,s[j]]==uValue and i<>j}
+#sum{x in V,x1 in V, x2 in V:
+#       ((x,x1) in E and (x,x2) in E and (wPath[x,x1,i]+wPath[x,x2,j]==2 or wPath[x,x1,j]+wPath[x,x2,i]==2))
+# or    ((x,x1) in E and (x2,x) in E and (wPath[x,x1,i]+wPath[x2,x,j]==2 or wPath[x,x1,j]+wPath[x,x2,i]==2))
+# or    ((x1,x) in E and (x2,x) in E and (wPath[x1,x,i]+wPath[x2,x,j]==2 or wPath[x1,x,j]+wPath[x,x2,i]==2))}
+#       costConflicts;
 #l'ordine è obj, variabili, vincoli
 problem path: MC, wPath,startingPath,finishingPath,allPath;
 

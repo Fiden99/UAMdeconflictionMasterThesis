@@ -1,0 +1,192 @@
+Gurobi 12.0.0:   tech:timing = 1
+Set parameter LogToConsole to value 1
+  tech:outlev = 1
+Set parameter Threads to value 1
+  tech:threads = 1
+Set parameter TimeLimit to value 431900
+  lim:time = 431900
+Set parameter Seed to value 0
+  tech:seed = 0
+Set parameter InfUnbdInfo to value 1
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (linux64 - "Rocky Linux 8.10 (Green Obsidian)")
+
+CPU model: Intel(R) Xeon(R) Platinum 8362 CPU @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 64 physical cores, 128 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  431900
+InfUnbdInfo  1
+Threads  1
+
+Optimize a model with 89432 rows, 23004 columns and 281023 nonzeros
+Model fingerprint: 0xfd81ea2d
+Model has 584 quadratic constraints
+Model has 4954 simple general constraints
+  2568 OR, 2386 INDICATOR
+Variable types: 6582 continuous, 16422 integer (0 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+03]
+  QMatrix range    [1e+00, 1e+00]
+  QLMatrix range   [6e-01, 1e+00]
+  Objective range  [1e+00, 1e+00]Presolve removed 52869 rows and 7931 columns
+Presolve time: 0.54s
+Presolved: 22077 rows, 6544 columns, 69692 nonzeros
+Presolved model hasPPresolve removed 62625 rows and 28288 columns
+Presolve time: 1.35s
+Presolved: 32569 rows, 9089 columns, 112157 nonzeros
+Presolved model has 520 SOS constraint(s)
+Variable types: 2238 continuous, 6851 integer (6787 binary)
+
+Root relaxation: objective 8.486216e+00, 4105 iterations, 0.08 seconds (0.08 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    8.48622    0   72          -    8.48622      -     -    2s
+     0     0    8.48622    0   33          -    8.48622      -     -    3s
+     0     0    8.48662    0   27          -    8.48662      -     -    3s
+     0     0    8.66917    0   29          -    8.66917      -     -    3s
+     0     0    8.66917    0   29          -    8.66917      -     -    3s
+H    0     0                      81.2330827    8.66917  89.3%     -    3s
+     0     0    8.66917    0   29   81.23308    8.66917  89.3%     -    3s
+     0     0    8.66917    0   31   81.23308    8.66917  89.3%     -    3s
+     0     0    8.66917    0   34   81.23308    8.66917  89.3%     -    3s
+     0     0    8.66917    0   34   81.23308    8.66917  89.3%     -    3s
+H    0     0                      20.5137845    8.66917  57.7%     -    3s
+     0     0    8.66917    0   35   20.51378    8.66917  57.7%     -    4s
+     0     0    2.65422    0   64          -    2.65422      -     -    4s
+     0     0    2.65422    0   81          -    2.65422      -     -    5s
+     0     0    2.65422    0   78          -    2.65422      -     -    5s
+     0     0    2.65422    0   55          -    2.65422      -     -    5s
+     0     0    2.65422    0   57          -    2.65422      -     -    5s
+     0     0    8.66917    0   33   20.51378    8.66917  57.7%     -    5s
+     0     2    8.66917    0   33   20.51378    8.66917  57.7%     -    5s
+H  191    98                      19.0250627   10.77694  43.4%  50.7    7s
+H  257    63                      14.7719298   10.88221  26.3%  64.3    7s
+H  364    80                      14.3533835   11.35840  20.9%  61.7    8s
+*  379    84              16      14.2481203   11.35840  20.3%  63.3    8s
+*  394    76              15      13.9799499   11.35840  18.8%  61.5    8s
+H  436    21                      12.6666667   11.40100  10.0%  63.5    8s
+H  437    21                      12.5614035   11.40100  9.24%  63.4    9s
+
+Cutting planes:
+  Learned: 315
+  Gomory: 43
+  Cover: 116
+  Implied boundH10383   107                    12154.876897   12.28542   100%  11.7   13s
+H10383   107                    12153.876897   12.28542   100%  11.7   13s
+H10383   107                    12151.876897   12.28542   100%  11.7   13s
+H10383   107                    12150.250330   12.28542   100%  11.7   13s
+H10389   112                    12148.776646   12.49845   100%  11.7   13s
+H10389   112                    12148.618752   12.49845   100%  11.7   13s
+H10389   112                    12148.460857   12.49845   100%  11.7   13s
+H10389   112                    12148.302962   12.49845   100%  11.7   14s
+H10389    93                     151.6864207   12.49845  91.8%  11.7   14s
+H10389    93                     147.7262249   12.49845  91.5%  11.7   14s
+H  1901   341   18.23511   11   51   21.87469   17.95489  17.9%  15.7   15s
+  2821   194   20.05013   26   28   21.87469   19.32832  11.6%  15.9   20s
+
+Cutting planes:
+  Learned: 90
+  Gomory: 47
+  Cover: 15
+  Implied bound: 70
+  Clique: 5
+  MIR: 81
+  StrongCG: 32
+  Flow cover: 53
+  Inf proof: 21
+  RLT: 2
+  Relax-and-lift: 7
+
+Explored 3120 nodes (61496 simplex iterations) in 22.37 seconds (23.16 work units)
+Thread count was 1 (of 128 available processors)
+
+Solution count 10: 21.8747 21.9699 22.2857 ... 87.0877
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.187468671677e+01, best bound 2.187468671677e+01, gap 0.0000%
+
+### solve_result = solved, _total_solve_time = 22.463206
+
+            56.4680795   12.49845  77.9%  11.7   18s
+H10409    68                      40.2349968   12.49845  68.9%  11.7   18s
+ 10421    76   12.56446    0   92   40.23500   12.56446  68.8%  11.7   20s
+H10431    77                      35.7788565   12.97922  63.7%  11.7   21s
+H10431    73                      32.7487813   12.97922  60.4%  11.7   21s
+H10431    68                      32.7287311   12.97922  60.3%  11.7   21s
+H10476    90                      30.0520394   14.21775  52.7%  13.9   24s
+H10476    85                      30.0319893   14.21775  52.7%  13.9   24s
+ 10493    89   18.25785   23   37   30.03199   14.21775  52.7%  13.9   25s
+H10531    83                      26.4179542   15.13976  42.7%  14.0   25s
+H10611    88                      26.3628164   16.42356  37.7%  14.3   26s
+H10611    84                      26.3252224   16.42356  37.6%  14.3   26s
+H10611    79                      26.1322399   16.42356  37.2%  14.3   26s
+H10644    73                      22.5062657   16.42356  27.0%  14.4   26s
+H10672    74                      22.2205514   16.42356  26.1%  14.4   26s
+H10880    93                      21.7008661   18.35977  15.4%  15.6   28s
+H10916    39                      20.0250627   18.65384  6.85%  15.8   29s
+H10916    35                      19.8819094   18.65384  6.18%  15.8   29s
+
+Cutting planes:
+  Learned: 100
+  Gomory: 63
+  Cover: 58
+  Implied bound: 26
+  MIR: 37
+  Mixing: 2
+  StrongCG: 10
+  Flow cover: 190
+  Inf proof: 4
+  Zero half: 1
+  RLT: 3
+  Relax-and-lift: 11
+
+Explored 10955 nodes (188935 simplex iterations) in 29.39 seconds (33.27 work units)
+Thread count was 1 (of 128 available processors)
+
+Solution count 10: 19.8819 20.0251 21.7009 ... 30.032
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.988190943358e+01, best bound 1.988095188709e+01, gap 0.0048%
+
+### solve_result = solved, _total_solve_time = 29.414348
+
+.01003    8.05125  33.0%     -    8s
+     0     0    8.05329    0   64   12.01003    8.05329  32.9%     -    8s
+     0     0    8.05329    0   64   12.01003    8.05329  32.9%     -    8s
+     0     0    8.05329    0   65   12.01003    8.05329  32.9%     -    8s
+     0     0    8.05329    0   48   12.01003    8.05329  32.9%     -    8s
+     0     0    8.05329    0   47   12.01003    8.05329  32.9%     -    8s
+     0     0    8.05329    0   50   12.01003    8.05329  32.9%     -    9s
+     0     0    8.05329    0   50   12.01003    8.05329  32.9%     -    9s
+     0     0    8.06072    0   46   12.01003    8.06072  32.9%     -    9s
+     0     0    8.06085    0   52   12.01003    8.06085  32.9%     -    9s
+     0     0    8.06201    0   53   12.01003    8.06201  32.9%     -    9s
+     0     0    8.06297    0   53   12.01003    8.06297  32.9%     -    9s
+     0     2    8.07019    0   53   12.01003    8.07019  32.8%     -    9s
+   149    34    9.31328   19   14   12.01003    9.20802  23.3%  32.5   10s
+
+Cutting planes:
+  Learned: 103
+  Gomory: 47
+  Cover: 139
+  Implied bound: 40
+  Clique: 6
+  MIR: 72
+  StrongCG: 7
+  Flow cover: 20
+  Mod-K: 3
+  RLT: 3
+  Relax-and-lift: 3
+
+Explored 238 nodes (43859 simplex iterations) in 10.38 seconds (10.07 work units)
+Thread count was 1 (of 128 available processors)
+
+Solution count 8: 12.01 12.01 12.3784 ... 16.2506
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.201002506268e+01, best bound 1.201002506268e+01, gap 0.0000%
+
+### solve_result = solved, _total_solve_time = 10.534967
+
