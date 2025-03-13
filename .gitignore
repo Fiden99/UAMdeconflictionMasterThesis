@@ -1304,6 +1304,7 @@ profile_default/
 ipython_config.py
 
 ampl.*
+old/*
 
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
