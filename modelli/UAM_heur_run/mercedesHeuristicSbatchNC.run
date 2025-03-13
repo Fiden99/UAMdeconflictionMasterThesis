@@ -46,6 +46,8 @@ param opt_w{E,F} default Infinity;
 param optTime default Infinity;
 param iteropt default Infinity;
 param obtainedSol binary default 0;
+
+param timeLimit default 30;
 #param t_hat_ear_backup{F,V} default Infinity;
 #param t_hat_lat_backup{F,V} default Infinity;
 #param cutoff default Infinity;
@@ -137,7 +139,8 @@ repeat
 	#time limit without solution
 	if solve_result_num == 472 and obtainedSol==0 then
 	{
-		option gurobi_options ('timing=1 outlev=1 threads=1 MIPFocus=1 mipstart=2 mipgap=1e-5 timelim=' & (120*(1+iterations))) ;
+		let timeLimit:=120*(1+iterations)
+		option gurobi_options ('timing=1 outlev=1 threads=1 MIPFocus=1 mipstart=2 mipgap=1e-5 timelim=' & timeLimit) ;
 		solve conflicts > (log_name);
 		option gurobi_options 'timing=1 outlev=1 threads=1 MIPFocus=1 timelim=30 mipstart=2 mipgap=1e-5' ;
 	}
@@ -278,7 +281,7 @@ if (obtainedSol == 0) then
 	printf "%s,30,+Inf,%f,+Inf,%d,+Inf\n",($datFile),(_ampl_elapsed_time + _total_solve_elapsed_time),iterations >> (result_name);
 else
 {
-	printf "%s,30,%f,%f,%f,%d,%d\n",($datFile),opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> (result_name);
+	printf "%s,%d,%f,%f,%f,%d,%d\n",($datFile),timeLimit,opt,(_ampl_elapsed_time + _total_solve_elapsed_time),optTime,iterations,(iteropt+1) >> (result_name);
 	# Store the solution in a file
 	printf "### total_solve_time = %f\n\n",(_ampl_elapsed_time + _total_solve_elapsed_time) > (sol_name);
 	display opt, iterations, optTime,iteropt>(sol_name);

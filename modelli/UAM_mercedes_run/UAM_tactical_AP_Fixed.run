@@ -9,9 +9,9 @@ let data_name :=sprintf("%s/data/mercedesTDFixed/AP/%s.dat",($absPath),($datFile
 param model_name symbolic;
 let model_name :=sprintf("%s/UAM_tactical_Set.mod",($absPath));
 param sol_name symbolic;
-let sol_name := sprintf("%s/output/mercedes/AP/%sFixed.sol", ($absPath),($datFile));
+let sol_name := sprintf("%s/output/mercedes/AP/%sFixedTini%s.sol", ($absPath),($datFile),($rTini));
 param log_name symbolic;
-let log_name := sprintf("%s/output/mercedes/AP/%sFixed.log", ($absPath),($datFile));
+let log_name := sprintf("%s/output/mercedes/AP/%sFixedTini%s.log", ($absPath),($datFile),($rTini));
 param reducedTini integer;
 let reducedTini := num($rTini);
 model (model_name);
