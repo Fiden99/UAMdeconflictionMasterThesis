@@ -14,7 +14,7 @@ repository: "https://github.com/Fiden99/UAMdeconflictionMasterThesis"
 repository-code: "https://github.com/Fiden99/UAMdeconflictionMasterThesis"
 version: "1.0.0"
 date-released: "2025-04-01"
-license: "GP L3.0"
+license: "GPL 3.0"
 keywords:
   - Urban Air Mobility
   - Traffic Management
