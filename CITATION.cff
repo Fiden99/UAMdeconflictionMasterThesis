@@ -1,8 +1,28 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+message: "If you use this software, please cite it as follows."
+type: software
+title: "Methods for Traffic Management in Urban Air Mobility"
 authors:
-  - family-names: Magi
-    given-names: Filippo
-  - family-names: D'Ambrosio
-    given-names: Claudia
-title: "Methods for traffic management in urban air mobility"
+  - given-names: "Filippo"
+    family-names: "Magi"
+    affiliation: "Università degli Studi di Milano"
+  - given-names: "Claudia"
+    family-names: "D'Ambrosio"
+    affiliation: "École Polytechnique"
+    orcid: "0000-0002-4040-0960"
+repository: "https://github.com/Fiden99/UAMdeconflictionMasterThesis"
+repository-code: "https://github.com/Fiden99/UAMdeconflictionMasterThesis"
+version: "1.0.0"
+date-released: "2025-04-01"
+license: "GPL 3.0"
+keywords:
+  - Urban Air Mobility
+  - Traffic Management
+  - Optimization
+  - Operations Research
+abstract: >
+  This software provides methods for traffic management in urban air mobility.
+  It includes optimization models for routing and scheduling, ensuring efficient
+  air traffic management in urban environments. The models allow aircraft to
+  dynamically adjust their routes if necessary, enhancing flexibility and 
+  responsiveness to changing conditions.
