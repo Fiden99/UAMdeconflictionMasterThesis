@@ -1305,6 +1305,8 @@ ipython_config.py
 
 ampl.*
 old/*
+temp/*
+pelegrin/*
 
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
