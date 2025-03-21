@@ -42,6 +42,8 @@ for { j in 1.._nvars} {
    printf "let %s :=\t %d\t %f\t %f;\n", _varname[j], _var[j] , _var[j].lb, _var[j].ub > (sol_name);
 }
 
+expand fixOrder1,fixOrder2,fixOrderFixed1,fixOrderFixed2,fixOrderFixedI2,fixOrderFixedI1,fixOrderFixedJ1,fixOrderFixedJ2 >>(warning_name);
+
 /*
 param FreePath symbolic;
 let FreePath :=sprintf("%s/temp/mercedes_Path.csv",($absPath));

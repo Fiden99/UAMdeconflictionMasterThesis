@@ -13,6 +13,8 @@ param sol_name symbolic;
 let sol_name := sprintf("%s/heuristicOut/mercedes/AP%s.sol", ($absPath),($datFile));
 param log_name symbolic;
 let log_name := sprintf("%s/heuristicOut/mercedes/AP%s.log", ($absPath),($datFile));
+param warning_name symbolic;
+let warning_name := sprintf("%s/warningHeur.txt", ($absPath));
 
 model (model_name);
 data (data_name);
@@ -301,4 +303,15 @@ else
 		printf"l[%d,%d,%d] :=\t%f;\n",i,j,x,opt_l[i,j,x]> (sol_name);
 	}
 }
+
+if {(i,j,x,y) in trail2:d[x,y] >= maxDistTrail and (x,y) not in nonAvailableEdges} then
+{
+ display data_name, "trail2", i,j,x,y>>warning_name;
+}
+if {(i,j,x,y) in trail1:d[x,y] >= maxDistTrail and (x,y) not in nonAvailableEdges} then
+{
+ display data_name, "trail1", i,j,x,y>>warning_name;
+}
+
+
 

@@ -301,3 +301,14 @@ else
 	}
 }
 
+if {(i,j,x,y) in trail2:d[x,y] >= maxDistTrail and (x,y) not in nonAvailableEdges} then
+{
+ display data_name, "trail2", i,j,x,y>>warning_name;
+}
+if {(i,j,x,y) in trail1:d[x,y] >= maxDistTrail and (x,y) not in nonAvailableEdges} then
+{
+ display data_name, "trail1", i,j,x,y>>warning_name;
+}
+
+
+

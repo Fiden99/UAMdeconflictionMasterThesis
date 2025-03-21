@@ -171,6 +171,9 @@ t_lat[f,x] = t_hat_lat[f,x];
 subject to fixPassedW{(f,x,y) in passedF : (f,y) in timeFixed}:
 wPath[x,y,f]= 1;
 
+subject to avoidShortcut{(x,y) in {setof{(f,x,y) in PathNC} (x,y)}, f in F diff (AP union NC)}:
+wPath[x,y,f] = 0;
+
 subject to priority1{f in AP, x in nodesAP}:
 t_ear[f,x] = t_hat_ear[f,x] + delayPriority[f];
 subject to priority2{f in AP, x in nodesAP}:
@@ -191,7 +194,7 @@ problem path: MC,
     wPath, 
 #constrains
     startingPath,finishingPath,allPath,
-    fixPassedW;
+    fixPassedW,avoidShortcut;
 
 problem conflicts: UAM,
 #variables

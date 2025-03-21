@@ -399,6 +399,46 @@ t_lat_fixed[f,x] = t_hat_lat[f,x] + delayPriority[f];
 #w[x,y,f] = 1;
 
 
+set nonAvailableEdges := setof{(f,x,y) in fixedFlights: f in NC} (x,y);
+subject to avoidShortcut{(x,y) in nonAvailableEdges, f in freeF}:
+w[x,y,f] = 0;
+
+param maxDistTrail := D*v_max/(v_max-v_min); # obtained from  d/v_min - d/v_max >= 2D/v_min
+#fix order for trail conflicts
+subject to fixOrder1  {i in freeF,j in freeF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j)) }:
+passFirst[i,j,x] - passFirst[i,j,y] <= 2 - w[x,y,i] - w[x,y,j];
+subject to fixOrder12 {i in freeF,j in freeF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j))}:
+passFirst[i,j,y] - passFirst[i,j,x] <= 2- w[x,y,i] - w[x,y,j];
+subject to fixOrder2  {i in freeF,j in freeF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] > t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i>j)) }:
+passFirst[i,j,x] - (1-passFirst[j,i,y]) <= 2 - w[x,y,i] - w[x,y,j];
+subject to fixOrder22 {i in freeF,j in freeF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] > t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i>j)) }:
+(1-passFirst[j,i,y]) - passFirst[i,j,x] <= 2- w[x,y,i] - w[x,y,j];
+
+subject to fixOrderFixed1 {(i,j,x,y) in trail2:d[x,y] >= maxDistTrail and (x,y) not in nonAvailableEdges}:
+pass2Fixeds[i,j,x] - pass2Fixeds[i,j,y] <= 0;
+
+subject to fixOrderFixed2 {(i,j,x,y) in trail2:d[x,y] >= maxDistTrail and (x,y) not in nonAvailableEdges}:
+pass2Fixeds[i,j,y] - pass2Fixeds[i,j,x] <= 0;
+
+subject to fixOrderFixedI1  {i in fixedF,j in freeF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (wFixed[x,y,i]==1) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j)) }:
+passIFixed[i,j,x] - passIFixed[i,j,y] <= 1-w[x,y,j];
+subject to fixOrderFixedI12 {i in fixedF,j in freeF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (wFixed[x,y,i]==1) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j)) }:
+passIFixed[i,j,y] - passIFixed[i,j,x] <= 1-w[x,y,j];
+subject to fixOrderFixedI2  {i in fixedF,j in freeF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (wFixed[x,y,i]==1) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] > t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i>j)) }:
+passIFixed[i,j,x] - (1-passJFixed[j,i,y]) <= 1-w[x,y,j];
+subject to fixOrderFixedI21 {i in fixedF,j in freeF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (wFixed[x,y,i]==1) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] > t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i>j)) }:
+(1-passJFixed[j,i,y]) - passIFixed[i,j,x] <= 1-w[x,y,j];
+
+subject to fixOrderFixedJ1  {i in freeF,j in fixedF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (wFixed[x,y,j]==1) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j)) }:
+passJFixed[i,j,x] - passJFixed[i,j,y] <= 1-w[x,y,i];
+subject to fixOrderFixedJ12 {i in freeF,j in fixedF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (wFixed[x,y,j]==1) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j)) }:
+passJFixed[i,j,y] - passJFixed[i,j,x] <= 1-w[x,y,i];
+subject to fixOrderFixedJ2  {i in freeF,j in fixedF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (wFixed[x,y,j]==1) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] > t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i>j)) }:
+passJFixed[i,j,x] - (1-passIFixed[j,i,y]) <= 1-w[x,y,i];
+subject to fixOrderFixedJ21 {i in freeF,j in fixedF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (wFixed[x,y,j]==1) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] > t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i>j)) }:
+(1 - passIFixed[j,i,y]) - passJFixed[i,j,x] <= 1-w[x,y,i];
+
+
 minimize opt: sum{i in AP} W * delayPriority[i] + sum{i in F diff (AP union NC)} abs_t_ear[i];
 
 /*

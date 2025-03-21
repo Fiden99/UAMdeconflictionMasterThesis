@@ -12,6 +12,8 @@ param sol_name symbolic;
 let sol_name := sprintf("%s/output/mercedes/AP/%sTini%s.sol", ($absPath),($datFile),($rTini));
 param log_name symbolic;
 let log_name := sprintf("%s/output/mercedes/AP/%sTini%s.log", ($absPath),($datFile),($rTini));
+param warning_name symbolic;
+let warning_name := sprintf("%s/warning.txt", ($absPath),($datFile),($rTini));
 param reducedTini integer;
 let reducedTini := num($rTini);
 model (model_name);
@@ -45,6 +47,30 @@ printf "variable\t\t value\tLB\t\t\tUB \n" >(sol_name);
 for { j in 1.._nvars} {
    printf "let %s :=\t %d\t %f\t %f;\n", _varname[j], _var[j] , _var[j].lb, _var[j].ub > (sol_name);
 }
+
+expand fixOrder1,fixOrder2,fixOrderFixed1,fixOrderFixed2,fixOrderFixedI2,fixOrderFixedI1,fixOrderFixedJ1,fixOrderFixedJ2 >>(warning_name);
+
+
+/*
+stampa per fixOrder
+param maxDistTrail := D*v_max/(v_max-v_min); # obtained from  d/v_min - d/v_max >= 2D/v_min
+if (i in freeF,j in freeF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j))) then
+   display data_name, "fixOrder1",i,j,x,y >> (warning_name);
+if (i in freeF,j in freeF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] > t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i>j))) then
+   display data_name, "fixOrder2",i,j,x,y >> (warning_name);
+if ((i,j,x,y) in trail2:d[x,y] >= maxDistTrail and (x,y) not in nonAvailableEdges) then
+   display data_name, "fixOrderFixed1",i,j,x,y >> (warning_name);
+if ((i,j,x,y) in trail2:d[x,y] >= maxDistTrail and (x,y) not in nonAvailableEdges) then
+   display data_name, "fixOrderFixed2",i,j,x,y >> (warning_name);
+if (i in fixedF,j in freeF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (wFixed[x,y,i]==1) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j))) then
+   display data_name, "fixOrderFixedI1",i,j,x,y >> (warning_name);
+if (i in fixedF,j in freeF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (wFixed[x,y,i]==1) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] > t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i>j))) then
+   display data_name, "fixOrderFixedI2",i,j,x,y >> (warning_name);
+if (i in freeF,j in fixedF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (wFixed[x,y,j]==1) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] < t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i<j))) then
+   display data_name, "fixOrderFixedJ1",i,j,x,y >> (warning_name);
+if (i in freeF,j in fixedF, (x,y) in E diff nonAvailableEdges: i<>j and d[x,y] >= maxDistTrail and (wFixed[x,y,j]==1) and (t_hat_ear[i,x] < t_hat_ear[j,x] or (t_hat_ear[i,x] == t_hat_ear[j,x] and i<j)) and (t_hat_ear[i,y] > t_hat_ear[j,y] or (t_hat_ear[i,y] == t_hat_ear[j,y] and i>j))) then
+   display data_name, "fixOrderFixedJ2",i,j,x,y >> (warning_name);
+*/
 
 /*
 param fix_name symbolic;

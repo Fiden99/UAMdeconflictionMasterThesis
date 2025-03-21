@@ -6,7 +6,7 @@ option solver gurobi;
 option gurobi_options 'timing=1 outlev=1 threads=1 MIPFocus=1 timelim=30 mipstart=2 mipgap=1e-5' ;
 #option show_stats 1;
 model MercedesHeuristic.mod;
-data data/mercedesTDHeur/metroplex63nDr0nDe3.dat;
+data data/mercedesTDHeur/NC/grid16.dat;
 param iterations default 0;
 #parametri d
 param alpha default 4;				#fattore moltiplicativo della distanza in caso di conflitto
@@ -24,6 +24,7 @@ param t_ear_temp{F,V} default 0;
 let {f in F} t_ear_temp[f,s[f]]:=t_hat_ear[f,s[f]];
 set tempSet within {E} default {};
 param gapUnf default 5;
+param obtainedSol default 0;
 
 for {f in F,(i,j) in E}
 	let dMCF[f,i,j]:= d[i,j];
@@ -73,7 +74,7 @@ repeat
 	{
 		let timeLimit := 120*(1+iterations);
 		option gurobi_options ('timing=1 outlev=1 threads=1 MIPFocus=1 mipstart=2 mipgap=1e-5 timelim=' & timeLimit) ;
-		solve conflicts > (log_name);
+		solve conflicts ;
 		option gurobi_options 'timing=1 outlev=1 threads=1 MIPFocus=1 timelim=30 mipstart=2 mipgap=1e-5' ;
 	}
 	else if solve_result == "solved" or (400<=solve_result_num and solve_result_num<=405) then
@@ -176,7 +177,5 @@ repeat
 			}
 		}
 	}
-
-
 }
 while (found==0);

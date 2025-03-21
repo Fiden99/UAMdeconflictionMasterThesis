@@ -1,54 +1,70 @@
 \begin{document}
 \begin{longtable}{|l|r|r|r|r|r|}
-\caption{Comparison between \textbf{heuristic} and \textbf{model without fixed path} } \label{table:heuristic:compare} \\
-\toprule
-instance & opt & result & diff & totalTime_heur & totalTime_free \\
-\midrule
+\caption{Comparison between \textbf{heuristic} and \textbf{model without fixed path} } \label{table:heuristic:compare} \\ \hline
+
+instance & opt & result & diff & total Time heuristic & total Time all Free \\ \hline
+
 \endfirsthead
-\caption[]{Comparison between \textbf{heuristic} and \textbf{model without fixed path} } \\
-\toprule
-instance & opt & result & diff & totalTime_heur & totalTime_free \\
-\midrule
+\caption[]{Comparison between \textbf{heuristic} and \textbf{model without fixed path} } \\ \hline
+
+instance & opt & result & diff & total Time heuristic & total Time all Free \\ \hline
+
 \endhead
-\midrule
-\multicolumn{6}{r}{Continued on next page} \\
-\midrule
+
+\multicolumn{6}{r}{Continued on next page} \\ \hline
+
 \endfoot
-\bottomrule
+
 \endlastfoot
-metroplex14nDr0nDe2 & 5.694236 & 5.393484 & 0.300752 & 0.379412 & 607.444620 \\
-metroplex19nDr0nDe2 & 4.157895 & 3.789474 & 0.368421 & 0.319781 & 362.203062 \\
-metroplex23nDr0nDe2 & 11.130326 & 11.130326 & 0.000000 & 0.341418 & 339.928517 \\
-grid14nDr0nDe2 & 2.842105 & 2.842105 & 0.000000 & 0.411706 & 59.706271 \\
-airport19nDr0nDe3 & 1.646617 & 1.646617 & 0.000000 & 0.385910 & 7.178048 \\
-airport18nDr0nDe1 & 1.548872 & 1.548872 & 0.000000 & 0.417111 & 7.162805 \\
-airport30nDr0nDe1 & 0.822055 & 0.822055 & 0.000000 & 0.403829 & 5.305924 \\
-airport30nDr0nDe2 & 1.393484 & 1.393484 & 0.000000 & 0.401886 & 4.893230 \\
-metroplex32nDr0nDe1 & 5.576441 & 5.576441 & 0.000000 & 0.428958 & 136.046468 \\
-airport2nDr0nDe3 & 1.107769 & 1.107769 & 0.000000 & 0.375512 & 4.879672 \\
-metroplex43nDr0nDe3 & 6.208020 & 6.208020 & 0.000000 & 0.374757 & 1594.118785 \\
-airport44nDr0nDe1 & 1.443609 & 1.443609 & 0.000000 & 0.375437 & 7.241333 \\
-grid3nDr0nDe1 & 4.593985 & 4.593985 & 0.000000 & 0.420656 & 37.655565 \\
-metroplex53nDr0nDe3 & 6.330827 & 6.330827 & 0.000000 & 0.348239 & 167.770541 \\
-metroplex95nDr0nDe3 & 8.090226 & 8.090226 & 0.000000 & 0.350122 & 523.766018 \\
-grid50nDr0nDe1 & 9.694236 & inf & -inf & 322.038383 & 3717.009233 \\
-grid86nDr0nDe1 & 4.491228 & inf & -inf & 375.399844 & 3694.099458 \\
-grid21nDr0nDe1 & 7.233083 & inf & -inf & 592.680537 & 3701.611991 \\
-grid48nDr0nDe3 & 13.503759 & inf & -inf & 583.954637 & 3701.869686 \\
-grid48nDr0nDe3 & 13.503759 & inf & -inf & 583.954637 & 3702.518434 \\
-grid25nDr0nDe2 & 3.182957 & inf & -inf & 651.211218 & 3705.949444 \\
-grid55nDr0nDe2 & 1.656642 & inf & -inf & 570.298385 & 3710.512305 \\
-grid87nDr0nDe3 & 14.463659 & inf & -inf & 514.910946 & 3687.436283 \\
-grid87nDr0nDe3 & 14.463659 & inf & -inf & 514.910946 & 3690.835071 \\
-metroplex53nDr0nDe2 & 35.598997 & inf & -inf & 688.663992 & 3751.465413 \\
-grid83nDr0nDe1 & 4.408521 & inf & -inf & 571.178617 & 3693.518546 \\
-grid65nDr0nDe2 & 10.601504 & inf & -inf & 625.662473 & 3684.862175 \\
-metroplex4nDr0nDe2 & 21.874687 & inf & -inf & 722.202398 & 3753.295254 \\
-grid89nDr0nDe1 & 12.486216 & inf & -inf & 582.118027 & 3707.516974 \\
-grid82nDr0nDe3 & 13.192982 & inf & -inf & 635.803994 & 3706.136060 \\
-grid82nDr0nDe3 & 13.192982 & inf & -inf & 635.803994 & 3706.393377 \\
-grid73nDr0nDe3 & 2.300752 & inf & -inf & 660.603433 & 3711.442785 \\
-grid73nDr0nDe3 & 2.300752 & inf & -inf & 660.603433 & 3709.970749 \\
-metroplex63nDr0nDe3 & 66.591427 & inf & -inf & 953.335936 & 3703.371115 \\
+metroplex10nDr0nDe2 & 4.944836 & 4.944836 & 0.000000 & 0.457043 & 238.174288 \\ \hline
+metroplex14nDr0nDe2 & 5.694236 & 5.393484 & 0.300752 & 0.397332 & 609.269337 \\ \hline
+metroplex19nDr0nDe2 & 4.157895 & 3.789474 & 0.368421 & 0.337359 & 361.333077 \\ \hline
+metroplex23nDr0nDe2 & 11.130326 & 11.130326 & 0.000000 & 0.373142 & 339.221982 \\ \hline
+airport13nDr0nDe1 & 1.305764 & 1.305764 & 0.000000 & 0.367011 & 7.132287 \\ \hline
+airport17nDr0nDe1 & 1.200501 & 1.200501 & 0.000000 & 0.418602 & 6.802327 \\ \hline
+airport18nDr0nDe1 & 1.548872 & 1.548872 & 0.000000 & 0.388369 & 7.071510 \\ \hline
+metroplex31nDr0nDe3 & 7.385965 & 9.190476 & -1.804511 & 0.330140 & 657.537286 \\ \hline
+airport30nDr0nDe2 & 1.393484 & 1.393484 & 0.000000 & 0.368493 & 4.995782 \\ \hline
+metroplex32nDr0nDe1 & 5.576441 & 5.576441 & 0.000000 & 0.402319 & 132.144967 \\ \hline
+grid30nDr0nDe3 & 5.380952 & 5.380952 & 0.000000 & 0.385771 & 67.309468 \\ \hline
+airport32nDr0nDe3 & 1.593985 & 1.593985 & 0.000000 & 0.384283 & 7.324980 \\ \hline
+airport2nDr0nDe3 & 1.107769 & 1.107769 & 0.000000 & 0.324829 & 5.060699 \\ \hline
+metroplex43nDr0nDe3 & 6.208020 & 6.208020 & 0.000000 & 0.390756 & 1458.190540 \\ \hline
+airport44nDr0nDe1 & 1.443609 & 1.443609 & 0.000000 & 0.374071 & 6.972172 \\ \hline
+grid50nDr0nDe1 & 9.694236 & inf & -inf & 512.720759 & 3719.303357 \\ \hline
+grid25nDr0nDe2 & 3.182957 & inf & -inf & 542.246891 & 3706.835087 \\ \hline
+grid21nDr0nDe1 & 7.233083 & inf & -inf & 625.602270 & 3701.842141 \\ \hline
+grid48nDr0nDe3 & 13.503759 & inf & -inf & 637.072111 & 3703.996816 \\ \hline
+grid55nDr0nDe3 & 1.942356 & inf & -inf & 624.775197 & 3714.412618 \\ \hline
+grid55nDr0nDe2 & 1.656642 & inf & -inf & 605.235189 & 3714.162783 \\ \hline
+grid65nDr0nDe2 & 10.601504 & inf & -inf & 628.763123 & 3687.893822 \\ \hline
+grid86nDr0nDe1 & 4.491228 & inf & -inf & 576.210686 & 3695.325535 \\ \hline
+grid82nDr0nDe3 & 13.192982 & inf & -inf & 583.494715 & 3705.709244 \\ \hline
+metroplex91nDr0nDe1 & 18.751880 & inf & -inf & 620.961339 & 3747.256917 \\ \hline
+grid89nDr0nDe1 & 12.486216 & inf & -inf & 642.733865 & 3707.145836 \\ \hline
+grid9nDr0nDe2 & 5.679198 & inf & -inf & 554.879477 & 3704.209323 \\ \hline
+grid89nDr0nDe2 & 6.947368 & inf & -inf & 667.634534 & 3710.292991 \\ \hline
+grid73nDr0nDe3 & 2.300752 & inf & -inf & 634.442574 & 3709.656020 \\ \hline
+metroplex63nDr0nDe3 & 458.553864 & inf & -inf & 1436.318366 & 3703.031164 \\ \hline
+airport1AP & 0.421053 & 0.421053 & 0.000000 & 6.673057 & 48.499322 \\ \hline
+airport23AP & 1.315789 & 1.315789 & 0.000000 & 7.008249 & 39.141172 \\ \hline
+airport41AP & 1.681704 & 1.681704 & 0.000000 & 4.404962 & 28.954742 \\ \hline
+airport42AP & 1001.631579 & 1001.631579 & 0.000000 & 6.758870 & 44.402419 \\ \hline
+airport72AP & 1.421053 & 1.421053 & 0.000000 & 7.461871 & 39.317077 \\ \hline
+grid15AP & 2.428571 & inf & -inf & 665.214196 & 3712.732525 \\ \hline
+grid22AP & 3001.250627 & inf & -inf & 692.814005 & 3715.046374 \\ \hline
+grid39AP & 9.456140 & inf & -inf & 692.203033 & 3708.145259 \\ \hline
+grid57AP & 1000.000000 & inf & -inf & 665.644590 & 3715.832739 \\ \hline
+metroplex62AP & 13.012531 & inf & -inf & 675.964465 & 3740.634286 \\ \hline
+airport25NC & 0.684211 & inf & -inf & 2.287517 & 13.542977 \\ \hline
+airport38NC & 0.842105 & inf & -inf & 2.276715 & 9.588886 \\ \hline
+airport4NC & 0.788046 & inf & -inf & 2.860375 & 12.164672 \\ \hline
+airport59NC & 1.421053 & 2.413995 & -0.992942 & 2.969290 & 23.762932 \\ \hline
+airport97NC & 1.072200 & inf & -inf & 2.924773 & 10.899818 \\ \hline
+grid31NC & 2.157895 & inf & -inf & 592.647741 & 90.666544 \\ \hline
+grid12NC & 1.631579 & inf & -inf & 672.820266 & 121.468394 \\ \hline
+grid36NC & 1.951417 & inf & -inf & 703.408476 & 90.166975 \\ \hline
+grid10NC & 1.315789 & inf & -inf & 758.298427 & 3716.804415 \\ \hline
+metroplex82NC & 362.721805 & inf & -inf & 762.350510 & 3722.425767 \\ \hline
 \end{longtable}
 \end{document}
