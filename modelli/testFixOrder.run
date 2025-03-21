@@ -1,0 +1,13 @@
+reset;
+param model_name symbolic;
+let model_name :=sprintf("%s/UAM_tactical_Set.mod",($absPath));
+param data_name symbolic;
+let data_name :=sprintf("%s/data/mercedesTD/AP/%s.dat",($absPath),($datFile));
+param out_name symbolic;
+let out_name := sprintf("%s/allFixOrder.txt", ($absPath));
+
+model (model_name);
+data (data_name);
+
+display data_name>>(out_name);
+expand fixOrder1,fixOrder2,fixOrderFixed1,fixOrderFixed2,fixOrderFixedI2,fixOrderFixedI1,fixOrderFixedJ1,fixOrderFixedJ2 >>(out_name);
