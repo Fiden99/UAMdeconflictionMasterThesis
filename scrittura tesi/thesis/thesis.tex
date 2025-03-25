@@ -24,7 +24,6 @@
 \usepackage[a4paper]{geometry}
 \usepackage{amssymb,amsmath,amsthm}
 \usepackage{graphicx}
-\usepackage{amsmath}
 \usepackage{url}
 \usepackage[pdfa]{hyperref}
 \usepackage{epsfig}
@@ -32,8 +31,8 @@
 \usepackage{setspace}
 \usepackage{tesi}
 \usepackage{algorithm}
-\usepackage{algorithmicx}
-\usepackage{algpseudocode}
+\usepackage{algcompatible}
+%\usepackage{algorithmicx}
 \usepackage{comment}
 \usepackage[section]{placeins}
 \usepackage[a-1b]{pdfx}
@@ -41,8 +40,16 @@
 \usepackage{csquotes}
 \usepackage{tikz}
 \usepackage{subcaption}
-\usepackage{subfigure}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{mathtools}
+%\usepackage{float}
+%\restylefloat{table}
+\newif\ifshowtableLinear
+\showtableLinearfalse % Cambia in \showtabletrue per mostrare la tabella
 
+\setcounter{secnumdepth}{5}
 
 %
 \newtheorem{myteor}{Teorema}[section]
@@ -50,9 +57,10 @@
 \newenvironment{teor}{\begin{myteor}\sl}{\end{myteor}}
 %
 \usepackage[
-    backend=biber,
-    style=draft,
- ]{biblatex}
+backend=biber,
+style=alphabetic,
+sorting=ynt
+]{biblatex}
 \addbibresource{biblio.bib}
 \usepackage{subfiles}
 %
@@ -60,8 +68,8 @@
 %
 \begin{document}
 
-\includegraphics{tesiSCIENZE_TECNOLOGIE.jpg}
-\title{Algorithms for traffic management in urban air mobility}
+\includegraphics[width=\textwidth]{thesis/picture/tesiSCIENZE_TECNOLOGIE.jpg}
+\title{Methods for traffic management in urban air mobility}
 \author{Filippo Magi}
 \dept{Corso di Laurea in Informatica Magistrale} 
 \anno{2023-2024}
@@ -91,15 +99,20 @@
 %			PREFAZIONE
 %
 \prefacesection{Preface}
-\subfile{thesis/sections/preface}
+\subfile{thesis/sections/intro/preface}
 %
 %
 %			ORGANIZZAZIONE
-\section*{Thesis organizzation}
+\section*{Thesis Organization}
 \label{organizzazione}
-La tesi \`e organizzata come segue:
+
+This thesis is organized as follows:
 \begin{itemize}
-\item nel Capitolo 1 ....
+    \item \textbf{Chapter 1}: We introduce the problem and review previous works.
+    \item \textbf{Chapter 2}: We present a general-use linear model to define the problem, highlight the differences with Pelegrin's work, and describe how we generate instances for testing.
+    \item \textbf{Chapter 3}: We introduce a modified model for solving Pelegrin's tactical deconfliction with some fixed paths.
+    \item \textbf{Chapter 4}: We present a heuristic approach for solving Pelegrin's tactical deconfliction while allowing path modifications.
+    \item \textbf{Chapter 5}: We analyze the results obtained from both the mathematical model and the heuristic for solving tactical deconfliction.
 \end{itemize}
 % 
 % 
@@ -107,20 +120,78 @@ La tesi \`e organizzata come segue:
 \afterpreface
 %			CAPITOLO 1: dshjkfg
 \chapter{Introduction}
-\label{cap1}
-
+\subfile{thesis/sections/intro/Introduction}
+\subfile{thesis/sections/intro/pelegrinSummary}
+\subfile{thesis/sections/intro/PortoleauSummary}
 
 %
 %
+\chapter{Definition of the problem}
+%\newpage
+\section{The model}\label{sec:modelDescription}
+We define the problem through its mathematical model.
+First, we introduce the decision variables, followed by an explanation of the input data.
+Finally, we present the constraints and describe the techniques used to linearize the nonlinear ones.
+\subfile{thesis/sections/generalModel/variablesAndData}
+\subfile{thesis/sections/generalModel/constraints}
+\subfile{thesis/sections/generalModel/linearization}
+\newpage
+\subfile{thesis/sections/mercedesChanges}
+\newpage
 \section{Testing maps}\label{sec:maps}
-\subfile{thesis/sections/topologies}
+\subfile{thesis/sections/maps/topologies}
+\subfile{thesis/sections/maps/generationOfIstances}
 
-\chapter{Exact Algorithm}\label{chap:ExactAlgo}
+\chapter{Exact Method}\label{chap:ExactAlgo}
+\subfile{thesis/sections/PelegrinModification}
+\chapter{Heuristic Algorithms}\label{chap:HeuristicAlgo}
+\subfile{thesis/sections/heuristic}
+%Da controollare risultati computazionali
+\chapter{Computational results}\label{chap:results}
+In this chapter, we present the results obtained for both the model and the heuristic.  
+For a complete overview of all instance results, refer to \cite{Magi_Methods_for_Traffic_2025}.  
+In both cases, we performed our calculations on the Atlas server at Polytechnique, equipped with an Intel\textregistered~Xeon\textregistered~Platinum 8362 CPU @ 2.80GHz and 2TiB of system memory.
+\subfile{thesis/sections/conclusions/PelegrinConclusion}
+\subfile{thesis/sections/conclusions/HeuristicConclusion}
+\chapter{Conclusion}\label{chap:conclusion}
+\subfile{thesis/sections/conclusions/Conclusion}
 %
 %			BIBLIOGRAFIA
-%
+
 \printbibliography
-% 
+
+\appendix 
+\chapter{Models} 
+\section{The non linearized model}\label{sec:wholeModel}
+\subfile{thesis/models/wholeModel} 
+\section{The linearized model}\label{sec:linearModel}
+\subfile{thesis/models/linearModel}
+\section{Pelegrin Model with Path Changing Capability}\label{sec:MercedesModifedModel}
+\subfile{thesis/models/MercedesModel}
+\chapter{The algorithms}
+\section{The math-heuristic}\label{alg:matheuristic}
+\subfile{thesis/pseudocode/matheuristic}
+\chapter{Tables}
+\section{Mercedes}
+%number of variables
+\subsection{Number of variables for fixed Flights}
+\subfile{thesis/tables/mercedes/variables/SummaryTablesFixed}
+\subsection{Number of variables for free Flights}
+\subfile{thesis/tables/mercedes/variables/SummaryTablesFree}
+\subsection{Comparison between number of variables for free and fixed flights}
+\subfile{thesis/tables/mercedes/variables/ComparisonTables}
+%times and results
+\subsection{Results and calculation time for fixed Flights}
+\subfile{thesis/tables/mercedes/times/SummaryTablesFixed}
+\subsection{Results and calculation time for free Flights}
+\subfile{thesis/tables/mercedes/times/SummaryTablesFree}
+\subsection{Comparison between results and calculation time for free and fixed flights}
+\subfile{thesis/tables/mercedes/times/ComparisonTablesResults}
+\section{heuristic}
+\subsection{Summary tables}
+\subfile{thesis/tables/heuristic/times/SummaryTables}\label{chap:heuristic:tables}
+\subsection{Comparison between heuristic and no fixed path}
+\subfile{thesis/tables/heuristic/times/comparison}
 \end{document}
 
 

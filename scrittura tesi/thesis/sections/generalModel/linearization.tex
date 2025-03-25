@@ -1,0 +1,90 @@
+\documentclass[../../thesis.tex]{subfiles}
+\begin{document}
+\subsection{Linearization of the model}\label{chap:linearization}
+
+As observed, the previous model is nonlinear due to the presence of bilinear constraints and conflict representations involving implications followed by disjunctions. 
+To obtain a linear formulation, we will apply a series of transformations, which, although effective, may introduce some relaxation of the original constraints. 
+We begin by addressing the quadratic constraints.
+
+\subsubsection{Linearization of Bilinear Constraints}
+\label{sec:linearization:times}
+
+Given constraints \eqref{eq:constrain:define_t_max} and \eqref{eq:constrain:define_t_min}, we apply the McCormick Envelopes~\cite{mccormick-1976} to obtain a linearized formulation.
+
+First, we introduce a big-$M$ parameter as an upper bound for $t^\text{ear}$. To ensure correctness, we can define it as $M = \sum_{(i,j) \in E} d(i,j)$ or, alternatively, assign a fixed conservative value, such as $M = 10^3$, which facilitates the generation of effective cuts while maintaining correctness in reasonable cases.
+
+To handle the bilinear terms, we introduce auxiliary variables $\overline{z}_{x,x',i}$ and $\underline{z}_{x,x',i}$ for each $(x,x') \in E, i \in F$, where these variables represent the product $z_{x,x',i} = t^\text{ear}_{i,x} \cdot w_{x,x',i}$. This transformation eliminates the bilinear terms, allowing for a linearized reformulation.
+
+
+\begin{align}
+%define min time
+    \underline t_{i,x'} &= \sum_{x\in V: (x,x')\in E} \left(w_{x,x',i} \frac{d(x,x')}{\overline v_{i,x,x'}} + \underline z_{x,x',i}\right)
+    &\forall i\in \mathcal{F}, x'\in V\\
+    \underline z_{x,x',i} &\leq w_{x,x',i}\cdot M &\forall i\in \mathcal{F}, (x,x')\in E\\
+    \underline z_{x,x',i} &\leq t^\text{ear}_{i,x} &\forall i\in \mathcal{F}, (x,x')\in E\\
+    \underline z_{x,x',i} &\geq t^\text{ear}_{i,x} - M (1-w_{x,x',i}) &\forall i\in \mathcal{F}, (x,x')\in E\\
+%\end{align}
+%\begin{align}
+%define max time    
+    \overline t_{i,x'} &= \sum_{x\in V: (x,x')\in E}\left(w_{x,x',i}\frac{d(x,x')}{\underline v_{i,x,x'}}+\overline z_{x,x',i}\right) 
+    &\forall i \in \mathcal{F}, x'\in V\\
+    \overline z_{x,x',i} &\leq w_{x,x',i}\cdot M &\forall i\in \mathcal{F}, (x,x')\in E\\
+    \overline z_{x,x',i} &\leq t^\text{ear}_{i,x} &\forall i\in \mathcal{F}, (x,x')\in E\\
+    \overline z_{x,x',i} &\geq t^\text{ear}_{i,x} - M (1-w_{x,x',i}) &\forall i\in \mathcal{F}, (x,x')\in E
+\end{align}
+
+
+
+\subsubsection{Linearization of Conflicts}  
+In order to handle conflicts, two transformations are required: the first eliminates the logical implication, while the second removes the disjunction.
+
+For clarity, we illustrate the process using a single constraint as an example. The complete linearized model is presented in Appendix~\ref{sec:linearModel}.  
+
+We will consider the \textit{diversion constraint} \ref{eq:constrain:diver} to analyze its transformations.
+
+Let's start by removing the implication, introducing a new binary variable, $yd$, and applying the previously defined big-$M$ method.  
+This technique is commonly known as \textbf{Indicator Constraint Reformulation}.
+
+\begin{align}
+    2(1-yd_{i,j,x,x_1,x_2}) &\leq w_{x,x_1,i} + w_{x_2,x,j},  
+    &\forall i, j \in \mathcal{F}, \forall x, x_1, x_2 \in V\text { s.t. } 
+    \nonumber\\
+    && (x,x_1) \in E, (x_2,x) \in E, i \neq j, x_1 \neq x_2, \\
+    w_{x,x_1,i} + w_{x_2,x,j} &\leq 2 - yd_{i,j,x,x_1,x_2},  
+    &\forall i, j \in \mathcal{F}, \forall x, x_1, x_2 \in V\text { s.t. } 
+    \nonumber\\
+    && (x,x_1) \in E, (x_2,x) \in E, i \neq j, x_1 \neq x_2.
+\end{align}
+{\tiny
+\begin{align}\label{eq:diverOR}
+    \bigvee&
+    \Bigg(\left(t^\text{ear}_{j,x}-t^\text{lat}_{i,x}\geq S(\alpha^{+-}_{x,x_1,x_2})\left(\frac{D}{\underline v_{j,x_2,x}} + \frac{D}{\underline v_{i,x,x_1}} - M \cdot yd_{i,j,x,x_1,x_2}\right)\right),
+    & \forall i, j \in \mathcal{F}, \forall x,x_{1}, x_{2} \in V \text{ s.t. }i\neq j,\nonumber\\&
+    \left(t^\text{ear}_{i,x}-t^\text{lat}_{j,x}\geq S(\alpha^{+-}_{x,x_1,x_2})\left(\frac{D}{\underline v_{i,x_2,x}}+\frac{D}{\underline v_{j,x,x_1}}- M \cdot yd_{i,j,x,x_1,x_2}\right)\right)\Bigg)
+    &(x,x_{1}) \in E, (x_{2},x) \in E, x_1\neq x_2.
+\end{align}
+}
+Now that we have removed the implication, we can proceed to eliminate the disjunction.  
+To achieve this, we apply \textbf{Fortet's linearization} (\cite{fortet-1960}), introducing two additional binary variables, $yd^1_{i,j,x,x_1,x_2}$ and $yd^2_{i,j,x,x_1,x_2}$, which allow us to reformulate the logical OR condition as a set of linear constraints.
+
+\begin{align}
+    %diver3
+    t^\text{ear}_{j,x}-t^\text{lat}_{i,x}&\geq S(\alpha^{+-}_{x,x_1,x_2})\left(\frac D{\underline v_{j,x_2,x}} 
+    + \frac D{\underline v_{i,x,x_1}}\right)-
+    &\forall i,j\in\mathcal F,\forall x,x_1,x_2\in V \text { s.t. }
+    \nonumber\\
+    &- M\cdot yd_{i,j,x,x_1,x_2}- M\cdot yd^1_{i,j,x,x_1,x_2} 
+    & (x,x_1)\in E,(x_2,x)\in E, i\neq j, x_1\neq x_2\\
+    %diver4
+    t^\text{ear}_{i,x}-t^\text{lat}_{j,x}&\geq S(\alpha^{+-}_{x,x1,x2})\left(\frac D{\underline v_{i,x_2,x}}+
+    \frac D{\underline v_{j,x,x_1}}\right)- 
+    &\forall i,j\in\mathcal F,\forall x,x_1,x_2\in V \text { s.t. }
+    \nonumber\\
+    &- M\cdot yd_{i,j,x,x_1,x_2}- M\cdot yd^2_{i,j,x,x_1,x_2}
+    &(x,x_1)\in E,(x_2,x)\in E, i\neq j, x_1\neq x_2\\
+    %diver5
+    yd^1_{i,j,x,x_1,x_2} &+ yd^2_{i,j,x,x_1,x_2}\leq 1&
+    \forall i,j\in\mathcal F,\forall x,x_1,x_2\in V\text { s.t. }
+    \nonumber\\&& (x,x_1)\in E,(x_2,x)\in E, i\neq j, x_1\neq x_2
+\end{align}
+\end{document}

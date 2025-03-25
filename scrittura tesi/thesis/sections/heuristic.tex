@@ -1,0 +1,232 @@
+\documentclass[../thesis.tex]{subfiles}
+
+\begin{document}
+Since solving the exact problem may require too much time, we propose a mathematical heuristic in which, at each iteration, a path is fixed, and the problem is solved with that fixed path, resulting in the same problem presented in \cite{pelegrin-2023}.  
+
+First, we describe how we modified the model.
+
+\section{The Used Models}
+We divided the problem into two sub-problems: the shortest path with modified costs and the deconflicting phase.
+
+\subsection{Finding the Path: Shortest Path Problem}\label{sssec:spp}
+We use the standard definition of the shortest path problem for each flight.  
+This can be solved using a solver or ad hoc algorithms, such as applying Dijkstra's algorithm to each flight, which results in Johnson's algorithm, since we have no negative costs.  
+
+There are two possible approaches: the simpler one involves fixing the path at the beginning and using it throughout the process, while the more adaptive approach updates the path at each iteration based on the location of conflicts.  
+
+For this reason, the objective function includes a new parameter, $d^\text{MCF}_{i,j}$, which is used to find a (possibly) new path without modifying the distance parameter used in the deconflicting problem.  
+
+It is worth noting that $w_{x,x',f}$ should be a binary variable. However, since the obtained matrix is Totally Unimodular (TUM), we can relax the integrality constraints and still obtain integer solutions.
+\begin{align}
+    \sum_{x\in V:(x,s_i)\in E} w_{x,s_{i},i} &- \sum_{x\in V:(s_i,x)\in E} w_{s_{i},x,i} = -1 & \forall i \in \mathcal{F} \\
+    \sum_{x\in V:(e_i,x)\in E} w_{e_{i},x,i} &- \sum_{x\in V:(x,e_i)\in E} w_{x,e_{i},i} = -1 & \forall i \in \mathcal{F} \\
+    \sum_{x'\in V:(x,x')\in E} w_{x,x',i} &= \sum_{x'\in V:(x',x)\in E} w_{x',x,i} & \forall i \in \mathcal{F}, \forall x \in V\setminus\{s_{i}, e_{i}\}\\
+    0 &\leq w_{x,x',i} \leq 1 & \forall i \in \mathcal{F}, \forall (x,x') \in E \nonumber \\
+    &\min \sum_{i \in \mathcal{F}, x \in V, y \in V:(x,y)\in E} w_{x,y,i} d^\text{MCF}_{i,x,y}
+\end{align}
+
+We also introduce an additional constraint to fix part of the path.  
+This is necessary for flights that have already started and have traversed certain nodes.
+
+\begin{align}
+    w_{x,x',i} = 1 & \quad \forall i \in \mathcal{F}, \forall (x,y) \in E \text{ s.t. } (i,y) \in timeFixed \land (i,x,y) \in passedF
+\end{align}
+
+where $passedF$ represents the set of edges that a flight must traverse in the tactical deconfliction, while $timeFixed$ contains those already traversed, as they were completed before $tini$.
+
+Additionally, we aim to prevent the use of arcs created by non-collaborative intruders.  
+To enforce this constraint, we ensure that these arcs are not available for any normal flight:  
+\begin{align}
+    w_{x,y,i} = 0, \quad \forall f \in F \setminus \{AP \cup NC\}, \quad (x,y) \in nonAvailableEdges
+\end{align}
+
+
+\subsection{Deconflicting problem}\label{ssec:deconflictingHeur}
+In this problem, we treat $w$ as a parameter rather than a variable, meaning its value cannot be modified.
+Since the path and the arcs used by each flight are already determined, we can identify conflicts in advance and activate only the necessary constraints, avoiding the creation of redundant ones, as discussed in Chapter~\ref{sec:setConflict}.
+
+Instead of the given set $fixedFlights$, we define the set $FV \subset F \times V$, which indicates whether a node $x \in V$ is used by a flight $f \in F$. It is defined as follows:
+\begin{align}\label{eq:set:FV}
+    FV = \{(f,v) \in F \times V \mid \exists (i,j) \in E \text{ s.t. } (j = v \lor i = v) \land w_{i,j,f} = 1\}
+\end{align}
+
+With this modification, we obtain the following model:
+
+\subfile{../models/subproblemModel.tex}
+
+\section{The Algorithm}\label{sec:alg:mathEuristicDescription}
+
+In this section, we describe the functioning of the matheuristic.  
+First, we define and initialize the necessary parameters:
+
+\begin{itemize}
+    \item $\alpha$: A multiplicative factor used to update the distance $d^{MCF}$ in cases where a conflict constraint is active.
+    \item $it$: The number of iterations performed by the algorithm, also used as a stopping condition.
+    \item $sameOpt$: The number of times the same solution has been found, used to stop the algorithm if it gets stuck in a local minimum.
+    \item $found$: A binary parameter indicating whether the heuristic can stop.
+    \item $d^\text{MCF}_{f,i,j}$ with $f\in F, (i,j)\in E$: The cost function in the path-finding problem for each flight, initialized with the $d$ values from the original problem.
+    \item $w$: A binary parameter defining the path, also used to determine the conflict sets.
+    \item $obtainedSol$: A binary parameter used to check whether a solution was found during the current iteration of the algorithm.
+    \item $maxIteration$ and $maxSameOpt$: Parameters corresponding to the maximum number of iterations and the maximum number of consecutive times the same solution can be obtained before stopping. These are initialized to $20$ and $3$, respectively.
+    \item $lastOpt$: The objective function value of the solution found in the last iteration.
+    \item $\varepsilon$: The error tolerance used to determine whether two solutions are considered the same.
+    \item $tempT^{ear}_{f,x}$ with $f\in F, x \in V$: A parameter simulating $t_{ear}$, used to update the path in case no feasible solution is found. It assigns traversal times while ignoring conflicts and assuming the minimum allowed speed.
+    \item $maxTimeUnf$: A parameter representing the allowable gap when updating distances, in cases where no solution is found due to infeasibility or time limit constraints.
+    \item Additional parameters to store information about the best solution found.
+\end{itemize}
+\begin{algorithm}[H]
+\begin{algorithmic}
+\STATE $\alpha\gets 4$
+\STATE $it\gets 0$
+\STATE $found\gets$ False
+\STATE $sameOpt\gets 0$
+\STATE $maxIteration\gets 20$
+\STATE $maxSameOpt\gets 3$
+\STATE $\varepsilon\gets 10^{-4}$
+\STATE $maxTimeUnf\gets 5$
+\FORALL{$f \in F,i \in V,j \in V:(i,j)\in E$}
+    \STATE $d^\text{MCF}_{f,i,j}\gets d(i,j)$
+\ENDFOR
+
+\algstore{alg:finishInit}
+\end{algorithmic}
+\end{algorithm}
+
+We try to find a solution for the path problem. If it is infeasible (or cannot be found within the given time limit), we stop the algorithm and return the best solution found so far (if available).
+We take the $w$ values obtained from solving the shortest path problem and fix them; they can only be modified in the next iteration after computing a new path with modified costs.
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+\algrestore{alg:finishInit}
+\WHILE{$found=$ False}
+    \STATE solve the model presented in \ref{sssec:spp}
+    \IF{the problem is unfeasible}
+        \STATE \textbf{break}
+    \ENDIF
+    \STATE save using $w$ the path obtained by \ref{sssec:spp}
+    \algstore{alg:finishPathProblem}
+\end{algorithmic}
+\end{algorithm}
+
+Since we already have the path for each flight, we can compute the parameter $t_ear_temp$. This value is obtained by ignoring conflicts and assuming that each flight follows its assigned path at the minimum allowed speed.
+
+Since cycles may exist in the paths, we use a set to store the edges of each path. In each iteration, we remove the currently processed edge to ensure proper handling of cyclic structures.
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+    \algrestore{alg:finishPathProblem}
+    \FORALL{$f\in F$}
+    \STATE $tempSet\gets \{(x,y)\in E$ s.t. $w_{x,y,f}=1\}$
+    \STATE $tempNode\gets s_f$
+    \WHILE{$tempNode\neq e_f$}
+    \STATE $i\gets $first$(\{ j \mid (tempNode, j) \in tempSet \})$
+    \STATE $tempT^{ear}_{f,i}\gets tempT^{ear}_{f,tempNode}+\underline v_{tempNode,i}$
+    \STATE $tempSet\gets tempSet\setminus\{(tempNode,i)\}$
+    \STATE $tempNode\gets i$
+    \ENDWHILE
+    \ENDFOR
+    \algstore{alg:finishSaveTimeUnf}
+\end{algorithmic}
+\end{algorithm}
+
+After determining the paths for each flight, we proceed to solve the deconfliction problem with all paths fixed. If we find a solution that improves upon the previously best-known one, we update the stored values accordingly.
+
+However, if no feasible solution is found, we adjust the weights based on the conflicts detected and update the iteration parameters to guide the next attempt. This ensures that the algorithm gradually steers towards a feasible and optimized solution.
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+    \algrestore{alg:finishSaveTimeUnf}
+    \STATE solve model presented in \ref{ssec:deconflictingHeur}
+    \IF{$obtainedSol = False\land$ couldn't find a solution due to timeLimit}
+    \STATE impose timeLimit to $2\cdot (it+1)$ minutes
+    \STATE solve the previous model with timelimit
+    \STATE reset to previous timeLimit
+    \ENDIF
+    \IF{we have found a feasible solution}
+    \STATE $obtainedSol\gets$ True
+    \IF{obtained solution is the best one I have found}
+    \STATE Store the solution and variables in the corresponding parameters
+    \ENDIF
+    \ENDIF
+    \IF{$|UAM-lastOpt| < \varepsilon\land$ problem is not unfeasible}
+    \STATE $sameOpt\gets sameOpt+1$
+    \ELSE
+    \STATE $sameOpt\gets0$
+    \ENDIF
+    \STATE $it\gets it+1$
+    \STATE $lastOpt\gets UAM$
+    \algstore{alg:afterSaveBestSolution}
+\end{algorithmic}
+\end{algorithm}
+Let’s define the stopping conditions and the cost update process when a feasible solution is found.
+If a solution is available, we update the cost only for arcs where a constraint was active. Otherwise, we adjust the cost for all arcs that could potentially lead to conflicts.
+Finally, we conclude the algorithm by printing the best solution found.
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+    \algrestore{alg:afterSaveBestSolution}
+    \IF{$it > maxIteration \lor sameOpt\geq maxSameOpt$}
+    \STATE $found\gets$ True
+    \ELSE
+    \IF{problem infeasible $\lor$ couldn't obtain a solution in time}
+    \FORALL{$f_i\in F,f_j\in F,x\in V$ s.t. $i\neq j\land (i,x)\in FV\land (j,x) \land (|tempT^{ear}_{i,x} - tempT^{ear}_{i,x}|< maxTimeUnf \lor |\hat t^{ear}_{i,x} - t^{ear}_{i,x}| < maxTimeUnf $}
+    \FORALL{$(a,b)\in E$ s.t. $a=x \lor b=x$}
+    \STATE $d^{MCF}_{i,a,b}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{i,a,b},10^5\}$
+    \STATE $d^{MCF}_{j,a,b}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{j,a,b},10^5\}$
+    \ENDFOR
+    \ENDFOR
+    \ELSE
+    %trail1
+    \FORALL{$f_i\in F,f_j\in F,x\in V$ s.t. $(i,x)\in FV\land (j,x)\in FV$}
+    \FORALL{$(a,b,y,y')\in trail$ s.t. $a=i\land b=j\land y=x\land\exists$ a trail constrain for such tuple that is active}
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y,y'},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y,y'},10^5\}$
+    \ENDFOR
+    %trail2
+    \FORALL{$(a,b,y,y')\in trail$ s.t. $a=i\land b=j\land y'=x\land\exists$ a trail constrain for such tuple that is active}
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y,y'},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y,y'},10^5\}$
+    \ENDFOR
+    %merge
+    \FORALL{$(a,b,y,y_1,y_2)\in merge$ s.t. $a=i\land b=j\land y=x\land \exists$ a merge constrain for such tuple that is active}
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y_1,y},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y_1,y},10^5\}$    
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y_2,y},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y_2,y},10^5\}$
+    \ENDFOR
+    \FORALL{$(a,b,y,y_1,y_2)\in split$ s.t. $a=i\land b=j\land y=x\land \exists$ a split constrain for such tuple that is active}
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y,y_1},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y,y_1},10^5\}$    
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y,y_2},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y,y_2},10^5\}$
+    \ENDFOR
+\algstore{alg:updateMerge}
+    \end{algorithmic}
+    \end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}
+\algrestore{alg:updateMerge}
+    %diver_1=\{&(i \in F, j \in F, x\in V, a\in dA, x_1\in V, x_2 \in V\text{ s.t. }\nonumber\\ &(i,j,x,dA)\in allConf\land (x,x_1) \in E\land (x_2,x)\in E \land \nonumber\\ &\land w_{x,x_1,i}+ w_{x2,x,j} =2 \land angle_{x,x_1,x_2} = a\}\\
+    \FORALL{$(a,b,y,y_1,y_2)\in diver1$ s.t. $a=i\land b=j\land y=x\land \exists$ a diver1 constrain for such tuple that is active}
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y,y_1},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y,y_1},10^5\}$    
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y_2,y},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y_2,y},10^5\}$
+    \ENDFOR
+    \FORALL{$(a,b,y,y_1,y_2)\in diver2$ s.t. $a=i\land b=j\land y=x\land \exists$ a diver2 constrain for such tuple that is active}
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y_1,y},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y_1,y},10^5\}$    
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y,y_2},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y,y_2},10^5\}$
+    \ENDFOR
+    \ENDFOR
+    \ENDIF
+    \ENDIF
+    \ENDWHILE
+    \STATE print optimal solution found, saved in designated parameters
+
+    \end{algorithmic}
+    \end{algorithm}
+
+The complete pseudo-code is provided without interruptions in Appendix \ref{alg:matheuristic}.
+\end{document}

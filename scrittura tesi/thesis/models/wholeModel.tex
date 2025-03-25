@@ -1,0 +1,65 @@
+\documentclass[../thesis.tex]{subfiles}
+\begin{document}
+\tiny
+%TODO aggiungere variabile per starting point intero
+\begin{align}\label{eq:newModel}
+%define t^ear and t^lat
+  \hat t^\text{ear}_{i,s_i}\leq&  t^\text{ear}_{i,s_i} & \forall i \in \mathcal F\\
+    t^\text{lat}_{i,x}=& t^\text{ear}_{i,x}+\hat t^\text{lat}_{i,x} -\hat t^\text{ear}_{i,x}
+    & \forall i\in \mathcal F, \forall x \in V\\
+%define path through w
+    \sum_{x\in V:(x,s_i)\in E} w_{x,s_i,i} -& \sum_{x\in V:(s_i,x)\in E} w_{s_i,x,i} = -1 & \forall i \in \mathcal{F} \\
+    \sum_{x\in V:(x,e_i)\in E} w_{x,e_{i},i} -& \sum_{x\in V:(e_i,x)\in E} w_{e_{i},x,i} = 1 & \forall i \in \mathcal{F} \\
+    \sum_{x'\in V:(x,x')\in E} w_{x,x',i} =& \sum_{x'\in V:(x',x)\in E} w_{x',x,i} & \forall i \in \mathcal{F}, \forall x \in V\setminus\{s_{i}, e_{i}\}\\
+%define min and max time
+    \underline t_{i,x} \leq& t^\text{ear}_{i,x}&\forall i \in \mathcal F, \forall x\in V: x\neq s_i\\
+    t^\text{ear}_{i,x} \leq& \overline t_{i,x}&\forall i\in \mathcal F,\forall x\in V: x\neq s_i\\
+    \underline t_{i,x'}=&\sum_{x\in V: (x,x')\in E} w_{x,x',i}\left(t^\text{ear}_{i,x}+\frac{d(x,x')}{\overline v_{x,x',i}}\right) &\forall i\in \mathcal F, x'\in V\\
+    \overline t_{i,x'}=&\sum_{x\in V: (x,x')\in E} w_{x,x',i}\left(t^\text{ear}_{i,x}+\frac{d(x,x')}{\underline v_{x,x',i}}\right) &\forall i \in F, x'\in V\\
+%\end{align}
+%\begin{align}
+%defining conflicts
+%trail
+    (w_{x,x',i} + w_{x,x',j} = 2) \Rightarrow \bigvee&\Big(
+    (\underline v_{i,x,x'}(t^\text{ear}_{j,x}-t^\text{lat}_{i,x})\geq D), \nonumber \\ &(\underline v_{j,x,x'}(t^\text{ear}_{i,x}-t^\text{lat}_{j,x})\geq D)\Big) & \forall i,j \in \mathcal{F}, \forall(x,x') \in E \text { }s.t. i\neq j\\
+    (w_{x,x',i} + w_{x,x',j} = 2) \Rightarrow\bigvee&\Big((
+    \underline v_{j,x,x'}(t^\text{ear}_{j,x'}-t^\text{lat}_{i,x'})\geq D), \nonumber\\&(\underline v_{i,x,x'}(t^\text{ear}_{i,x'}-t^\text{lat}_{j,x'})\geq D)\Big)
+    & \forall i,j \in \mathcal{F}, \forall(x,x') \in E \text { }s.t. i\neq j\\
+%merge
+    (w_{x_{1},x,i} + w_{x_{2},x,j} = 2)
+    \Rightarrow \bigvee 
+    &\Bigg(
+    \left(t^\text{ear}_{j,x} - t^\text{lat}_{i,x} \geq S(\alpha^-_{x,x_1,x_2}) \frac{D}{\underline{v}_{j,x_2,x}}\right)
+    ,\nonumber &
+    \forall i\neq j \in \mathcal{F}, \forall x,x_{1}, x_{2} \in V
+    \\&
+    \left(t^\text{ear}_{i,x} - t^\text{lat}_{j,x} \geq S(\alpha^-_{x,x_1,x_2}) \frac{D}{\underline{v}_{i,x_1,x}}\right)
+    \Bigg)
+     &s.t. (x_{1},x) \in E, (x_{2},x) \in E, x_1\neq x_2
+\end{align}
+\begin{align}
+%diver
+    (w_{x,x_{1},i} + w_{x_{2},x,j} = 2) \Rightarrow  \bigvee&
+    \Bigg(\left(t^\text{ear}_{j,x}-t^\text{lat}_{i,x}\geq S(\alpha^{+-}_{x,x_1,x_2})\left(\frac D{\underline v_{j,x_2,x}} + \frac D{\underline v_{i,x,x_1}}\right)\right)
+    ,\nonumber & \forall i\neq j \in \mathcal{F}, \forall x,x_{1}, x_{2} \in V
+    \\&\left(t^\text{ear}_{i,x}-t^\text{lat}_{j,x}\geq S(\alpha^{+-}_{x,x_1,x_2})\left(\frac D{\underline v_{i,x_2,x}}+\frac D{\underline v_{j,x,x_1}}\right)\right)\Bigg)&
+     s.t. (x,x_{1}) \in E, (x_{2},x) \in E, x_1\neq x_2   \\
+%split  
+    (w_{x,x_{1},i} + w_{x,x_{2},j} = 2) \Rightarrow \bigvee&\Bigg(
+    \left(
+    t^\text{ear}_{j,x}-t^\text{lat}_{i,x}\geq S(\alpha^+_{x,x_1,x_2}) \frac D{\underline v_{i,x,x_1}}\right)
+    &  \forall i \neq j \in \mathcal{F}, \forall x,x_{1}, x_{2} \in V 
+    ,\nonumber\\&\left(
+    t^\text{ear}_{i,x}-t^\text{lat}_{j,x}\geq S(\alpha^+_{x,x_1,x_2})\frac D {\underline v_{j,x,x_2}}
+    \right)\Bigg)
+    & s.t. (x,x_{1}) \in E, (x,x_{2}) \in E,x_1\neq x_2 \\
+    \mathclap{t^\text{ear}_{i,x}, \in \mathbb{Z}_{+}} \nonumber \\
+    w_{x,x',i} \in \{0,1\} \nonumber
+\end{align}
+Objectives:
+\begin{align}
+    %\min \sum_{i,x,x'} w_{x,x',i} \\
+    &\min \sum_{i} t_{i,e_{i}}
+    &\min \sum_{i \in F,x \in V,y \in V:(x,y)\in E} w_{x,y,i}d_{x,y}
+\end{align}
+\end{document}

@@ -1,0 +1,127 @@
+\documentclass[../../thesis.tex]{subfiles}
+
+\begin{document}
+%\section{The model}
+\subsection{The constrains}\label{ssec:bigModel:constrains}
+%\subsection{The Constraints}\label{ssec:bigModel:constraints}
+
+After defining the data and variables, we now present the model that describes the problem we aim to solve.
+Using \( w \), we define the path that each flight will follow.
+We employ the well-known flow conservation constraints, ensuring that each flight has exactly one outgoing arc from its source and exactly one incoming arc to its destination.
+
+\begin{align}
+% Define path through x
+    \sum_{x\in V:(x,s_i)\in E} w_{x,s_i,i} -& \sum_{x\in V:(s_i,x)\in E} w_{s_i,x,i} = -1 & \forall i \in \mathcal{F} \\
+    \sum_{x\in V:(x,e_i)\in E} w_{x,e_{i},i} -& \sum_{x\in V:(e_i,x)\in E} w_{e_{i},x,i} = 1 & \forall i \in \mathcal{F} \\
+    \sum_{x'\in V:(x,x')\in E} w_{x,x',i} =& \sum_{x'\in V:(x',x)\in E} w_{x',x,i} & \forall i \in \mathcal{F}, \forall x \in V\setminus\{s_{i}, e_{i}\}
+\end{align}
+
+Each flight must depart no earlier than a predefined threshold \( \hat{t}^{ear}_{i,s_i} \), as specified in constraint \eqref{eq:constrain:defineStartingTime}.  
+Furthermore, for each flight \( i \), \( t^{ear}_{i,s_i} \) must be a positive integer, whereas integrality is not required for other nodes.  
+This condition is enforced by constraint \eqref{eq:constrain:startInt}, which ensures that \( t^\text{ear}_{i,s_i} \) is an integer for every flight \( i \).  
+Finally, we define \( t^{lat}_{i,x} \) as the sum of \( t^{ear}_{i,x} \) and the gap given by \( \hat{t}^{lat}_{i,x} - \hat{t}^{ear}_{i,x} \), as formally defined in constraint \eqref{eq:constrain:defineLat}.
+
+\begin{align}
+% Define min and max time
+% Define t^ear and t^lat
+    \hat t^\text{ear}_{i,s_i} \leq& t^\text{ear}_{i,s_i} & \forall i \in \mathcal{F} \label{eq:constrain:defineStartingTime}\\
+    t^\text{lat}_{i,x} =& t^\text{ear}_{i,x} + \hat t^\text{lat}_{i,x} - \hat t^\text{ear}_{i,x} & \forall i \in \mathcal{F}, \forall x \in V \label{eq:constrain:defineLat} \\
+    ts^\text{ear}_{i} =& t^\text{ear}_{i,s_i} & \forall i \in \mathcal{F}\label{eq:constrain:startInt}
+\end{align}
+
+Now we define $\overline t$ and $\underline t$, defined by the maximum and minimum speed allowed, and we want that $t^{ear}$ will be between that values.
+Note that constraints \eqref{eq:constrain:define_t_min} and \eqref{eq:constrain:define_t_max} are bilinear. In section \ref{sec:linearization:times}, we will discuss their linearization.
+\begin{align}\label{eq:constrain:defineSpeedBound}
+    \underline t_{i,x} \leq& t^\text{ear}_{i,x}
+    &\forall i \in \mathcal F, \forall x\in V\text{ s.t. } x\neq s_i\\
+    t^\text{ear}_{i,x} \leq& \overline t_{i,x}
+    &\forall i\in \mathcal F,\forall x\in V\text{ s.t. } x\neq s_i\\
+    \underline t_{i,x'}=&\sum_{x\in V: (x,x')\in E} w_{x,x',i}\left(t^\text{ear}_{i,x}+\frac{d(x,x')}{\overline v_{x,x',i}}\right) &\forall i\in \mathcal F, x'\in V
+    \label{eq:constrain:define_t_min}\\
+    \overline t_{i,x'}=&\sum_{x\in V: (x,x')\in E} w_{x,x',i}\left(t^\text{ear}_{i,x}+\frac{d(x,x')}{\underline v_{x,x',i}}\right) &\forall i \in\mathcal F, x'\in V\label{eq:constrain:define_t_max}
+\end{align}
+
+Finally, we analyze conflicts, starting with \textit{trailing conflicts}. These occur when two flights use the same arc and must maintain a sufficient separation to avoid collisions. Since both flights travel at the same speed along the edge, ensuring an adequate separation at the endpoints is sufficient. Specifically, the minimum separation distance at the endpoints must be at least \( D \).
+
+\begin{align}
+%defining conflicts
+%trail
+    (w_{x,x',i} + w_{x,x',j} = 2) \Rightarrow \bigvee&\Bigg(
+    (\underline v_{i,x,x'}(t^\text{ear}_{j,x}-t^\text{lat}_{i,x})\geq D), \nonumber \\ 
+    &\quad (\underline v_{j,x,x'}(t^\text{ear}_{i,x}-t^\text{lat}_{j,x})\geq D)\Bigg) 
+    & \forall i,j \in \mathcal{F}, \forall(x,x') \in E \text{ s.t. } i\neq j\\
+    (w_{x,x',i} + w_{x,x',j} = 2) \Rightarrow\bigvee&\Bigg(
+    (\underline v_{j,x,x'}(t^\text{ear}_{j,x'}-t^\text{lat}_{i,x'})\geq D), \nonumber\\
+    &\quad (\underline v_{i,x,x'}(t^\text{ear}_{i,x'}-t^\text{lat}_{j,x'})\geq D)\Bigg)
+    & \forall i,j \in \mathcal{F},\forall(x,x')\in E \text{ s.t. } i\neq j
+\end{align}
+
+Next, we analyze the \textit{non-trailing conflicts}, which occur when two flights share a common node but not a complete arc.  
+If multiple flight paths intersect at node \(x\), we must ensure that their passage is sufficiently spaced to prevent collisions.  
+These conflicts can be classified into three categories:  
+
+\begin{itemize}
+    \item \textbf{Merging conflicts}, defined by constraint \eqref{eq:constrain:merge}, occur when two flights terminate at the same node \(x\).
+    \item \textbf{Diverging conflicts}, defined by constraint \eqref{eq:constrain:diver}, arise when one flight arrives at \(x\) while another departs from the same node.
+    \item \textbf{Splitting conflicts}, defined by constraint \eqref{eq:constrain:split}, occur when two flights meet at \(x\) and then continue toward different nodes.
+\end{itemize}
+
+The left-hand side of each implication indicates the presence of a conflict at node \(x\),  
+while the right-hand side represents the constraint designed to prevent the conflict,  
+as thoroughly described in \cite{pelegrin-2023}.
+
+{\tiny
+\begin{align}
+%merge
+\label{eq:constrain:merge}
+    (w_{x_{1},x,i} + w_{x_{2},x,j} = 2)
+    \Rightarrow \bigvee &\Bigg(
+    \left(t^\text{ear}_{j,x} - t^\text{lat}_{i,x} \geq S(\alpha^-_{x,x_1,x_2}) \frac{D}{\underline{v}_{j,x_2,x}}\right)
+    ,\nonumber & 
+    \forall i,j \in \mathcal{F}, \forall x,x_{1}, x_{2} \in V \text { s.t. }\\ 
+    & \left(t^\text{ear}_{i,x} - t^\text{lat}_{j,x} \geq S(\alpha^-_{x,x_1,x_2}) \frac{D}{\underline{v}_{i,x_1,x}}\right)
+    \Bigg)&
+      i\neq j,(x_{1},x) \in E, (x_{2},x) \in E, x_1\neq x_2 \\
+%diver
+\label{eq:constrain:diver}
+    (w_{x,x_{1},i} + w_{x_{2},x,j} = 2) \Rightarrow  \bigvee&
+    \Bigg(\left(t^\text{ear}_{j,x}-t^\text{lat}_{i,x}\geq S(\alpha^{+-}_{x,x_1,x_2})\left(\frac D{\underline v_{j,x_2,x}} + \frac D{\underline v_{i,x,x_1}}\right)\right),
+    & \forall i,j \in \mathcal{F}, \forall x,x_{1}, x_{2} \in V \text { s.t. }\nonumber\\&
+    \left(t^\text{ear}_{i,x}-t^\text{lat}_{j,x}\geq S(\alpha^{+-}_{x,x_1,x_2})\left(\frac D{\underline v_{i,x_2,x}}+\frac D{\underline v_{j,x,x_1}}\right)\right)\Bigg)&
+      i\neq j,(x,x_{1}) \in E, (x_{2},x) \in E \\
+%split 
+\label{eq:constrain:split}
+    (w_{x,x_{1},i} + w_{x,x_{2},j} = 2) \Rightarrow \bigvee&\Bigg(
+    \left(
+    t^\text{ear}_{j,x}-t^\text{lat}_{i,x}\geq S(\alpha^+_{x,x_1,x_2}) \frac D{\underline v_{i,x,x_1}}\right)
+    ,\nonumber & 
+    \forall i,j \in \mathcal{F}, \forall x,x_{1}, x_{2}\in V\text{ s.t. } \\
+    &\left(
+    t^\text{ear}_{i,x}-t^\text{lat}_{j,x}\geq S(\alpha^+_{x,x_1,x_2})\frac D {\underline v_{j,x,x_2}}
+    \right)\Bigg) 
+    &   i\neq j,(x,x_{1}) \in E, (x,x_{2}) \in E,x_1\neq x_2 %\\
+\end{align}
+}
+
+Finally, we define the possible values for the variables as follows:
+\begin{align}
+    &t^\text{ear}_{i,x} \in \mathbb{R}_{+}, &\forall i\in \mathcal{F}, x\in V \nonumber \\
+    &t^\text{lat}_{i,x} \in \mathbb{R}_{+}, &\forall i\in \mathcal{F}, x\in V \nonumber \\    
+    &\underline{t}_{i,x} \in \mathbb{R}_{+}, &\forall i\in \mathcal{F}, x\in V \nonumber \\
+    &\overline{t}_{i,x} \in \mathbb{R}_{+}, &\forall i\in \mathcal{F}, x\in V \nonumber \\
+    &ts^\text{ear}_i \in \mathbb{Z}_{+}, &\forall i\in \mathcal{F} \nonumber\\
+    &w_{x,x',i} \in \{0,1\}, &\forall (x,x')\in E, i\in \mathcal{F} \nonumber
+\end{align}
+
+\subsection{Objectives}
+There are multiple possible objective functions. Equation \eqref{eq:obj:MC} minimizes the total distance traveled, which is particularly useful for heuristics or as a subproblem in a column-generation approach.
+However, our main objective is given in \eqref{eq:obj:UAM}, which aims to minimize the total travel time, although this may lead to fairness issues.
+Finally, if we are interested in evaluating the effectiveness of a strategic model, it is more relevant to minimize the deviation between the planned and actual arrival times, as formulated in \eqref{eq:obj:MercedesObj}.
+\begin{align}
+    %\min \sum_{i,x,x'} w_{x,x',i} \\
+    &\min \sum_{i \in F,x \in V,y \in V:(x,y)\in E} w_{x,y,i}d_{x,y} \label{eq:obj:MC}\\
+    &\min \sum_{i\in F} t^\text{ear}_{i,e_{i}}\label{eq:obj:UAM}\\
+    &\min \sum_{i\in F} |\hat t^\text{ear}_{i,e_{i}} - t^\text{ear}_{i,e_{i}}|\label{eq:obj:MercedesObj}
+\end{align}
+
+\end{document}

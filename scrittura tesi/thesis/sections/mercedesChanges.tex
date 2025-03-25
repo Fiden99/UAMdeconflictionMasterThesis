@@ -1,0 +1,70 @@
+\documentclass[../thesis.tex]{subfiles}
+\begin{document}
+\section{The Strategic Model in Comparison with Mercedes' Work}  
+\label{sec:MercedesModification}  
+
+Building upon the previously described model, we aim to compare and enhance the framework presented in \cite{pelegrin-2023} by incorporating the possibility of path changes.  
+
+Given a strategically solved instance, we introduce factors such as delays, drift, priority flights, or non-cooperative intruders, as detailed in Section~\ref{sec:generationInstance}. Since Mercedes' model assumes predetermined paths, we extend it by allowing path changes for delayed flights or those that may encounter conflicts with new flights, while keeping the other paths fixed.  
+
+For clarity, we divide our analysis into three distinct cases:  
+\begin{itemize}
+    \item \textbf{Drift and delay}  
+    \item \textbf{Priority flights}  
+    \item \textbf{Non-cooperative intruders}  
+\end{itemize}
+
+Each case is considered separately, as we assume that only one of these situations occurs at a time.  
+
+\subsection{Differences with the Common Model}  
+
+Before analyzing each of the three possible cases, we first identify some common factors shared across all scenarios.  
+
+We define a hypothetical reference time, denoted as the parameter $tini$. This parameter separates past events, which are unmodifiable, from future events, which can still be adjusted.  
+
+For flights that are already airborne at $tini$ (referred to as $inFlights$), we fix the safety time at nodes that have already been traversed, as well as at the next immediate node, based on the strategic plan. If necessary, we will adjust the safety time at subsequent nodes to account for conflicts and speed constraints.
+
+For flights that have not yet departed (referred to as $grounded$), the departure time can be freely chosen, as long as it is an integer value and occurs after $tini$.
+
+The description of the instances used to solve this problem will be provided in Section \ref{sec:maps}.
+
+\subsection{Drift and Delay}  
+
+In a strategically solved problem, we introduce modifications in five different ways:  
+\begin{enumerate}
+    \item Adding a delay of 1, 2, or 3 time units, meaning that the affected flights can only depart after $tini$.  
+    \item Introducing a drift, where an airborne flight reaches a node slightly earlier or later than initially planned, requiring adjustments.  
+    \item Combining one drift and one delay in a single scenario.  
+\end{enumerate}  
+
+In all five cases, the objective is to minimize the absolute difference between the strategic arrival time and the adjusted arrival time at the final node for each flight.
+
+\subsubsection{Drift}
+Let's recall from Mercedes' work what a drift is:  
+\ll Drifts are deviations (ahead or delays) of a flight from its earliest scheduled arrival at one waypoint, and are randomly generated in the interval (0, 0.25] minutes.\gg [\cite{pelegrin-2023}].\\
+In the case of a single drift, we solve the problem without changing the path. We modify only the safety time for that flight at the affected node and adjust the times of any subsequent nodes accordingly. Therefore, for the drift-only scenario, our model operates in the same way as Mercedes' model.
+\subsubsection{Delay}
+\ll[\dots] (a) trip is delayed if it is still on ground when its latest departure time is due. If so, the pilot has to wait to receive a new schedule for safely performing its trip.\gg[\cite{pelegrin-2023}]\\
+For delays, we allow a path change if it proves beneficial.  
+This flexibility can help avoid congested nodes.
+
+\subsection{High priority}
+
+A new flight is generated at a random time $t$, with its origin and destination randomly chosen among the available sky-ports.  
+In this case, flights that might encounter a conflict with the high-priority flight are allowed to change their path after $tini$.  
+
+For high-priority flights, the objective is to minimize their delay first, and then minimize the time difference for other flights.  
+To emphasize this priority, we assign a unit of delay for the high-priority flight a weight equivalent to 1000 units of delay for a regular flight.  
+
+We assume that the high-priority flight cannot change its path, as the selected route is already the fastest one.  
+However, flights that may experience conflicts with the high-priority flight are allowed to adjust their path accordingly.
+
+\subsection{Non-cooperative intruder}
+
+A non-cooperative intruder is generated at a random time instant, following a predetermined trajectory that crosses the track network between two cruise nodes.  
+
+Since the non-cooperative intruder will not alter its schedule, it is necessary to avoid conflicts as much as possible.  
+To ensure feasibility, flights that may experience conflicts with the intruder are allowed to change their path accordingly.  
+
+% Although we modify the graph to insert the path of the intruder.
+\end{document}

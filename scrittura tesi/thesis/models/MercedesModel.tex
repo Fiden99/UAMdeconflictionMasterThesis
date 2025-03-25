@@ -1,0 +1,448 @@
+\documentclass[../thesis.tex]{subfiles}
+\begin{document}
+%ft^ear is t_ear_fixed
+%tFF is timeFixedFree 
+%pF is passFirst, pF^2 is pass2Fixeds, p1F is pass1Fixed
+%nodoubles is (\hat t^\text{ear}_{i,x} <\hat t^\text{ear}_{j,x} \lor (\hat t^\text{ear}_{i,x} = \hat t^\text{ear}_{j,x}\land i<j)
+%w^F is wFixed
+
+{\scriptsize
+\begin{align}
+%afterprecalculated
+    tini \leq & ts^\text{ear}_i &\forall i\in F\setminus inFlight\\
+%calcuateLat
+    t^\text{lat}_{i,x}=& t^\text{ear}_{i,x}+\hat t^\text{lat}_{i,x} -\hat t^\text{ear}_{i,x}& \forall i\in  freeF, \forall x \in V\\
+%calculateLatFixed
+    ft^\text{lat}_{i,x}=& ft^\text{ear}_{i,x}+\hat t^\text{lat}_{i,x} -\hat t^\text{ear}_{i,x}& \forall i\in  fixedF\setminus AP, \forall x \in V \text{ s.t. }\nonumber\\&&(f,i)\in FV\setminus timeFixed\\
+%startInteger
+    ts^\text{ear}_i = &t^\text{ear}_{i,s_i} & \forall i\in freeF\\
+%startIntegerFixed
+    ts^\text{ear}_i = &ft^\text{ear}_{i,s_i} & \forall i\in fixedF\\
+%flow conservation constrains
+%startingW
+\sum_{(x,s_i)\in E} w_{x,s_i,i}-& \sum_{(s_i,x)\in E} w_{s_i,x,i}=-1& \forall i\in freeF\\
+%ending
+\sum_{(x,e_i)\in E} w_{x,e_i,i}-& \sum_{(e_i,x)\in E} w_{e_i,x,i}=1& \forall i\in freeF\\
+%allW
+\sum_{(x,x')\in E} w_{x,x',i} & = \sum_{(x',x)\in E} w_{x',x,i} &\forall i \in freeF, x\in V\setminus\{s_i,e_i\}\\
+%define min and max time
+%limitT_down
+    \underline t_{i,x} \leq& t^\text{ear}_{i,x}
+    &\forall i \in  freeF, \forall x\in V\text{ s.t. }\nonumber\\&& x\neq s_i \land (i,x)\notin tFF\\
+%limitT_up
+    t^\text{ear}_{i,x} \leq& \overline t_{i,x}
+    &\forall i\in  freeF,\forall x\in V\text{ s.t. }\nonumber\\&&x\neq s_i\land (i,x)\notin tFF\\
+%defineT_down
+    \underline t_{i,x'}=\sum_{(x,x')\in E} w_{x,x',i}&\cdot(t^\text{ear}_{i,x}+\frac{d(x,x')}{\overline v_{x,x',i}})
+    &\forall i\in  freeF, x'\in V\setminus\{s_i\}\text{ s.t. } (i,x')\notin tFF\\
+%defineT_up
+    \overline t_{i,x'}=\sum_{(x,x')\in E} w_{x,x',i}&(t^\text{ear}_{i,x}+\frac{d(x,x')}{\underline v_{x,x',i}})
+    &\forall i\in  freeF, x'\in V\setminus\{s_i\}\text{ s.t. } (f,x')\notin tFF
+\end{align}
+\begin{align}
+%limitT_down_fixed
+    \underline{ft}_{i,x} \leq& ft_{i,x} &\forall (i,x)\in FV\setminus timeFixed \text{ s.t. } x\neq s_i\\
+%limitT_up_fixed
+    ft_{i,x} \leq& \overline{ft}_{i,x} &\forall (i,x)\in FV\setminus timeFixed \text{ s.t. } x\neq s_i\\
+%defineT_downFixed
+    \underline {ft}_{i,x'}=&ft^\text{ear}_{i,x}+\frac{d(x,x')}{\overline v_{x,x',i}}
+    &\forall i\in fixedF\setminus (AP\cup NC),x\in V, x'\in V \text{ s.t. }\nonumber\\ &&(f,x,x')\in fixedFlights\land (f,x')\notin timeFixed\\
+    %defineT_upFixed
+    \overline t_{i,x'}=&t^\text{ear}_{i,x}+\frac{d(x,x')}{\underline v_{x,x',i}}
+    &\forall i\in fixedF\setminus (AP\cup NC),x\in V, x'\in V \text{ s.t. }\nonumber\\ &&(f,x,x')\in fixedFlights\land (f,x')\notin timeFixed
+\end{align}
+\begin{align}
+%defining conflicts
+%ft^ear is t_ear_fixed
+%tFF is timeFixedFree 
+%pF is passFirst, pF^2 is pass2Fixeds, p1F is pass1Fixed
+%nodoubles is (\hat t^\text{ear}_{i,x} <\hat t^\text{ear}_{j,x} \lor (\hat t^\text{ear}_{i,x} = \hat t^\text{ear}_{j,x}\land i<j)
+%w^F is wFixed
+%trail1
+%trail13
+w_{x,y,i} + w_{x,y,j} = 2& \implies t^\text{ear}_{j,x}-t^\text{lat}_{i,x} \geq& i\in freeF,j \in freeF,x\in V,y \in V\text{ s.t. } \nonumber\\& \frac D{\underline v_{x,y,i}} pF_{i,j,x} - M(1-pF_{i,j,x}) 
+& i\neq j \land (x,y)\in E\land noDoubles\\
+%tral13Fixed
+ft^\text{ear}_{j,x}-ft^\text{lat}_{i,x}&\geq \frac D {\underline v_{x,y,i}}pF^2_{i,j,x} - M(1-pF^2_{i,j,x}) & (i,j,x,y)\in trail1\\
+%trail13FixedI
+t^\text{ear}_{j,x}- ft^\text{lat}_{i,x} &\geq \frac D{\underline v_{x,y,i}} pF^I_{i,j,x} - &
+i \in fixedF,j\in freeF,x\in V,y\in V\text{s.t.}\nonumber\\&-M (1-pF^I_{i,j,x}) - M(1-w_{x,y,j})&
+(x,y)\in E\land  w^F_{x,y,i}\land i\neq j\land noDoubles\\
+%trail13FixedJ
+ft^\text{ear}_{j,x}-t^\text{lat}_{i,x}&\geq \frac D{\underline v_{x,y,i}} pF^J_{i,j,x} - & i\in freeF,j \in fixedF,x\in V,y\in V\text{ s.t. }
+\nonumber\\&
+-M (1-pF^J_{i,j,x}) -M (1-w_{x,y,i})
+& (x,y)\in E\land i\neq j\land w^F_{x,y,j}=1\land noDoubles\\
+%trail14
+w_{x,y,i} + w_{x,y,j} = 2& \implies t^\text{ear}_{i,x}-t^\text{lat}_{j,x} \geq
+& i\in freeF,j \in freeF,x\in V, y \in V\text{ s.t. }\nonumber\\
+& \frac D{\underline v_{x,y,j}} (1-pF_{i,j,x}) - M \cdot pF_{i,j,x}
+& i\neq j\land (x,y)\in E\land noDoubles\\
+%tral14Fixed
+ft^\text{ear}_{i,x}-ft^\text{lat}_{j,x}&\geq \frac D {\underline v_{x,y,j}}(1-pF^2_{i,j,x}) - M\cdot pF^2_{i,j,x} & (i,j,x,y)\in trail1\\
+%trail14FixedI
+ft^\text{ear}_{i,x}- t^\text{lat}_{j,x} &\geq \frac D{\underline v_{x,y,j}} (1-pF^I_{i,j,x}) - &
+i \in fixedF,j\in freeF,x\in V,y\in V\text{s.t.}\nonumber\\
+&-M\cdot pF^I_{i,j,x} - M(1-w_{x,y,j})&
+(x,y)\in E\land  w^F_{x,y,i}\land i\neq j\land noDoubles\\
+%trail14FixedJ
+t^\text{ear}_{i,x}-ft^\text{lat}_{j,x}&\geq \frac D{\underline v_{x,y,j}} (1-pF^J_{i,j,x}) - & i\in freeF,j \in fixedF,x\in V,y\in V\text{ s.t. }
+\nonumber\\&
+-M\cdot pF^J_{i,j,x} -M (1-w_{x,y,i})
+& (x,y)\in E\land i\neq j\land w^F_{x,y,j}=1\land noDoubles
+\end{align}
+\begin{align}
+%trail2
+%trail23
+w_{x,y,i} + w_{x,y,j} = 2& \implies t^\text{ear}_{j,y}-t^\text{lat}_{i,y} \geq
+& i\in freeF,j \in freeF,x\in V,y \in V\text{ s.t. } \nonumber\\& 
+\frac D{\underline v_{x,y,i}} pF_{i,j,x} - M(1-pF_{i,j,x}) 
+& i\neq j\land (x,y)\in E\land noDoubles\\
+%tral23Fixed
+ft^\text{ear}_{j,y}-ft^\text{lat}_{i,y}&\geq \frac D {\underline v_{x,y,i}}pF^2_{i,j,x} - M(1-pF^2_{i,j,x}) & (i,j,x,y)\in trail2\\
+%trail23FixedI
+t^\text{ear}_{j,y}- ft^\text{ear}_{i,y} &
+\geq \frac D{\underline v_{x,y,i}} pF^I_{i,j,x} - &
+i \in fixedF,j\in freeF,x\in V,y\in V\text{s.t.}\nonumber\\&
+-M (1-pF^I_{i,j,x}) - M(1-w_{x,y,j})&
+(x,y)\in E\land  w^F_{x,y,i}\land i\neq j\land noDoubles\\
+%trail23FixedJ
+ft^\text{ear}_{j,y}-t^\text{lat}_{i,y}&\geq \frac D{\underline v_{x,y,i}} pF^J_{i,j,x} - & i\in freeF,j \in fixedF,x\in V,y\in V\text{ s.t. }
+\nonumber\\&
+-M (1-pF^J_{i,j,x}) -M (1-w_{x,y,i})
+& (x,y)\in E\land i\neq j\land w^F_{x,y,j}=1\land noDoubles\\
+%trail24
+w_{x,y,i} + w_{x,y,j} = 2& \implies t^\text{ear}_{i,y}-t^\text{lat}_{j,y} \geq
+& i\in freeF,j \in freeF,x\in V, y \in V\text{ s.t. }\nonumber\\
+& \frac D{\underline v_{x,y,j}} (1-pF_{i,j,x}) - M \cdot pF_{i,j,x}
+& (x,y)\in E\land noDoubles\\
+%tral24Fixed
+ft^\text{ear}_{i,y}-ft^\text{lat}_{j,y}&\geq \frac D {\underline v_{x,y,j}}(1-pF^2_{i,j,x}) - M\cdot pF^2_{i,j,x} & (i,j,x,y)\in trail2\\
+%trail24FixedI
+ft^\text{ear}_{i,y}- t^\text{ear}_{j,y} &\geq \frac D{\underline v_{x,y,j}} (1-pF^I_{i,j,x}) - &
+i \in fixedF,j\in freeF,x\in V,y\in V\text{s.t.}\nonumber\\&-M\cdot pF^I_{i,j,x} - M(1-w_{x,y,j})&
+(x,y)\in E\land  w^F_{x,y,i}\land i\neq j\land noDoubles\\
+%trail23FixedJ
+t^\text{ear}_{i,y}-ft^\text{lat}_{j,y}&\geq \frac D{\underline v_{x,y,j}} (1-pF^J_{i,j,x}) - & i\in freeF,j \in fixedF,x\in V,y\in V\text{ s.t. }
+\nonumber\\&
+-M\cdot pF^J_{i,j,x} -M (1-w_{x,y,i})
+& (x,y)\in E\land i\neq j\land w^F_{x,y,j}=1\land noDoubles
+\end{align}
+\begin{align}
+%merge3
+w_{x_1,x,i} + w_{x_2,x,j} = 2&\implies t^\text{ear}_{j,x}- t^\text{lat}_{i,x}\geq S(\alpha^-_{x,x_1,x_2})&
+i\in freeF,j\in freeF,x\in V, x_1\in V, x_2\in V\text { s.t. }
+\nonumber\\
+&\frac D {\underline v_{x_1,x,i}} pF_{i,j,x} -M(1-pF_{i,j,x})&
+x_1\neq x_2 \land
+(x_1,x)\in E\land (x_2,x)\in E \land i\neq j\land \nonumber\\&&\land  (x,x_1,x_2)\in conflictsNodes  \land  noDoubles\\
+%merge3Fixed
+ft^\text{ear}_{j,x}- ft^\text{lat}_{i,x}&\geq S(\alpha^-_{x,x_1,x_2})&
+(i,j,x,x_1,x_2)\in merge
+\nonumber\\
+&\frac D {\underline v_{x_1,x,i}} pF^2_{i,j,x} -M(1-pF^2_{i,j,x})\\
+%merge3FixedI
+t^\text{ear}_{j,x}- ft^\text{lat}_{i,x}&\geq S(\alpha^-_{x,x_1,x_2})\frac D {\underline v_{x_1,x,i}} pF^I_{i,j,x}-&
+i \in fixedF, j\in freeF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+&  -M(1-pF^I_{i,j,x}) - M(1-w_{x_2,x,j})&
+(x_1,x)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x_1,x,i}=1\land\nonumber\\
+&&\land i\neq j \land (x,x_1,x_2)\in conflictsNodes\land noDoubles\\
+%merge3FixedJ
+ft^\text{ear}_{j,x}- t^\text{lat}_{i,x}&\geq S(\alpha^-_{x,x_1,x_2}) \frac D {\underline v_{x_1,x,i}} pF^J_{i,j,x}-&
+i \in freeF, j\in fixedF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+ &-M (1-pF^J_{i,j,x}) - M(1-w_{x_1,x,i}) &
+(x_1,x)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x_2,x,j}=1\land\nonumber\\
+&&\land i\neq j\land (x,x_1,x_2)\in conflictsNodes\land noDoubles\\
+%
+%
+%merge4
+w_{x_1,x,j} + w_{x_2,x,i} = 2&\implies t^\text{ear}_{i,x}- t^\text{lat}_{j,x}\geq S(\alpha^-_{x,x_1,x_2})&
+i\in freeF,j\in freeF,x\in V, x_1\in V, x_2\in V\text { s.t. }
+\nonumber\\
+&\frac D {\underline v_{x_1,x,j}} (1-pF_{i,j,x}) -M\cdot pF_{i,j,x}&
+x_1\neq x_2 \land
+(x_1,x)\in E\land (x_2,x)\in E \land i\neq j\land \nonumber\\&&\land  (x,x_1,x_2)\in conflictsNodes  \land  noDoubles\\
+%merge4Fixed
+ft^\text{ear}_{i,x}- ft^\text{lat}_{j,x}&\geq S(\alpha^-_{x,x_1,x_2})&
+(i,j,x,x_1,x_2)\in merge
+\nonumber\\
+&\frac D {\underline v_{x_1,x,j}} (1-pF^2_{i,j,x}) -M\cdot pF^2_{i,j,x}\\
+%merge4FixedI
+ft^\text{ear}_{i,x}- t^\text{lat}_{j,x}&\geq S(\alpha^-_{x,x_1,x_2})\frac D {\underline v_{x_1,x,j}} (1-pF^I_{i,j,x})-&
+i \in fixedF, j\in freeF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+&  -M\cdot pF^I_{i,j,x} - M(1-w_{x_1,x,j})&
+(x_1,x)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x_2,x,i}=1\land\nonumber\\
+&&\land i\neq j \land (x,x_1,x_2)\in conflictsNodes\land noDoubles\\
+%merge3FixedJ
+t^\text{ear}_{i,x}- ft^\text{lat}_{j,x}&\geq S(\alpha^-_{x,x_1,x_2}) \frac D {\underline v_{x_1,x,j}} (1-pF^J_{i,j,x})-&
+i \in freeF, j\in fixedF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+ &-M\cdot pF^J_{i,j,x} - M(1-w_{x_2,x,i}) &
+(x_1,x)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x_1,x,j}=1\land\nonumber\\
+&&\land i\neq j\land (x,x_1,x_2)\in conflictsNodes\land noDoubles
+\end{align}
+
+
+\begin{align}
+%diver3
+w_{x,x_1,i} + w_{x_2,x,j} = 2&\implies t^\text{ear}_{j,x}- t^\text{lat}_{i,x}\geq S(\alpha^{+-}_{x,x_1,x_2})&
+i\in freeF,j\in freeF,x\in V, x_1\in V, x_2\in V\text { s.t. }
+\nonumber\\
+&(\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}}) pF_{i,j,x} -M(1-pF_{i,j,x})&
+x_1\neq x_2 \land
+(x,x_1)\in E\land (x_2,x)\in E \land i\neq j\land \nonumber\\&&\land  (x,x_1,x_2)\in conflictsNodes  \land  noDoubles\\
+%diver3Fixed
+ft^\text{ear}_{j,x}- ft^\text{lat}_{i,x}&\geq S(\alpha^{+-}_{x,x_1,x_2})(\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}})&
+(i,j,x,x_1,x_2)\in diver1
+\nonumber\\
+& pF^2_{i,j,x} -M(1-pF^2_{i,j,x})\\
+%diver3FixedI
+t^\text{ear}_{j,x}- ft^\text{lat}_{i,x}\geq& S(\alpha^-_{x,x_1,x_2})(\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}})pF^I_{i,j,x}-&
+i \in fixedF, j\in freeF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+&  -M(1-pF^I_{i,j,x}) - M(1-w_{x_2,x,j})&
+(x,x_1)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x,x_1,i}=1\land\nonumber\\
+&&\land i\neq j \land (x,x_1,x_2)\in conflictsNodes\land noDoubles\\
+%diver3FixedJ
+ft^\text{ear}_{j,x}- t^\text{lat}_{i,x}&\geq S(\alpha^-_{x,x_1,x_2}) (\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}}) pF^J_{i,j,x}-&
+i \in freeF, j\in fixedF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+ &-M (1-pF^J_{i,j,x}) - M(1-w_{x,x_1,i}) &
+(x,x_1)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x_2,x,j}=1\land\nonumber\\
+&&\land i\neq j\land (x,x_1,x_2)\in conflictsNodes\land noDoubles\\
+%
+%
+%diver4
+w_{x,x_1,i} + w_{x_2,x,j} = 2&\implies t^\text{ear}_{i,x}- t^\text{lat}_{j,x}\geq S(\alpha^-_{x,x_1,x_2})&
+i\in freeF,j\in freeF,x\in V, x_1\in V, x_2\in V\text { s.t. }
+\nonumber\\
+&(\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}}) (1-pF_{i,j,x}) -M\cdot pF_{i,j,x}&
+x_1\neq x_2 \land
+(x,x_1)\in E\land (x_2,x)\in E \land i\neq j\land \nonumber\\&&\land  (x,x_1,x_2)\in conflictsNodes  \land  noDoubles\\
+%diver4Fixed
+ft^\text{ear}_{i,x}- ft^\text{lat}_{j,x}&\geq S(\alpha^-_{x,x_1,x_2})&
+(i,j,x,x_1,x_2)\in diver1
+\nonumber\\
+&(\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}}) (1-pF^2_{i,j,x}) -M\cdot pF^2_{i,j,x}\\
+%diver4FixedI
+ft^\text{ear}_{i,x}- t^\text{lat}_{j,x}&\geq S(\alpha^-_{x,x_1,x_2})(\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}}) (1-pF^I_{i,j,x})-&
+i \in fixedF, j\in freeF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+&  -M\cdot pF^I_{i,j,x} - M(1-w_{x_2,x,j})&
+(x,x_1)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x,x_1,i}=1\land\nonumber\\
+&&\land i\neq j \land (x,x_1,x_2)\in conflictsNodes\land noDoubles\\
+%diver4FixedJ
+t^\text{ear}_{i,x}- ft^\text{lat}_{j,x}&\geq S(\alpha^-_{x,x_1,x_2}) (\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}}) (1-pF^J_{i,j,x})-&
+i \in freeF, j\in fixedF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+ &-M\cdot pF^J_{i,j,x} - M(1-w_{x,x_1,i})&
+(x,x_1)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x_2,x,j}=1\land\nonumber\\
+&&\land i\neq j\land (x,x_1,x_2)\in conflictsNodes\land noDoubles
+\end{align}
+
+
+%diver3_1
+\begin{align}
+%diver3_1
+w_{x,x_1,j} + w_{x_2,x,i} = 2 \land& w_{x,x_1,i} + w_{x_2,x,j} < 2\implies t^\text{ear}_{j,x}- t^\text{lat}_{i,x}\geq S(\alpha^{+-}_{x,x_1,x_2})&
+i\in freeF,j\in freeF,x\in V, x_1\in V, x_2\in V\text { s.t. }
+\nonumber\\
+&(\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}}) pF_{i,j,x} -M(1-pF_{i,j,x})&
+x_1\neq x_2 \land
+(x,x_1)\in E\land (x_2,x)\in E \land i\neq j\land \nonumber\\&&\land  (x,x_1,x_2)\in conflictsNodes  \land  noDoubles\\
+%diver3_1Fixed
+ft^\text{ear}_{j,x}- ft^\text{lat}_{i,x}&\geq S(\alpha^{+-}_{x,x_1,x_2})(\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}})&
+(i,j,x,x_1,x_2)\in diver2
+\nonumber\\
+& pF^2_{i,j,x} -M(1-pF^2_{i,j,x})\\
+%diver3_1FixedI
+t^\text{ear}_{j,x}- ft^\text{lat}_{i,x}\geq& S(\alpha^-_{x,x_1,x_2})(\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}})pF^I_{i,j,x}-&
+i \in fixedF, j\in freeF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+&  -M(1-pF^I_{i,j,x}) - M(1-w_{x,x_1,j})&
+(x,x_1)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x_2,x,i}=1\land \nonumber\\
+&&\land i\neq j \land (x,x_1,x_2)\in conflictsNodes\land noDoubles\\
+%diver3_1FixedJ
+ft^\text{ear}_{j,x}- t^\text{lat}_{i,x}&\geq S(\alpha^-_{x,x_1,x_2}) (\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}}) pF^J_{i,j,x}-&
+i \in freeF, j\in fixedF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+ &-M (1-pF^J_{i,j,x}) - M(1-w_{x_2,x,i}) &
+(x,x_1)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x,x_1,j}=1\land\nonumber\\
+&&\land i\neq j\land (x,x_1,x_2)\in conflictsNodes\land noDoubles\\
+%
+%
+%diver4_1
+w_{x,x_1,j} + w_{x_2,x,i} = 2 \land& w_{x,x_1,i}+w_{x_2,x,j}<2\implies t^\text{ear}_{i,x}- t^\text{lat}_{j,x}\geq S(\alpha^-_{x,x_1,x_2})&
+i\in freeF,j\in freeF,x\in V, x_1\in V, x_2\in V\text { s.t. }
+\nonumber\\
+&(\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}}) (1-pF_{i,j,x}) -M\cdot pF_{i,j,x}&
+x_1\neq x_2 \land
+(x,x_1)\in E\land (x_2,x)\in E \land i\neq j\land \nonumber\\&&\land  (x,x_1,x_2)\in conflictsNodes  \land  noDoubles\\
+%diver4Fixed
+ft^\text{ear}_{i,x}- ft^\text{lat}_{j,x}&\geq S(\alpha^-_{x,x_1,x_2})&
+(i,j,x,x_1,x_2)\in diver2
+\nonumber\\
+&(\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}}) (1-pF^2_{i,j,x}) -M\cdot pF^2_{i,j,x}\\
+%diver4FixedI
+ft^\text{ear}_{i,x}- t^\text{lat}_{j,x}&\geq S(\alpha^-_{x,x_1,x_2})(\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}}) (1-pF^I_{i,j,x})-&
+i \in fixedF, j\in freeF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+&  -M\cdot pF^I_{i,j,x} - M(1-w_{x,x_1,j})&
+(x,x_1)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x_2,x,i}=1\land\nonumber\\
+&&\land i\neq j \land (x,x_1,x_2)\in conflictsNodes\land noDoubles\\
+%diver4FixedJ
+t^\text{ear}_{i,x}- ft^\text{lat}_{j,x}&\geq S(\alpha^-_{x,x_1,x_2}) (\frac D {\underline v_{x_1,x,i}} + \frac D{\underline v_{x,x_2,j}}) (1-pF^J_{i,j,x})-&
+i \in freeF, j\in fixedF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+ &-M\cdot pF^J_{i,j,x} - M(1-w_{x_2,x,i})&
+(x,x_1)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x,x_1,j}=1\land\nonumber\\
+&&\land i\neq j\land (x,x_1,x_2)\in conflictsNodes\land noDoubles
+\end{align}
+
+
+
+
+
+\begin{align}
+%split3
+w_{x,x_1,i} + w_{x,x_2,j} = 2&\implies t^\text{ear}_{j,x}- t^\text{lat}_{i,x}\geq S(\alpha^-_{x,x_1,x_2})&
+i\in freeF,j\in freeF,x\in V, x_1\in V, x_2\in V\text { s.t. }
+\nonumber\\
+&\frac D {\underline v_{x,x_1,i}} pF_{i,j,x} -M(1-pF_{i,j,x})&
+x_1\neq x_2 \land
+(x,x_1)\in E\land (x,x_2)\in E \land i\neq j\land \nonumber\\&&\land  (x,x_1,x_2)\in conflictsNodes  \land  noDoubles\\
+%split3Fixed
+ft^\text{ear}_{j,x}- ft^\text{lat}_{i,x}&\geq S(\alpha^-_{x,x_1,x_2})&
+(i,j,x,x_1,x_2)\in split
+\nonumber\\
+&\frac D {\underline v_{x,x_1,i}} pF^2_{i,j,x} -M(1-pF^2_{i,j,x})\\
+%split3FixedI
+t^\text{ear}_{j,x}- ft^\text{lat}_{i,x}&\geq S(\alpha^-_{x,x_1,x_2})\frac D {\underline v_{x,x_1,i}} pF^I_{i,j,x}-&
+i \in fixedF, j\in freeF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+&  -M(1-pF^I_{i,j,x}) - M(1-w_{x,x_2,j})&
+(x,x_1)\in E\land (x,x_2)\in E\land x_1\neq x_2\land w^F_{x,x_1,i}=1\land\nonumber\\
+&&\land i\neq j \land (x,x_1,x_2)\in conflictsNodes\land noDoubles\\
+%split3FixedJ
+ft^\text{ear}_{j,x}- t^\text{lat}_{i,x}&\geq S(\alpha^-_{x,x_1,x_2}) \frac D {\underline v_{x,x_1,i}} pF^J_{i,j,x}-&
+i \in freeF, j\in fixedF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+ &-M (1-pF^J_{i,j,x}) - M(1-w_{x,x_1,i}) &
+(x,x_1)\in E\land (x,x_2)\in E\land x_1\neq x_2\land w^F_{x,x_2,j}=1\land\nonumber\\
+&&\land i\neq j\land (x,x_1,x_2)\in conflictsNodes\land noDoubles\\
+%
+%
+%split4
+w_{x,x_1,i} + w_{x,x_2,j} = 2&\implies t^\text{ear}_{i,x}- t^\text{lat}_{j,x}\geq S(\alpha^-_{x,x_1,x_2})&
+i\in freeF,j\in freeF,x\in V, x_1\in V, x_2\in V\text { s.t. }
+\nonumber\\
+&\frac D {\underline v_{x,x_2,j}} (1-pF_{i,j,x}) -M\cdot pF_{i,j,x}&
+x_1\neq x_2 \land
+(x,x_1)\in E\land (x,x_2)\in E \land i\neq j\land \nonumber\\&&\land  (x,x_1,x_2)\in conflictsNodes  \land  noDoubles\\
+%split4Fixed
+ft^\text{ear}_{i,x}- ft^\text{lat}_{j,x}&\geq S(\alpha^-_{x,x_1,x_2})&
+(i,j,x,x_1,x_2)\in split
+\nonumber\\
+&\frac D {\underline v_{x,x_1,i}} (1-pF^2_{i,j,x}) -M\cdot pF^2_{i,j,x}\\
+%split4FixedI
+ft^\text{ear}_{i,x}- t^\text{lat}_{j,x}&\geq S(\alpha^-_{x,x_1,x_2})\frac D {\underline v_{x,x_1,i}} (1-pF^I_{i,j,x})-&
+i \in fixedF, j\in freeF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+&  -M\cdot pF^I_{i,j,x} - M(1-w_{x,x_2,j})&
+(x,x_1)\in E\land (x,x_2)\in E\land x_1\neq x_2\land w^F_{x,x_1,i}=1\land\nonumber\\
+&&\land i\neq j \land (x,x_1,x_2)\in conflictsNodes\land noDoubles\\
+%merge4FixedJ
+t^\text{ear}_{i,x}- ft^\text{lat}_{j,x}&\geq S(\alpha^-_{x,x_1,x_2}) \frac D {\underline v_{x,x_1,j}} (1-pF^J_{i,j,x})-&
+i \in freeF, j\in fixedF, x\in V,x_1\in V,x_2\in V\text { s.t. }
+\nonumber\\
+ &-M\cdot pF^J_{i,j,x} - M(1-w_{x,x_1,i}) &
+(x_1,x)\in E\land (x_2,x)\in E\land x_1\neq x_2\land w^F_{x,x_2,j}=1\land\nonumber\\
+&&\land i\neq j\land (x,x_1,x_2)\in conflictsNodes\land noDoubles
+\end{align}
+
+
+
+
+\begin{align}
+%abs
+%abs1
+t^\text{|ear|}_i\geq& t^\text{ear}_{i,e_i} - \hat t^\text{ear}_{i,e_i} &\forall i\in freeF\\
+%abs2
+t^\text{|ear|}_i\geq& \hat t^\text{ear}_{i,e_i} - t^\text{ear}_{i,e_i} &\forall i\in freeF\\
+%abs1Fixed
+t^\text{|ear|}_i\geq& ft^\text{ear}_{i,e_i} - \hat t^\text{ear}_{i,e_i} &\forall i\in fixedF\setminus (AP\cup NC)\\
+%abs2Fixed
+t^\text{|ear|}_i\geq& \hat t^\text{ear}_{i,e_i} - ft^\text{ear}_{i,e_i} &\forall i\in fixedF\setminus (AP\cup NC)\\
+%fixPassedEar
+t^\text{ear}_{i,x} =& \hat t^\text{ear}_{i,x}& \forall i\in F, x\in V\text { s.t. } (i,x)\in timeFixed \land i\notin drifted_{flight}\land x\notin drifted_{wp} \\
+%fixPassedLat
+t^\text{lat}_{i,x} =& \hat t^\text{lat}_{i,x}& \forall i\in F, x\in V\text { s.t. } (i,x)\in timeFixed \land i\notin drifted_{flight}\land x\notin drifted_{wp} \\
+%fixFreeEar
+t^\text{ear}_{i,x} =& \hat t^\text{ear}_{i,x}& \forall i\in F, x\in V\text { s.t. } (i,x)\in timeFixedFree \\
+%fixFreeLat
+t^\text{lat}_{i,x} =& \hat t^\text{lat}_{i,x}& \forall i\in F, x\in V\text { s.t. } (i,x)\in timeFixedFree \\
+%fixFreePath
+w_{x,x',i} =& 1 &\forall  \forall i\in F, x\in V,x'\in V\text { s.t. } (i,x')\in timeFixedFree \land (i,x,x')\in passedFree\\
+%avoidShortcut
+w_{x,x',i}=&0&forall i\in freeF, (x,x')\in nAE\\
+%priority1
+ft^\text{ear}_{i,x} =& \hat t^\text{ear}_{i,x} + \tau_i &\forall i\in AP, x\in V \text{ s.t .} (i,x)\in FV\\ 
+%priority2
+ft^\text{lat}_{i,x} =& \hat t^\text{lat}_{i,x} + \tau_i &\forall i\in AP, x\in V\text{ s.t .} (i,x)\in FV\\ 
+%
+%
+%
+%
+%definition of variables
+% t_ear, t_lat and fixed
+&\mathclap{t^\text{ear}_{i,x} \in \mathbb{R}_+}&\forall i\in freeF,x\in V \nonumber \\
+&\mathclap{t^\text{lat}_{i,x} \in \mathbb{R}_+}&\forall i\in freeF,x\in V \nonumber \\
+&\mathclap{ft^\text{ear}_{i,x} \in \mathbb{R}_+}&\forall i\in F,x\in V\text{ s.t. } (i,x)\in FV \nonumber \\
+&\mathclap{ft^\text{lat}_{i,x} \in \mathbb{R}_+}&\forall i\in F,x\in V\text{ s.t. } (i,x)\in FV \nonumber \\
+% delayPriority
+&\mathclap{\tau_i\in \mathbb{Z}_+} &\forall i\in AP\nonumber\\
+%
+%
+%
+%\end{align}
+%\begin{align}
+% w
+&\mathclap{w_{x,y,i}\in \{0,1\}} &\forall i\in F,x\in V,y\in V\text{ s.t. } (x,y)\in E \nonumber\\
+%tup, tdown and fixed
+&\mathclap{\underline t_{i,x}\in \mathbb{Z}_+} &\forall i\in F,x\in V \nonumber\\
+&\mathclap{\overline  t_{i,x}\in \mathbb{Z}_+} &\forall i\in F,x\in V \nonumber\\
+&\mathclap{\underline {ft}_{i,x}\in \mathbb{Z}_+} &\forall i\in F,x\in V \text{ s.t. } (i,x)\in FV\nonumber\\
+&\mathclap{\overline  {ft}_{i,x}\in \mathbb{Z}_+} &\forall i\in F,x\in V \text{ s.t. } (i,x)\in FV\nonumber\\
+% t_ear_start
+&\mathclap{ts^\text{ear}\in \mathbb{N}_+} &\forall i\in F\nonumber \\
+&\mathclap{t^\text{|ear|}\in \mathbb{Z}_+} &\forall i\in F\setminus(AP\cup NC)\nonumber \\
+%passFirst
+&\mathclap{pF_{i,j,x}\in \{0,1\}} &\forall i\in freeF,j\in freeF,x\in V\text{ s.t. } i\neq j\land noDoubles\nonumber\\
+&\mathclap{pF^I_{i,j,x}\in \{0,1\}} &\forall i\in fixedF,j\in freeF,x\in V\text{ s.t. } i\neq j \land (i,x)\in FV \land noDoubles \nonumber\\
+&\mathclap{pF^J_{i,j,x}\in \{0,1\}} &\forall i\in freeF,j\in fixedJ,x\in V\text{ s.t. } i\neq j \land (j,x)\in FV \land noDoubles \nonumber\\
+&\mathclap{pF_{i,j,x}\in \{0,1\}} &\forall i\in fixedF,j\in fixedF,x\in V\text{ s.t. } i\neq j\land (i,x)\in FV\land (j,x)\in FV \land noDoubles\nonumber
+\end{align}
+Objectives:
+\begin{align}
+    %\min \sum_{i,x,x'} w_{x,x',i} \\
+    %&\min \sum_{i \in F,x \in V,y \in V:(x,y)\in E} w_{x,y,i}d_{i,j}
+    UAM:&\min \sum_{i\in AP} \tau_i + \sum_{i\in F\setminus{AP\cup NC}} t^\text{|ear|}_i
+\end{align}
+}
+%ft^ear is t_ear_fixed
+%tFF is timeFixedFree 
+%pF is passFirst, pF^2 is pass2Fixeds, p1F is pass1Fixed
+%nodoubles is (\hat t^\text{ear}_{i,x} <\hat t^\text{ear}_{j,x} \lor (\hat t^\text{ear}_{i,x} = \hat t^\text{ear}_{j,x}\land i<j)
+%w^F is wFixed
+With the next acronyms:
+\begin{itemize}
+    \item $ft^\text{ear}$ is time fixed, so the variable for $t^\text{ear}$ for flight with fixed path
+    \item $tFF$ is timeFixedFree, so the couple $(V,freeF)$ that have been fixed since those node have been already traversed.
+    \item $pF$ is passFirst, $PF^I$ is passIFixed, $PF^J$ is passJFixed and $pF^2$ is pass2Fixeds
+    \item noDoubles means $\hat t^\text{ear}_{i,x} <\hat t^\text{ear}_{j,x} \lor (\hat t^\text{ear}_{i,x} = \hat t^\text{ear}_{j,x}\land i<j)$
+    \item $nAE$ is nonAvailableEdges
+\end{itemize}
+\end{document}

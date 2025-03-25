@@ -1,0 +1,16 @@
+\documentclass[../../thesis.tex]{subfiles}
+
+\begin{document}
+\section{Conclusions}  
+We have shown how the proposed improvements to the previous model introduce a new degree of freedom, leading to better results. In some cases, our approach was able to find solutions where the previous model failed. Additionally, we developed a heuristic that, in all tested cases, was able to find a feasible solution in significantly less time compared to the full model. In most cases, where the full model could not find a solution within an hour, our heuristic produced a solution within a 10\% optimality gap.  
+
+\section{Future Work}  
+There are several potential directions for future research. One possibility is to develop a branch-and-price algorithm, particularly when free paths are available, for example, by using the shortest path problem as the pricing problem.  
+
+Another avenue for exploration is applying our new model or heuristic to the work proposed by \cite{portoleau-2024} to determine whether better results can be achieved.  
+
+Additionally, studying the complexity of our problem could be of interest—specifically, whether it remains NP-hard or belongs to a higher complexity class, such as $P^{NP}$ or $NP^{NP}$.  
+
+Finally, an interesting alternative approach could be to develop an algorithm based on the critical path method to solve the deconflicting problem, assuming a predefined priority order of passage.  
+
+\end{document}

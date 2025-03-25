@@ -1,0 +1,42 @@
+\documentclass[../../../thesis.tex]{subfiles}
+\begin{document}
+
+\section{Pelegrin's Comments}
+The results were obtained using AMPL and Gurobi 12.0.0 as the solver, with the following modifications to the standard iteration:
+\begin{itemize}
+    \item AMPL presolve disabled;
+    \item Only one thread available per problem;
+    \item MIP gap reduced from $10^{-4}$ to $10^{-5}$;
+    \item intFocus option enabled.
+\end{itemize}
+
+\subsection{Delay and Drift Cases}
+As shown in Tables \ref{table:mercedes:resultsComparison1} and \ref{table:mercedes:resultsComparison2}, the objective function values remain largely consistent across instances involving drift and delays, with a maximum deviation of one point in the mean. In some cases, the flexibility to change the path improves the objective function, justifying the better mean value observed in the table. However, certain instances demonstrate that keeping a fixed path results in a superior objective function, as evidenced in Table \ref{table:mercedes:betterFixedDD}.
+
+\subfile{../../tables/mercedes/comparison/betterFixedDD}
+
+The observed differences are always on the order of $10^{-6}$, likely attributable to approximation errors or MIP tolerance. Conversely, Table \ref{table:mercedes:betterFreeDD} highlights instances where modifying the path yields an improved objective function value, with more significant differences.
+
+\subfile{../../tables/mercedes/comparison/betterFreeDD}
+
+\subsection{High-Priority Cases}
+In high-priority scenarios, as illustrated in Table \ref{table:mercedes:betterFixedAP}, the solutions differ by at most $10^{-5}$. As previously discussed, such minor variations are not particularly significant.
+
+\subfile{../../tables/mercedes/comparison/betterFixedAP}
+
+%However, in certain instances, due to slight differences and large values, a better solution is obtained in the fixed-path case, as the alternative approach terminates before reaching optimality due to relative error tolerance.
+Table \ref{table:mercedes:betterFreeAP} demonstrates that allowing free paths can prevent conflicts with high-priority flights, leading to substantially improved results. In some cases, this also helps avoid delays for high-priority flights.
+
+\subfile{../../tables/mercedes/comparison/betterFreeAP}
+
+\subsection{Non-Collaborative Intruder Cases}
+Similar to the delay and drift cases, allowing path flexibility in the presence of a non-collaborative intruder can yield better results, as shown in Table \ref{table:mercedes:betterFreeNC}. However, as with the previous cases, some instances—listed in Table \ref{table:mercedes:betterFixedNC}—exhibit better objective function values due to approximation and tolerance, with differences limited to $10^{-6}$.
+
+\subfile{../../tables/mercedes/comparison/betterFixedNCFinite}
+\subfile{../../tables/mercedes/comparison/betterFreeNCFinite}
+
+As evident from the data, approximately two-thirds of the generated instances are infeasible. Additionally, the mean and standard deviation in the free-path case are significantly worse. Unlike previous cases, where precision issues were a concern, the degradation in solution quality here arises because certain instances become unsolvable with a fixed path, whereas allowing path changes increases the percentage of solved instances by up to $40\%$. This phenomenon is illustrated in Table \ref{table:mercedes:feasibleUnfeasible}.
+
+\subfile{../../tables/mercedes/comparison/FreeFindFeasible}
+
+\end{document}

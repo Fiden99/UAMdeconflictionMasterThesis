@@ -1,0 +1,42 @@
+\documentclass[../../thesis.tex]{subfiles}
+
+\begin{document}
+
+In \cite{portoleau-2024}, a two-stage variant of the UAM flight scheduling problem is introduced.  
+This model considers a scenario with budget uncertainty affecting the availability of vehicles to take off at the planned time. The objective is to minimize the total sum of flight arrival times and the cost of re-optimization after the uncertainty has been revealed.  
+
+The first stage, also referred to as the \textit{strategic level}, computes the initial schedule.  
+The second stage, known as the \textit{tactical level}, adjusts the schedule to maintain feasibility in response to disruptions.  
+
+To solve this problem, the Adversarial Benders Decomposition method is employed.  
+The master problem seeks to minimize the objective function after uncertainty has been revealed, while the subproblem evaluates the worst-case scenario.  
+Since the master problem is a linear program, it can be solved efficiently. Conversely, the subproblem is an integer program, making it computationally expensive. To address this, heuristic approaches are used instead of solving the subproblem exactly:  
+\begin{itemize}
+    \item \textbf{Local search}
+    \item \textbf{Fixing the order}: This approach preserves the order computed at the strategic level.  
+    Using this approximation, two additional heuristics are proposed:  
+    \begin{itemize}
+        \item Reformulating the problem as a $\max\min$ function and solving it through its dual quadratic formulation.  
+        \item Exploiting the recursive nature of delay computation to derive an objective function that is continuous, increasing, and piecewise-linear.  
+    \end{itemize}
+\end{itemize}
+
+
+
+
+
+%In \cite{portoleau-2024} it's introduced a two-stage variant of the UAM flight scheduling problem.
+%In this model, we consider a scenario with budget uncertainty on the availability of vehicles to takeoff at the planned time, where we want to minimize the sum of the arrival each flight and the cost of the re-optimization after the uncertainty has been revealed.
+%In the first level, called also strategic level, we computer the initial schedule, on the second level, called also tactical level, we want to repair the schedule to maintain it feasible.
+%To solve this problem, we use the adversarial Bender Method,with a master problem that want to minimize the objective function given after revealed the uncertainty, and the subproblem, where is considered the worst-scenario case.
+%Since the master problem is linear, is easy to solve, meanwhile the subproblem is an integer one, so instead of solving it, we have some heuristic to solve it:
+%\begin{itemize}
+%    \item \textbf{Local search}
+%    \item \textbf{Fixing the order}: use the order calculated at strategic level.
+%    Using this approximation, we have other two heuristic:
+%    \begin{itemize}
+%        \item from the approximation, we can obtain a $\max\min$ function, and we calculate the solution using his dual quadratic formulation
+%       \item we can see that the delay is a recursive function, we obtain a objective function which is a continuous, increasing, piecewise-linear function
+%    \end{itemize}
+%\end{itemize}
+\end{document}

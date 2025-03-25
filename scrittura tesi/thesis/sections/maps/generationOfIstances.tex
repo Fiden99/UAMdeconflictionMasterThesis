@@ -1,0 +1,136 @@
+\documentclass[../../thesis.tex]{subfiles}
+
+\begin{document}
+\subsection{Creation of Instances}\label{sec:generationInstance}
+
+For each topology introduced in Section \ref{sec:topologies}, we first generate a nominal schedule through strategic deconfliction.  
+Once the nominal schedule is obtained, we introduce disruptions to create different tactical scenarios.
+
+\subsubsection{Strategic Deconfliction}
+
+We define the maximum number of trips per batch and set the flight duration range between 7 and 25 time units.  
+%capire se tenere simulation o usare altra parole,e  trovare miglior termine
+The simulation consists of 5 batches, spaced 10 minutes apart, with 20 flights per batch, leading to a maximum of 100 flights.  
+
+Given these parameters, we read the input file containing the topology and construct the corresponding graph.  
+With the complete graph information, we proceed to generate the set of flight requests.  
+For each flight, we randomly select a takeoff vertiport as the starting point, followed by a randomly chosen landing vertiport, ensuring that the time distance between them falls within the predefined limits.  
+The flight path is determined as one of the shortest paths, using travel time between nodes as the weight metric.  
+
+With the flight requests and paths established, we compute the strategic deconfliction using AMPL.  
+For each batch, we initialize the necessary sets and parameters in AMPL, assigning a fixed speed of 2.5 for each arc (or 1.5 for arcs adjacent to the source or destination node).  
+If flights from previous batches are still airborne or pending departure, they are incorporated into the new batch.  
+Pending flights are treated as high-priority requests.  
+
+The scheduling model is multi-objective:  
+\begin{enumerate}
+    \item \textbf{Primary objective:} Maximize the number of scheduled flights, prioritizing pending flights. 
+    \item \textbf{Secondary objective:} Minimize the maximum departure time.  
+\end{enumerate}
+
+The constraints used can be summarized as follows:  
+\begin{itemize}
+    \item Definition of variables used for the objective functions.  
+    \item Consideration of flights only within the current batch.  
+    \item Computation of arrival times at nodes.  
+    \item Conflict resolution.  
+\end{itemize}
+
+Once the model is solved, we store the solution and generate an output file containing the strategic schedule.  
+
+\subsubsection{Tactical deconflicting}
+After obtaining the data from the strategic deconfliction, we extract the graph and the schedule. Additionally, we define $v_{\min}$ and $v_{\max}$ by modifying the speed values from the previous model by $\pm 5\%$.
+\newline
+The following sections describe the three types of disruptions we consider:\newline
+
+\textbf{Delay and Drifts}\newline\newline
+\textbf{Delay:} If there is a single delay (without any drift), we randomly select a flight from the set of scheduled flights.  
+When $n>1$ delays are introduced, we first select a time $t$ at which at least $n$ flights depart in the strategic plan. Then, we randomly pick one of those departure times and select $n$ flights departing at that instant.  
+If a drift occurs alongside a delay, we exclude all departure times within the first fifth of the time horizon.  
+We define $tini$ as the originally planned departure time $t$ plus a small perturbation $\varepsilon^\text{Delay}$.  
+\newline\newline
+\textbf{Drifts:} We randomly select a flight that is in the air at time $tini$ and identify the first node visited after $tini$.  
+If there are no delays, we randomly pick a flight and select a node from its path, excluding the source node and its immediate successor, as well as the destination node and its predecessor.  
+In this case, the value of $tini$ is set to the nominal earliest arrival time $\hat{t}^\text{ear}$ at that node, adjusted by a perturbation $\varepsilon^\text{Drift}$.  
+If a delay is also present, we randomly select a flight that is in flight, meaning it has departed before $tini$, which is derived from the delay, but has not yet landed.   
+Then, we update the $\hat{t}^\text{ear}$ of the drifted flight. The decision of whether the flight arrives late or early is made with same probability:  
+\begin{itemize}
+    \item If the flight arrives late, we increase $\hat{t}^\text{ear}$ by a value between $0.01$ and $\frac{\varepsilon^\text{Drift}}{2}$.
+    \item If the flight arrives early, we decrease $\hat{t}^\text{ear}$ by a value between $\frac{\varepsilon^\text{Drift}}{2}$ and $0.01$.
+\end{itemize}
+
+Finally, in both cases, we update the set of flights:  
+\begin{itemize}
+    \item Flights that have already landed by $tini$ are removed.
+    \item Flights still in the air at $tini$ are added to the $inFlight$ set.
+    \item Flights that have not yet departed are added to the $grounded$ set.
+\end{itemize}
+    
+\textbf{High Priority Flights}  
+\newline
+We generate a new flight with \( id = 1 + \max_{f\in F}\{id_f\} \) and create a path between two randomly selected sky-ports, following the same limitations described for strategic deconflicting.  
+The departure time \( tini \) is randomly set within the first fifth of the time horizon. The nominal earliest arrival time \( \hat{t}^\text{ear} \) for this flight is initialized at \( tini \) for the starting node. For subsequent nodes, it is recursively computed as:  
+
+\[
+\hat{t}^\text{ear}_{i,x} = \hat{t}^\text{ear}_{i-1,x} + \frac{dist(i-1,i)}{v}
+\]
+
+where:  
+\begin{itemize}
+    \item \( x \) represents the high-priority flight,  
+    \item \( i \) is the current node under evaluation,  
+    \item \( i-1 \) is the previous node in the path,  
+    \item \( v = 2.5 \) is the cruising speed for each arc, except for arcs adjacent to the source or destination node, where \( v = 1.5 \).  
+\end{itemize}
+
+Finally, we store the flight information and update the sets of flights accordingly, as done for drifts and delays.
+\newline
+
+\textbf{Non-Collaborative Intruder}  
+\newline
+We randomly select two cruise nodes that belong to different skylanes to ensure that the trajectory does not overlap with the existing network track.
+
+A direct trajectory is computed between the two nodes. If the trajectory intersects another skylane, we must modify the nodes near the intersection point.  
+
+If an existing node is close enough to the intersection point (within one minute), no modifications are made. Otherwise, a new node is introduced at the intersection point.  
+This new node is added to the graph with updated distance and angle calculations relative to its neighboring nodes, ensuring proper integration into flight paths passing through it.  
+
+The non-collaborative intruder’s path is then defined, and its times are computed. The departure time is randomly selected as an integer between 11 (since the maximum reaction time allowed is 10) and half of the time horizon.  
+
+Finally, flight classifications are updated as delays and drifts, and angles and times are adjusted based on the presence of the new flight.\newline
+
+\subsection{Free and Fixed Flights}
+
+We have already determined the paths for the flights, but to introduce a level of flexibility, we decide which flights can modify their paths after \( tini \).  
+
+For delays, this is straightforward, as they are the only ones allowed to change their path. In contrast, flights experiencing drifts must keep their path fixed.  
+High-priority flights and non-collaborative intruders also have fixed paths, but flights that may conflict with them are granted the ability to modify their paths.  
+
+To determine if a flight should have this flexibility, we compare the values of \( \hat{t}^\text{ear} \) and \( \hat{t}^\text{lat} \) for the two flights. If their difference is smaller than the largest required safety separation time, given by:  
+
+\[
+2\cdot\max_{(x,x_1,x_2)\in Conf} S(\alpha_{x,x_1,x_2})\cdot \frac{D}{v_{min}}
+\]
+
+for a node \( x \), then we allow the flight to change its path. Otherwise, the flight maintains its original fixed path.  
+
+\subsubsection{Instances Obtained}
+
+Once this classification is completed, we store the relevant parameters, which have already been presented in Section~\ref{sec:modelData}.
+
+We generate 100 instances for strategic deconfliction, and for each of them, we obtain:  
+
+\begin{itemize}
+    \item Five instances including drifts and delays, specifically:
+    \begin{itemize}
+        \item One instance with a single delay and no drifts.
+        \item One instance with two delays.
+        \item One instance with three delays.
+        \item One instance with no delays but one drift.
+        \item One instance with both one delay and one drift.
+    \end{itemize}
+    \item One instance containing a high-priority flight.
+    \item One instance featuring a non-collaborative intruder.
+\end{itemize}
+
+\end{document}
