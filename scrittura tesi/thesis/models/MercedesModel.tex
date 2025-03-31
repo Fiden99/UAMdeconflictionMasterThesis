@@ -387,7 +387,7 @@ t^\text{lat}_{i,x} =& \hat t^\text{lat}_{i,x}& \forall i\in F, x\in V\text { s.t
 %fixFreePath
 w_{x,x',i} =& 1 &\forall  \forall i\in F, x\in V,x'\in V\text { s.t. } (i,x')\in timeFixedFree \land (i,x,x')\in passedFree\\
 %avoidShortcut
-w_{x,x',i}=&0&forall i\in freeF, (x,x')\in nAE\\
+w_{x,x',i}=&0&forall i\in freeF, (x,x')\in nAA\\
 %priority1
 ft^\text{ear}_{i,x} =& \hat t^\text{ear}_{i,x} + \tau_i &\forall i\in AP, x\in V \text{ s.t .} (i,x)\in FV\\ 
 %priority2
@@ -443,6 +443,6 @@ With the next acronyms:
     \item $tFF$ is timeFixedFree, so the couple $(V,freeF)$ that have been fixed since those node have been already traversed.
     \item $pF$ is passFirst, $PF^I$ is passIFixed, $PF^J$ is passJFixed and $pF^2$ is pass2Fixeds
     \item noDoubles means $\hat t^\text{ear}_{i,x} <\hat t^\text{ear}_{j,x} \lor (\hat t^\text{ear}_{i,x} = \hat t^\text{ear}_{j,x}\land i<j)$
-    \item $nAE$ is nonAvailableEdges
+    \item $nAA$ is nonAvailableArcs
 \end{itemize}
 \end{document}

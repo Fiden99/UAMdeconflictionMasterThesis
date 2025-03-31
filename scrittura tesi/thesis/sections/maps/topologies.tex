@@ -2,26 +2,26 @@
 
 \begin{document}
 
-\subsection{Topologies}\label{sec:topologies}
-For our tests, we used three UAM network topologies, first introduced in \cite{pelegrin-2023}.  
+\section{Topologies}\label{sec:topologies}
+For our tests, we used three UAM network topologies, first introduced in \cite{pelegrin-2023} and depicted in Figure \ref{pic:topologies}.  
 We adopted the same method for generating these networks and utilized the 
 original code, 
 %capire se mantenere la seguente riga
 applying minor fixes due to changes in the Python version.
 A detailed explanation of the instance generation process is provided in Section \ref{sec:generationInstance}.  
 
-The graphs used are depicted in Figure \ref{pic:topologies}. Each path is mono-directional, and path changes are only allowed at predetermined points.  
+%Each path is mono-directional, and path changes are only allowed at predetermined points.  
 The figure also illustrates the travel times (based on a default speed) and the vertiports, represented by $\times$.  
 Vertiports are the only nodes where a collaborative flight can depart or arrive.  
 
 \begin{enumerate}
     \item \textbf{Grid}: Shown in Figure \ref{fig:grid}, this topology consists of 8 vertiports arranged in a grid layout.
-    \item \textbf{Metroplex}: Depicted in Figure \ref{fig:metroplex}, this topology features two densely connected regions, with 3 and 6 vertiports respectively, linked by a single corridor.
     \item \textbf{Airport}: Represented in Figure \ref{fig:airport}, this topology includes 4 vertiports, interconnected through a central airport via a fifth vertiport.
+    \item \textbf{Metroplex}: Depicted in Figure \ref{fig:metroplex}, this topology features two densely connected regions, with 3 and 6 vertiports respectively, linked by a single corridor.
 \end{enumerate}
 
 The graphs are directed, and intersections between two tracks are modeled as shown in Figure \ref{fig:crossingTrack}.  
-To allow for greater flexibility in speed changes, additional "breakpoint" nodes are inserted along the edges at intervals of one minute of travel time.
+To allow for greater flexibility in speed changes, additional "waypoint" nodes are inserted along the arcs at intervals of one minute of travel time at default speed.
 
 \begin{figure}
 \centering

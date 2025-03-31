@@ -2,8 +2,10 @@
 
 \begin{document}
 \section{Conclusions}  
-We have shown how the proposed improvements to the previous model introduce a new degree of freedom, leading to better results. In some cases, our approach was able to find solutions where the previous model failed. Additionally, we developed a heuristic that, in all tested cases, was able to find a feasible solution in significantly less time compared to the full model. In most cases, where the full model could not find a solution within an hour, our heuristic produced a solution within a 10\% optimality gap.  
+We have demonstrated how the proposed improvements to the previous model introduce a new degree of freedom, resulting in better outcomes. In some cases, our approach is able to find feasible solutions due to the ability to change the path, whereas the previous model with a fixed path proved infeasible.
 
+Moreover, we developed a heuristic that, in all tested cases, found a feasible solution in significantly less time compared to the full model. In most cases where the full model was unable to find a feasible solution within an hour, the heuristic succeeded. For instances that could converge to optimality, the maximum difference between the global solution and our solution was at most 10\%.
+ 
 \section{Future Work}  
 There are several potential directions for future research. One possibility is to develop a branch-and-price algorithm, particularly when free paths are available, for example, by using the shortest path problem as the pricing problem.  
 
@@ -11,6 +13,6 @@ Another avenue for exploration is applying our new model or heuristic to the wor
 
 Additionally, studying the complexity of our problem could be of interest—specifically, whether it remains NP-hard or belongs to a higher complexity class, such as $P^{NP}$ or $NP^{NP}$.  
 
-Finally, an interesting alternative approach could be to develop an algorithm based on the critical path method to solve the deconflicting problem, assuming a predefined priority order of passage.  
+Finally, an interesting alternative approach could be to develop an algorithm based on the critical path method (\cite{kelley_critical-path_1959}) to solve the deconflicting problem, assuming a predefined priority order of passage.  
 
 \end{document}

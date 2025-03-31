@@ -11,7 +11,7 @@ Along with the set of flights, we introduce additional subsets: the set of high-
 
 As previously discussed, delays for high-priority flights are penalized more heavily than for other flights. To model this, we introduce a weighting parameter \( W \), which will be used in the objective function.  
 
-Since conflicts do not occur at every node, we define the set \( \textit{conflictsNodes} \), which contains only nodes where conflicts may arise. Over this set, we define the angle \( \alpha \), which is used to model non-trailing conflicts.  
+Since conflicts do not occur at every node, we define the set \( \textit{conflictsNodes} \), which contains only nodes where conflicts may arise. Over this set, we define the angle \( \alpha_{x,x_1,x_2} \forall (x,x1,x2)\in conflictsNodes \), which is used to model non-trailing conflicts.  
 
 Additionally, we introduce the parameter \( tini \), whose purpose has already been explained.  
 
@@ -28,7 +28,7 @@ We also need to define the set \( \textit{inFlights} \), which contains flights 
 Similarly, for flights that are allowed to change their path, we define the sets \( \textit{passedFreeF} \), \( \textit{passedFreeNode} \), \( \textit{firstNotPassedFree} \), and \( \textit{timeFixedFree} \).  
 
 Since non-collaborative flights utilize specific shortcuts that are not accessible to regular flights, it is necessary to account for these arcs. 
-To explicitly forbid their usage, we define the subset \( nonAvailableEdges \subseteq E \), which contains only the arcs utilized by non-collaborative flights.
+To explicitly forbid their usage, we define the subset \( nonAvailableArcs \subseteq E \), which contains only the arcs utilized by non-collaborative flights.
 
 
 Finally, we identify drifted flights and their corresponding waypoints using the two parameters \( \textit{drifted}_{\text{flight}} \) and \( \textit{drifted}_{\text{wp}} \).  
@@ -40,13 +40,13 @@ Since multiple conflict constraints can exist over a single node, some may be re
 
 For flights that cannot change their path, we use the set $fixedFlights$ to define all conflicts for a given angle.
 
-Since this conflict set will be used to create a partition of conflicts, we must include information about the angle used in the non-trailing constraints to ensure the model's correctness. This approach eliminates degenerate constraints, although it may introduce some unnecessary constraints, which can later be removed by a presolver.
+Since this conflict set will be used to create a partition of conflicts, we must include information about the angle used in the non-trailing constraints to ensure the model's correctness. This approach eliminates degenerate constraints, although it may keep some unnecessary constraints, which can later be removed by a presolver.
 
 Additionally, we break symmetries by considering each conflict pair only once, using $\hat{t}^{ear}$ as a reference. In case of a tie, we apply a lexicographic ordering. However, with the introduction of angles, we cannot guarantee that this results in a strict partition.
 
 Finally, we define the set \textit{allConf} as follows:
 \begin{align}\label{eq:set:allConf}
-    allConf = &\{(i,j,v,a) \in F\times F\times V\times dA \text{ s.t. }  
+    allConf = &\{(i,j,x,a) \in F\times F\times V\times dA \text{ s.t. }  
     (i,x) \in fixedFlights,\nonumber\\& (j,x) \in fixedFlights, i\neq j,  
     (\hat{t}^{ear}_{i,x} < \hat{t}^{ear}_{j,x} \lor (\hat{t}^{ear}_{i,x} = \hat{t}^{ear}_{j,x} \land i<j)) \}
 \end{align}
@@ -56,7 +56,7 @@ where $dA$ represents the set of all possible angle values.
 Given the set \textit{allConf}, we can partition it into the various types of conflicts that may arise.
 
 \begin{itemize}
-    \item \textbf{Diverging conflict}: If there exists a triple of nodes $x, x_1, x_2$ such that $wFixed_{x,x_1,i} = wFixed_{x_2,x,j} = 1$ or $wFixed_{x,x_1,j} = wFixed_{x_2,x,i} = 1$, then we include the tuple $(i,j,x,x_1,x_2, \alpha_{x,x_1,x_2})$ in the set \textit{diver}.
+    \item \textbf{Diverging conflict}: If there exists a triplet of nodes $(x, x_1, x_2)$ such that \newline $wFixed_{x,x_1,i} = wFixed_{x_2,x,j} = 1$ or $wFixed_{x,x_1,j} = wFixed_{x_2,x,i} = 1$, then we include the tuple $(i,j,x,x_1,x_2, \alpha_{x,x_1,x_2})$ in the set \textit{diver}.
     
     It is important to note that in this case, we explicitly consider both conditions $wFixed_{x,x_1,i} = wFixed_{x_2,x,j} = 1$ and $wFixed_{x,x_1,j} = wFixed_{x_2,x,i} = 1$ since this relation is not symmetric. However, we ensure that the same tuple is not considered twice.
     
@@ -70,7 +70,7 @@ Given the set \textit{allConf}, we can partition it into the various types of co
         & wFixed_{x,x_1,j} + wFixed_{x_2,x,i} = 2 \land \alpha_{x,x_1,x_2} = a \}
     \end{align}
     
-    \item \textbf{Merging conflict}: If there exists a triple of nodes $x, x_1, x_2$ such that $w_{x_1,x,i} = w_{x_2,x,j} = 1$, then we include the tuple $(i,j,x,x_1,x_2, \alpha_{x,x_1,x_2})$ in the \textit{merge} set.
+    \item \textbf{Merging conflict}: If there exists a triplet of nodes $(x, x_1, x_2)$ such that $w_{x_1,x,i} = w_{x_2,x,j} = 1$, then we include the tuple $(i,j,x,x_1,x_2, \alpha_{x,x_1,x_2})$ in the \textit{merge} set.
     Since this case is symmetric, we only need to consider one of the two possible cases.
 
     \begin{align}
@@ -79,7 +79,7 @@ Given the set \textit{allConf}, we can partition it into the various types of co
     wFixed_{x_1,x,j} + wFixed_{x_2,x,i} = 2 \land \alpha_{x,x_1,x_2} = a \}
     \end{align}
 
-    \item \textbf{Splitting conflict}: If there exists a triple of nodes $x, x_1, x_2$ such that $w_{x,x_1,i} = w_{x,x_2,j} = 1$, then we include the tuple $(i,j,x,x_1,x_2, \alpha_{x,x_1,x_2})$ in the \textit{split} set. As in the case of merging conflicts, we consider only one case due to symmetry.
+    \item \textbf{Splitting conflict}: If there exists a triplet of nodes $(x, x_1, x_2)$ such that $w_{x,x_1,i} = w_{x,x_2,j} = 1$, then we include the tuple $(i,j,x,x_1,x_2, \alpha_{x,x_1,x_2})$ in the \textit{split} set. As in the case of merging conflicts, we consider only one case due to symmetry.
     \begin{align}
         split = \{(i, j, x, a, x_1, x_2) \in F \times F \times V \times dA \times V \times V \text{ s.t. } \nonumber\\
         (i,j,x,a) \in allConf \land (x,x_1) \in E \land (x,x_2) \in E \land \nonumber\\
@@ -96,7 +96,10 @@ Given the set \textit{allConf}, we can partition it into the various types of co
         & (x,y) \in E \land wFixed_{x,y,i} + wFixed_{x,y,j} = 2 \}
     \end{align}
 \end{itemize}
-We want to consider each tuple only once. If the same tuple $(i,j,x,a) \in allConf$ appears in multiple sets, we will use the following priority order to determine where it should be placed:  
+In order to avoid degenerate constrains, we want to consider only once (or less) each tuple $(i,j,x,a)\in allConf$ , then if that tuple 
+%We want to consider each tuple only once.
+%If the same tuple $(i,j,x,a) \in allConf$ 
+appears in multiple sets, we will use the following priority order to determine where it should be placed:  
 \[
 diver \preceq merge \preceq split \preceq trail
 \]
@@ -105,11 +108,14 @@ Since the \textit{diver} constraint has the largest angle (which we need to cons
 \section{The Variables}
 The variables remain the same as in the general model. However, in this case, we need to distinguish between those defined over $freeF$ (which we will call \textit{free}) and those defined over $fixedFlights$ (which we will call \textit{fixed}). We denote the free variables using the names introduced in Section~\ref{sec:modelVar}, while we append the suffix \textbf{Fixed} to the fixed ones.
 
-A special case is the \textit{passFirst} variable, which has multiple possible scenarios, leading to different binary variables:
+A special case is the binary variable \textit{passFirst}, which has multiple possible scenarios, leading to different binary variables:
 
 \begin{itemize}
     \item $passFirst$: defined when both flights are free, covering all $V$.
+    %da migliorare quanto segue
     \item $pass1Fixed$: defined when a conflict occurs between a free flight and a fixed flight; it is only defined at nodes traversed by the fixed flight.
+    We can have two possibilities in this case: in both case the first flight is fixed and the second one is free
+    $pass1Fixed_{i,j,x}=1$, which means that flight $i$ will pass before $j$ on node $x$ and $pass1Fixed_{j,i,x}=1$, in this case flight $j$ will pass before $i$ on $x$.
     \item $pass2Fixed$: defined when both flights are fixed; in this case, it is only defined at nodes where the paths of the two flights intersect.
     %\item $passIFixed$: defined when the first flight $i$ is fixed and the second flight $j$ is free; it is only defined at nodes that flight $i$ traverses.
     %\item $passJFixed$: analogous to $passIFixed$, but with the first flight $i$ free and the second flight $j$ fixed.
@@ -123,8 +129,9 @@ Instead of using $pass1Fixed$, we can split it into two separate variables to el
 \end{itemize}
 Additionally, we introduce two new variables to define the objective function:
 \begin{itemize}
-    \item $t^{|ear|}_{f}$: defined for flights that are neither high-priority nor non-collaborative intruders. It represents the absolute difference between $t^\text{ear}$ and $\hat{t}^\text{ear}$ at the ending node of each flight.
-    \item $\tau$: defined only for priority flights, representing the units of time delay for each priority flight. It must be an integer.
+    \item $t^{|ear|}_{f}$: with $f\in\mathcal F\setminus\{AP\cup NC\}$.
+    It represents the absolute difference between $t^\text{ear}$ and $\hat{t}^\text{ear}$ at the destination node of each flight.
+    \item $\tau_i$:  with $i\in AP$, it  represent the units of time delay for each priority flight. It must be an integer.
 \end{itemize}
 
 \section{Constrains}
@@ -137,7 +144,7 @@ We obtain the following constraint, which applies to both free and fixed flights
 tini &\leq t^{ear}_{f,s_f} &\forall f \in F \setminus inFlights
 \end{align}  
 
-As we can easily see, the flow-conservation constraints presented in Chapter~\ref{sssec:spp} must be defined only for free flights.  
+As we can easily see, the flow-conservation constraints presented in Chapter~\ref{sssec:spp} must be defined only for free flights (with constrains \eqref{eq:spp:source},\eqref{eq:spp:sink},\eqref{eq:spp:nodes})
 
 Regarding conflict constraints, since we separated fixed and free variables, we must consider four cases:  
 \begin{enumerate}
@@ -147,11 +154,11 @@ Regarding conflict constraints, since we separated fixed and free variables, we 
     \item The first flight is free, and the second one is fixed.
 \end{enumerate}  
 
-We also remember that, for non-trailing conflicts, we have to consider two other possible cases for each constraint: given $(x,x_1,x_2)$ as the conflict nodes, with $x$ being the common node, and $(i,j)$ the flights that have a conflict, we have to consider the case where $i$ passes through $x_1$ and the case when $j$ passes through $x_1$.
+We also recall that, for non-trailing conflicts, we have to consider two other possible cases for each constraint: given $(x,x_1,x_2)$ as the conflict nodes, with $x$ being the common node, and $(i,j)$ the flights that have a conflict, we have to consider the case where $i$ passes through $x_1$ and the case when $j$ passes through $x_1$.
 
 Since the obtained constraint is the same, due to symmetry, for merging and splitting conflicts, we have to consider both cases only for diverging conflicts.
 
-In the end, the constraints \ref{eq:constrain:merge} and \ref{eq:constrain:split} each become 8, while \ref{eq:constrain:diver} becomes 16 (as we will see, we will use indicator constraints in some cases).
+In the end, the constraints \ref{eq:constrain:merge} and \ref{eq:constrain:split} each will expand in 8 constrains, while \ref{eq:constrain:diver} will expand in 16 constrains (as we will see, we will use indicator constraints in some cases).
 
 
 We will describe only the splitting case, since the others are obtained in the same manner. 
@@ -162,59 +169,62 @@ For the sake of simplicity, we will denote the variables simply as $t^{ear}, t^{
 \hat t^{ear}_{i,x} < \hat t^{ear}_{j,x} \lor (\hat t^{ear}_{i,x} = \hat t^{ear}_{j,x} \land i<j).
 \]
 
-Let's start with the case where both flights are fixed. In this scenario, we only need to consider the variable representing the safety time and the binary variable indicating which flight will pass first. This case is the most similar to the original formulation.
+Let us start with the case where both flights are fixed. In this scenario, we only need to consider the variable representing the safety time and the binary variable indicating which flight will pass first. 
+This case has the same meaning presented in the original formulation presented in \cite{pelegrin-2023}.
 
-In the proposed model, we used the set presented in Section~\ref{sec:setConflict} to avoid degeneracy. However, in this section, we provide the expanded form of the constraint.
-
-{\tiny
-\begin{align}\label{eq:constrain:mercedesBothFixed}
+In the proposed model, we used the set presented in Section~\ref{sec:setConflict} to avoid degeneracy. However, in this section, we provide the expanded form of the constraint.\newline
+\scalebox{0.9}{ % Cambia il valore per ridimensionare (es. 0.8 per l'80% della grandezza originale)
+\begin{minipage}{\textwidth} % Necessario per evitare problemi con l'align
+ \begin{align}\label{eq:constrain:mercedesBothFixed}
 \nonumber
 t^{ear}_{j,x} - t^{lat}_{i,x} &
-\geq S(\alpha^-_{x,x_1,x_2})\frac{D}{v_{min}} \cdot passFirst_{i,j,x} - 
-& i \in \text{fixedF}, j \in \text{fixedF}, x \in V, \\
+\geq S(\alpha^-_{x,x_1,x_2})\frac{D}{\underline v_{i,x_1,x_2}} \cdot passFirst_{i,j,x} - 
+& \forall i \in \text{fixedF}, j \in \text{fixedF}, x \in V, \\
 \nonumber
 & -\text{bigM} \cdot (1-passFirst_{i,j,x})
 & \text{ s.t. } (x,x_1,x_2) \in \text{conflictsNodes} \land i\neq j \land \\
 && \land  wFixed_{x_1,x,i} + wFixed_{x_2,x,j} = 2 \land x_1\neq x_2
-\end{align}
+    \end{align}
+    \end{minipage}
 }
-Consider now the case where only one flight has a fixed path, while the other can still change its trajectory. In this case, we cannot use both $wFixed$ terms in the constraint definition; instead, we need to deactivate the constraint using $w$.
+
+Let us now consider the case where only one flight has a fixed path, while the other can still change its trajectory. In this case, we cannot use both $wFixed$ terms in the constraint definition; instead, we need to deactivate the constraint using $w$.
 
 We have to consider this constraint twice: once when $j$ is the fixed flight and once when $i$ is the fixed flight. Here, we analyze the first case, since the other one is symmetric, and it is sufficient to switch which flight is free and which one is fixed.
-When considering \( passFirst_{j,i,x} \), to maintain consistency with other variables, we must take its complement, i.e., \( 1 - passFirst_{j,i,x} \).
-
-
-{\tiny
+When considering \( passFirst_{j,i,x} \), to maintain consistency with other variables, we must take its complement, i.e., \( 1 - passFirst_{j,i,x} \).\newline
+\scalebox{0.8}{ % Cambia il valore per ridimensionare (es. 0.8 per l'80% della grandezza originale)
+\begin{minipage}{\textwidth} % Necessario per evitare problemi con l'align
 \begin{align}\label{eq:constrain:mercedesOneFixed}
 \nonumber
 t^{ear}_{j,x} - t^{lat}_{i,x} &
 \geq S(\alpha^-_{x,x_1,x_2})\frac{D}{v_{min}} \cdot passFirst_{i,j,x} - 
-& i \in \text{freeF}, j \in \text{FixedF}, x \in V, \\
+& \forall i \in \text{freeF}, j \in \text{FixedF}, x \in V, \\
 \nonumber
 & -\text{bigM} \cdot (1-passFirst_{i,j,x}) - \text{bigM} \cdot (1-w_{x_1,x,i})
 & \text{ s.t. } (x,x_1,x_2) \in \text{conflictsNodes} \land i\neq j \land \\
 && \land wFixed_{x_2,x,j} = 1 \land x_1\neq x_2
 \end{align}
+\end{minipage}
 }
 
-The last case occurs when both flights can change their paths. In this scenario, we cannot filter the paths using $wFixed$; instead, we must consider all the possible (interesting) pairs of flights and edges.
+The last case occurs when both flights can change their paths. In this scenario, we cannot filter the paths using $wFixed$; instead, we must consider all the possible (interesting) pairs of flights and arcs.
 
-We use indicator constraints, but as shown in \ref{chap:linearization}, they can be transformed into linear constraints by introducing auxiliary variables and using $bigM$.
-
-Thus, the constraint is as follows:
-{\tiny
+We use indicator constraints, but as shown in \ref{sec:linearization}, they can be transformed into linear constraints by introducing auxiliary variables and using $bigM$.
+Thus, the constraint is as follows:\newline
+\scalebox{0.7}{ % Cambia il valore per ridimensionare (es. 0.8 per l'80% della grandezza originale)
+\begin{minipage}{\textwidth} % Necessario per evitare problemi con l'align
 \begin{align}\label{eq:constrain:mercedesNoFixed}
 (w_{x_1,x,i} + w_{x_2,x,j} = 2) \implies &
-t^{ear}_{j,x} - t^{lat}_{i,x} \geq S(\alpha^-_{x,x_1,x_2})\frac{D}{v_{min}} \cdot passFirst_{i,j,x} 
+t^{ear}_{j,x} - t^{lat}_{i,x} \geq\nonumber\\
+&\geq S(\alpha^-_{x,x_1,x_2})\frac{D}{v_{min}} \cdot passFirst_{i,j,x}-
 & i \in freeF, j \in freeF, x \in V, (x_1,x) \in E, (x_2,x) \in E \nonumber\\
 & - bigM\cdot (1-passFirst_{i,j,x})
 & \text{ s.t. } (x,x_1,x_2) \in \text{conflictsNodes} \land i\neq j \land x_1\neq x_2
 \end{align}
+\end{minipage}
 }
 
-%inserire qui pezzo su evitare vincoli degeneri e uso degli insiemi
-
-Finally, we'll introduce some new constraints that are needed to define the value of some variables or to fix some variable values.  
+Finally, we introduce some new constraints that are needed to define the value of some variables or to fix some variable values.  
 As we introduced in the presentation of the variables, we added \( t^{|ear|} \), which represents the absolute value of the difference between \( t^\text{ear} \) and \( \hat{t}^\text{ear} \) at the ending node for each flight.  
 
 We can define it through the following constraints in the general case; in the real model, it is divided into free and fixed flights:
@@ -226,8 +236,8 @@ t^{|ear|}_{f} &\geq \hat{t}^{ear}_{f,e_f} - t^{ear}_{f,e_f}, & \forall f\in F\se
 
 We also added the delay variable for priority flights, \( \tau \), which is defined as follows:
 \begin{align}\label{eq:constrain:defineDelayPriorityMercedes}
-t^{ear}_{i,x} &= \hat{t}^{ear}_{i,x} + \tau_i, & \forall i\in AP\\
-t^{lat}_{i,x} &= \hat{t}^{lat}_{i,x} + \tau_i, & \forall i\in AP
+t^{ear}_{i,x} &= \hat{t}^{ear}_{i,x} + \tau_i, & \forall (i,x) \in fixedFlights\text { s.t. } i\in AP\\
+t^{lat}_{i,x} &= \hat{t}^{lat}_{i,x} + \tau_i, & \forall (i,x) \in fixedFlights\text { s.t. } i\in AP
 \end{align}
 
 Since some flights are already in progress and have passed through certain nodes at specific times, we need to impose those values, which we can do using constraints \ref{eq:constrain:fixTimeEar}, \ref{eq:constrain:fixTimeLat}, and \ref{eq:constrain:fixPassedW}.  
@@ -248,26 +258,27 @@ w_{x,x',i} &= 1 & \forall (i,x') \in timeFixedFree \land (i,x,x')\in passedFreeF
 Since free flights may choose a path created by non-collaborative intruders, it is necessary to introduce a constraint to prevent this scenario.  
 Thus, we impose the following restriction:
 \begin{align}
-    w_{x,y,i} & = 0, \quad \forall (x,y) \in nonAvailableEdges, \quad f \in freeF
+    w_{x,y,i} & = 0, \quad \forall (x,y) \in nonAvailableArcs, \quad f \in freeF
     \label{eq:constrain:avoidShortcut}
 \end{align}
 
 
 \section{Objective function}
 As we have seen, adding high-priority flights requires considering another delay, and thus, we must modify the objective function.  
-Since we can change the path, we cannot use the one defined by Mercedes in \eqref{eq:obj:MercedesFixed}:  
+Since we can change the path, we cannot use the one defined by Pelegrin in \eqref{eq:obj:MercedesFixed}:  
 \begin{align}\label{eq:obj:MercedesFixed}
-\sum_{f_i \in \mathcal{F}^1} \sum_{\substack{x\in \mathcal{P}_i:\\ x\neq x^i_2,x_{k_i}^i }} |\hat{t}^{ear}_{i,x}-t^{ear}_{i,x}|
+\text{minimize } z:\sum_{f_i \in \mathcal{F}^1} \sum_{\substack{x\in \mathcal{P}_i:\\ x\neq x^i_2,x_{k_i}^i }} |\hat{t}^{ear}_{i,x}-t^{ear}_{i,x}|
 + M\sum_{f_i\in \mathcal{F}^2}\tau_i
 \end{align}
-where we used $W$ instead of $M$, $\mathcal{F}^1$ represents normal flights, and $\mathcal{F}^2$ the high-priority ones.  
+
+$\mathcal{F}^1$ represents normal flights, while $\mathcal{F}^2$ denotes high-priority ones. The parameter $M$ is a large constant, but we use $W$ instead to distinguish it from the one used for linearization.
 
 Since the fixed path for each flight is lost, we can retain the part concerning high-priority flights, but we must modify the part regarding normal flights.  
 We decided to consider only the ending node since, along with the starting one, it is the only one we are completely certain the flight will pass through.  
 This leads to the following revised objective function:  
 \begin{align}\label{eq:obj:MercedesFree}
-\sum_{f_i \in \mathcal{F}^1} t^{|ear|}_{f}+
-W\sum_{f_i\in \mathcal{F}^2}\tau_i
+\text{minimize} z:\sum_{i \in \mathcal{F}\setminus\{AP\cup NC\}} t^{|ear|}_{i}+
+W\sum_{i\in AP}\tau_i
 \end{align}
 
 \end{document}

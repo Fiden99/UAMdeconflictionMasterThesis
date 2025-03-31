@@ -1,0 +1,123 @@
+\documentclass[../main.tex]{subfiles}
+
+
+
+\begin{document}
+
+\begin{algorithm}
+\caption{propagate the times with hypergraph}
+\label{alg:hyperalgo}
+\begin{algorithmic}
+\Require{graph $G=(V,E)$, set of flights $F$, path of each flight $P_i\forall i\in F$, safety precalculated time $\hat t_{x,i}\forall i \in F, x\in P_i$, speed matrix $v$, disruption $\delta$, set of priority flights $F_2$, distance $d$, safety distance $D$ }
+\Ensure{interval of safe earliest time for flight can traverse node}
+
+\State $t\gets$ propagateTime$(F,P,\hat t,\delta)$ \Comment{algo \ref{algo:disruption}}
+\State $Z\gets $SearchConflict$(G,F,P,t,\hat t, F_2)$ \Comment{algo \ref{algo:findConflictsHyper}}
+\State $G'=(V,A,A')\gets (V,A,Z)$ %hypergraph with two set of arcs
+\State $\Psi\gets \left [x_1^1,\dots, x_1^ {|F|}\right]$
+\While{$\exists i \in F: \Psi[i]\neq -1$}
+    \State $i\gets$ first $(j\in F: \Psi[j]\neq -1)$
+    \While{$\Psi[i]\neq -1$}
+        \State $x\gets \Psi[i]$
+        \If{$\exists z: (z,x)\in A'$}
+            \State BackPropagation$(G',P,z, (z,x).\text{flight}, \{((z,x), (z,x).\text{flight})\},d,v,D,\Psi)$ \Comment{algo \ref{alg:backPropagation}}
+        \Else
+            \If{$x=x_1^i$}
+                \State $t^d_{x,i}=\hat t^d_{x,i}$
+                \State $t^a_{x,i}=\hat t^a_{x,i}$
+            \Else
+            \State $y\gets$prec$_{x,i}$
+            \State $t^d_{x,i}\gets t^d_{y,i} + \frac d {v_{x,i}}$ \Comment{versione semplificata, da aggiornare con intervalli temporali date da velocità differenti}
+            \State $t^a_{x,i}\gets t^a_{y,i} + \frac d {v_{x,i}}$
+            \EndIf
+            \State $\Psi[i]\gets$ suc$_{x,i}$
+        \EndIf
+    \EndWhile
+\EndWhile
+
+
+\end{algorithmic}
+\end{algorithm}
+\newpage
+
+\begin{algorithm}
+\caption{BackPropagation}\label{alg:backPropagation}
+\begin{algorithmic}
+\Require{hyper-graph $G'=(V,A,A')$, path $P_i\forall i \in F$, node $x$ to back-propagate, flight $f$,  set of considered conflicts $CF$, distance $d$, speed $v$, safety distance $D$, vector of last visited node for each flight $\Psi$}
+\Ensure{interval of safe earliest of $x$}
+\If{$x = x_1^f \land \nexists (z,x)\in A'$} %come posso segnare lo starting point
+    \State $t^a(x,f)\gets \hat t^a$
+    \State $t^d(x,f)\gets \hat t^d$
+    \State $\Psi[f]\gets $suc$_{x,i}$
+    \State \textbf{return} 
+    %TODO inserire psi anche dopo
+\ElsIf{$x = x_1^f \land \exists (z,x)\in A'$}
+    \ForAll{$(z,x) \in A': ((z,x),(z,x).$flight$) \notin CF$}
+        \State BackPropagation$(G',P,z,(z,x).$flight$, CF\cup\{(z,x),(z,x).$flight$\},d,v,D,\Psi)$
+        \State $t^a(x,f)\gets \max\{t^a_{z,(z,x).\text{flight}} + \frac D s, t^a(x,f)\}$
+        \State $t^d(x,f)\gets \max\{t^d_{z,(z,x).\text{flight}} + \frac D s, t^d(x,f)\}$
+        \State $\Psi[f]\gets$ suc$_{x,f}$
+    \EndFor
+    \State \textbf{return} 
+\EndIf
+\If{$\nexists z: (z,x)\in A'$}
+    \State $z\gets $prec$(x,f)$
+    \State BackPropagation$(G',P,z,f,CF,d,v,D,\Psi)$    
+    \State $t^a(x,f)\gets t^a_{z,f} + \frac d s$
+    \State $t^d(x,f)\gets t^d_{z,f} + \frac d s$
+    \State $\Psi[f]\gets$ suc$_{x,f}$
+
+\Else
+    \ForAll{$(z,x)\in A'$}
+        \If{$((z,x),(z,x).$flight$)\notin CF$}
+            \State BackPropagation$(G',z,(z,x).$flight$, CF\cup\{(z,x),(z,x).$flight$\},d,v,D,\Psi)$
+            \State $t^a(x,f)\gets \max\{t^a_{z,(z,x).\text{flight}} + \frac D s, t^a(x,f)\}$
+            \State $t^d(x,f)\gets \max\{t^d_{z,(z,x).\text{flight}} + \frac D s, t^d(x,f)\}$
+         \EndIf
+        \State $\Psi[f]\gets$ suc$_{x,f}$
+    \EndFor
+\EndIf
+\State \textbf{return}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Find conflicts}
+\label{algo:findConflictsHyper}
+\begin{algorithmic}
+\Require graph $G$, set of flights $F$, path for each flight $P_i\forall i\in F$, safety arrival and departure time $(t_{x,i}^a,t_{x,i}^d) \forall i\in F, \forall x\in P_i$, pre-calculated safety time $(\hat t^a_{x,i},\hat t^d_{x,i})$,set of priority flights $F_2$
+\Ensure set of conflicts, with the first node is the one who pass first
+\State $C\gets \emptyset$
+\ForAll{$i \in F$}
+    \ForAll{$j\in F: i\neq j$}
+        \ForAll{$ x \in P_i\cap P_j$}
+            \If{$t^d_{x,i}\leq t^a_{x,j} \lor t^a_{x,i}\geq t^d_{x,j}$}
+                \If{$ i \in F_2 \land j\notin F_2$}
+                    \State $c \gets (\text{prec}_i(x),x)$
+                    \State $c.$flight$\gets i$
+                    \State $C\gets C\cup\{c\}$
+                \ElsIf{$j \in F_2 \land i \notin F_2$}
+                    \State $c \gets (\text{prec}_j(x),x)$
+                    \State $c.$flight$\gets j$
+                    \State $C\gets C\cup\{c\}$                
+                \Else
+                    \If{$\hat t^d_{x,i} \leq \hat t^d_{x,j}$}
+                        \State $c \gets (\text{prec}_i(x),x)$
+                        \State $c.$flight$\gets i$
+                        \State $C\gets C\cup\{c\}$                    
+                    \Else
+                        \State $c \gets (\text{prec}_j(x),x)$
+                        \State $c.$flight$\gets j$
+                        \State $C\gets C\cup\{c\}$
+                    \EndIf
+                \EndIf
+            \EndIf
+        \EndFor
+    \EndFor
+\EndFor
+\State \textbf{return} C
+\end{algorithmic}
+\end{algorithm}
+
+
+\end{document}

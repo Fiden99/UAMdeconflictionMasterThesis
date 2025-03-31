@@ -25,7 +25,6 @@
 \usepackage{amssymb,amsmath,amsthm}
 \usepackage{graphicx}
 \usepackage{url}
-\usepackage[pdfa]{hyperref}
 \usepackage{epsfig}
 \usepackage[english]{babel}
 \usepackage{setspace}
@@ -36,6 +35,7 @@
 \usepackage{comment}
 \usepackage[section]{placeins}
 \usepackage[a-1b]{pdfx}
+\usepackage[pdfa]{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage{csquotes}
 \usepackage{tikz}
@@ -57,11 +57,14 @@
 \newenvironment{teor}{\begin{myteor}\sl}{\end{myteor}}
 %
 \usepackage[
-backend=biber,
-style=alphabetic,
-sorting=ynt
+    backend=biber,
+    style=authoryear-comp,
+    sorting=ynt,
+    maxcitenames=6,
+    maxbibnames=10
 ]{biblatex}
 \addbibresource{biblio.bib}
+
 \usepackage{subfiles}
 %
 %			TITOLO
@@ -94,7 +97,7 @@ sorting=ynt
 %
 \beforepreface
 \prefacesection{}
-        {\hfill \Large {\sl dedicato a \dots}}
+        {\hfill \Large {\sl dedicato a tutti coloro che mi sono stati vicino nei momenti difficili}}
 % 
 %			PREFAZIONE
 %
@@ -109,10 +112,11 @@ sorting=ynt
 This thesis is organized as follows:
 \begin{itemize}
     \item \textbf{Chapter 1}: We introduce the problem and review previous works.
-    \item \textbf{Chapter 2}: We present a general-use linear model to define the problem, highlight the differences with Pelegrin's work, and describe how we generate instances for testing.
-    \item \textbf{Chapter 3}: We introduce a modified model for solving Pelegrin's tactical deconfliction with some fixed paths.
-    \item \textbf{Chapter 4}: We present a heuristic approach for solving Pelegrin's tactical deconfliction while allowing path modifications.
-    \item \textbf{Chapter 5}: We analyze the results obtained from both the mathematical model and the heuristic for solving tactical deconfliction.
+    \item \textbf{Chapter 2}: We present a general-use Mixed integer linear model to define the problem, highlight the differences with previous works.
+    \item \textbf{Chapter 3}: We introduce a new model for solving tactical deconfliction with some fixed paths.
+    \item \textbf{Chapter 4}: We present a heuristic approach for solving tactical deconfliction while allowing path modifications.
+    \item \textbf{Chapter 5}:We describe the instances used for testing and explain how they were generated.
+    \item \textbf{Chapter 6}: We analyze the computational results obtained by both the mathematical model and the heuristic for solving tactical deconfliction.
 \end{itemize}
 % 
 % 
@@ -129,24 +133,26 @@ This thesis is organized as follows:
 \chapter{Definition of the problem}
 %\newpage
 \section{The model}\label{sec:modelDescription}
-We define the problem through its mathematical model.
-First, we introduce the decision variables, followed by an explanation of the input data.
-Finally, we present the constraints and describe the techniques used to linearize the nonlinear ones.
+We define the problem using its mathematical model.  
+First, Section \ref{sec:modelData} explain the input data, followed by Section \ref{sec:modelVar} which introduces the decision variables.
+%,Section \ref{sec:modelData}, which explains the input data.  
+Next, we present the constraints in Section \ref{ssec:bigModel:constrains}, and finally, in Section \ref{sec:linearization}, we describe the techniques used to linearize the nonlinear constraints.  
 \subfile{thesis/sections/generalModel/variablesAndData}
 \subfile{thesis/sections/generalModel/constraints}
 \subfile{thesis/sections/generalModel/linearization}
-\newpage
 \subfile{thesis/sections/mercedesChanges}
-\newpage
-\section{Testing maps}\label{sec:maps}
-\subfile{thesis/sections/maps/topologies}
-\subfile{thesis/sections/maps/generationOfIstances}
+%\section{Testing maps}\label{sec:maps}
 
 \chapter{Exact Method}\label{chap:ExactAlgo}
 \subfile{thesis/sections/PelegrinModification}
+
 \chapter{Heuristic Algorithms}\label{chap:HeuristicAlgo}
 \subfile{thesis/sections/heuristic}
-%Da controollare risultati computazionali
+
+\chapter{Maps used and instance creation}\label{sec:maps}
+\subfile{thesis/sections/maps/topologies}
+\subfile{thesis/sections/maps/generationOfIstances}
+
 \chapter{Computational results}\label{chap:results}
 In this chapter, we present the results obtained for both the model and the heuristic.  
 For a complete overview of all instance results, refer to \cite{Magi_Methods_for_Traffic_2025}.  
@@ -169,25 +175,25 @@ In both cases, we performed our calculations on the Atlas server at Polytechniqu
 \section{Pelegrin Model with Path Changing Capability}\label{sec:MercedesModifedModel}
 \subfile{thesis/models/MercedesModel}
 \chapter{The algorithms}
-\section{The math-heuristic}\label{alg:matheuristic}
+\section{The matheuristic}\label{alg:matheuristic}
 \subfile{thesis/pseudocode/matheuristic}
 \chapter{Tables}
-\section{Mercedes}
+\section{Pelegrin's instances}
 %number of variables
-\subsection{Number of variables for fixed Flights}
+\subsection{Number of variables for fixed flights}
 \subfile{thesis/tables/mercedes/variables/SummaryTablesFixed}
-\subsection{Number of variables for free Flights}
+\subsection{Number of variables for free flights}
 \subfile{thesis/tables/mercedes/variables/SummaryTablesFree}
 \subsection{Comparison between number of variables for free and fixed flights}
 \subfile{thesis/tables/mercedes/variables/ComparisonTables}
 %times and results
-\subsection{Results and calculation time for fixed Flights}
+\subsection{Results and calculation time for fixed flights}
 \subfile{thesis/tables/mercedes/times/SummaryTablesFixed}
-\subsection{Results and calculation time for free Flights}
+\subsection{Results and calculation time for free flights}
 \subfile{thesis/tables/mercedes/times/SummaryTablesFree}
 \subsection{Comparison between results and calculation time for free and fixed flights}
 \subfile{thesis/tables/mercedes/times/ComparisonTablesResults}
-\section{heuristic}
+\section{Results for the matheuristic}
 \subsection{Summary tables}
 \subfile{thesis/tables/heuristic/times/SummaryTables}\label{chap:heuristic:tables}
 \subsection{Comparison between heuristic and no fixed path}

@@ -1,0 +1,52 @@
+\documentclass[../main.tex]{subfiles}
+
+
+
+\begin{document}
+% Attenzione, pseudopolinomiale
+
+
+\begin{algorithm}
+\caption{propagate time, stop each time you find a conflict}\label{alg:restartAlgo}
+\begin{algorithmic}
+\Require{graph $G=(V,E)$, set of flights $F$, path of each flight $P_i\forall i\in F$, safety precaculated time $\hat t_{i,x} \forall i\in F,\forall x\in P_i$ , speed matrix $v$,distruption $\delta_i \forall i \in F$, set of priority flights $F_2$, distance $d$, safety distance $D$}
+\Ensure{reoptimized safety time }
+\State $t\gets$ updateTime$(F,P,\hat t,\delta)$ \Comment{algo \ref{algo:disruption}}
+\State $\Psi\gets [x_1^1,\dots,x_1^{|F|}]$ \Comment{array which initially contains the starting node for each flights}
+\ForAll{$ i \in F$}
+    \ForAll{$x \in P_i$}
+        \State check$_{x,i}\gets$ False
+    \EndFor
+\EndFor
+\State $C\gets$findConflicts$(F,P,t,\hat t,F_2)$
+\State $S\gets$ Stack.Empty
+\While {$\exists i\in F : \Psi[i]\neq -1$}
+    \If{$\neg S.$isEmpty}
+        \State $i\gets S$.pop()
+    \Else
+        \State $i\gets $first$(f\in F: \Psi[f]\neq -1)$ \Comment{primo elemento di $F$ che si trova che non è ancora finito}
+    \EndIf
+    \While {$\Psi[i]\neq -1$}
+        \State $x\gets \Psi[i]$
+        \If{$\exists j\in F: (j,i,x)\in C\land \neg $check$_{x,j}$} \Comment{flight $j$ pass before $i$ through $x$}
+                \State $S.$push$(i)$
+                \State $i\gets j$
+        \ElsIf{$\nexists j \in F: (j,i,x)\in C$} \Comment{no conflict}
+            \State $t^d_{x,i}\gets t^d_{\text{prec}(x,i),i} + \frac {d_{x,i}}{v_{x,i}}$ \Comment{we can improve the extra function time}
+            \State $t^a_{x,i}\gets t^a_{\text{prec}(x,i),i} + \frac {d_{x,i}}{v_{x,i}}$
+            \State check$_{x,i}\gets$ True
+            \State $\Psi[i]\gets $suc$(x,i)$ \Comment{if $x$ is last node, return $-1$}
+        \Else %fare caso conflitto svolto%
+            \Comment{evaluated previous conflict}
+            \State $t^d_{x,i}\gets t^d_{x,j} + \frac D {v_{x,i}}$
+            \State $t^a_{x,i}\gets t^a_{x,j} + \frac D {v_{x,i}}$
+            \State check$_{x,i}\gets$ True
+            \State $\Psi[i]\gets $suc$(x,i)$  \Comment{if $x$ is last node, return $-1$}
+        \EndIf
+    \EndWhile
+\EndWhile
+
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}

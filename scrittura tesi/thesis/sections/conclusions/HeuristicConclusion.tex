@@ -1,7 +1,7 @@
 \documentclass[../../thesis.tex]{subfiles}
 
 \begin{document}
-\section{Heuristic comment}
+\section{Computational results of heuristic}
 
 We ran our computations with the following Gurobi options activated:
 \begin{itemize}
@@ -12,11 +12,14 @@ We ran our computations with the following Gurobi options activated:
     \item Standard time limit set to $30$ seconds, as detailed in Section \ref{sec:alg:mathEuristicDescription}.
 \end{itemize}
 
-As presented in the tables of Chapter \ref{chap:heuristic:tables}, a feasible solution was always found, even in cases where the Mercedes model without fixed paths failed.
+We reduced the timelimit, since it's an heuristic we don't need the optimal solution but a feasible one.
+Also we add mipStart=2 since we have multiple iterations with similar data, so it can be helpful, in the previous case we don't need that.
 
-From the results, computation times are generally low, with the best solution typically found within the first few iterations. Figure \ref{fig:heur:nIter} illustrates that more than half of the instances terminate within four iterations, with a sharp decrease thereafter, except for the last instance, which converges without being trapped in local optima.
+As presented in the tables of Chapter \ref{chap:heuristic:tables}, a feasible solution was always found, even in cases where the Pelegrin's model without fixed paths failed.
 
-Furthermore, Figure \ref{fig:heur:optIter} shows that in most cases, the best solution is found in the first iteration. The majority of optimal solutions are identified within the first five iterations, except for the non-collaborative intruder case, where an improved solution appears in later iterations.
+From the results, computation times are generally low, with the best solution typically found within the first few iterations. Figures \ref{fig:heurDD:nIter},\ref{fig:heurAP:nIter} and \ref{fig:heurNC:nIter} illustrates that more than half of the instances terminate within four iterations, with a sharp decrease thereafter, except for the last instance, which converges without being trapped in local optima.
+
+Furthermore, Figures \ref{fig:heurDD:optIter},\ref{fig:heurAP:optIter} and \ref{fig:heurNC:optIter} shows that in most cases, the best solution is found in the first iteration. The majority of optimal solutions are identified within the first five iterations, except for the non-collaborative intruder case, where an improved solution appears in later iterations.
 
 For each category (high-priority flights, non-collaborative intruder, and cases with 1, 2, and 3 delays), we selected the five slowest and five fastest heuristic instances. We then solved the problem without fixed paths, imposing a one-hour time limit—approximately three times the duration of the slowest instance.
 
@@ -28,54 +31,58 @@ Finally, only two instances required an extended time limit. Both involved delay
 
 \begin{figure}[ht]
     \centering
-    \begin{subfigure}{0.3\textwidth}
+    \begin{subfigure}{0.49\textwidth}
         \centering
         \includegraphics[width=\linewidth]{thesis/picture/heuristic/nIter_histogram_DD.png}
         \caption{Total iterations with delayed flights}
         \label{fig:heurDD:nIter}
     \end{subfigure}
     \hfill
-    \begin{subfigure}{0.3\textwidth}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{thesis/picture/heuristic/optIter_histogram_DD.png}
+        \caption{Optimal iterations with delayed flights}
+        \label{fig:heurDD:optIter}
+    \end{subfigure}
+    \caption{Heuristic results for instances with delayed flights}
+    \label{fig:heur:delay}
+\end{figure}
+\begin{figure}
+\centering
+    \begin{subfigure}{0.49\textwidth}
         \centering
         \includegraphics[width=\linewidth]{thesis/picture/heuristic/nIter_histogram_AP.png}
         \caption{Total iterations with high-priority flights}
         \label{fig:heurAP:nIter}
     \end{subfigure}
     \hfill
-    \begin{subfigure}{0.3\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{thesis/picture/heuristic/nIter_histogram_NC.png}
-        \caption{Total iterations with non-collaborative intruder flights}
-        \label{fig:heurNC:nIter}
-    \end{subfigure}
-    \caption{Total number of iterations needed to complete the heuristic}
-    \label{fig:heur:nIter}
-\end{figure}
-
-\begin{figure}[ht]
-    \centering
-    \begin{subfigure}{0.3\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{thesis/picture/heuristic/optIter_histogram_DD.png}
-        \caption{Optimal iterations with delayed flights}
-        \label{fig:heurDD:optIter}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.3\textwidth}
+    \begin{subfigure}{0.49\textwidth}
         \centering
         \includegraphics[width=\linewidth]{thesis/picture/heuristic/optIter_histogram_AP.png}
         \caption{Optimal iterations with high-priority flights}
         \label{fig:heurAP:optIter}
     \end{subfigure}
+    \caption{Heuristic results for instances with high-priority flights}
+    \label{fig:heur:AP}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{thesis/picture/heuristic/nIter_histogram_NC.png}
+        \caption{Total iterations with non-collaborative intruder flights}
+        \label{fig:heurNC:nIter}
+    \end{subfigure}
     \hfill
-    \begin{subfigure}{0.3\textwidth}
+    \begin{subfigure}{0.49\textwidth}
         \centering
         \includegraphics[width=\linewidth]{thesis/picture/heuristic/optIter_histogram_NC.png}
         \caption{Optimal iterations with non-collaborative intruder flights}
         \label{fig:heurNC:optIter}
     \end{subfigure}
-    \caption{Number of iterations required to find the best heuristic solution}
-    \label{fig:heur:optIter}
+    \caption{Heuristic results for instances with non collaborative intruder}
+    \label{fig:heur:NC}
 \end{figure}
 
 {\tiny

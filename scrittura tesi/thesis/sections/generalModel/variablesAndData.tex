@@ -2,38 +2,46 @@
 
 \begin{document}
 %\section{The model}
-\subsection{The Variables} \label{sec:modelVar}  
-
-We now introduce the variables used in the model.  
-
-First, we define a binary variable \( w_{x,x',i} \) for each flight \( i \) and each arc \( (x,x') \).  
-The variable is set to \( w_{x,x',i} = 1 \) if and only if flight \( i \) uses the arc \( (x,x') \).  
-Thus, this variable allows for path flexibility, eliminating the need to follow a predetermined route for each flight.  
-
-To ensure safe passage through a node \( x \), we introduce \( t^{ear}_{i,x} \) and \( t^{lat}_{i,x} \), which represent the earliest and latest time periods during which flight \( i \) can safely traverse the node \( x \).  
-
-Considering a used arc \( (x,x') \), we define the lower bound \( \underline{t}_{i,x'} \) based on \( t^{ear}_{i,x} \), which represents the minimum time at which flight \( i \) must reach node \( x' \) to maintain a feasible speed.  
-Similarly, the upper bound \( \overline{t}_{i,x'} \) is defined following the same logic to ensure compliance with the maximum speed constraints.  
-
-Finally, we add an integer variable \( ts^\text{ear}_i \) which enforces that flight \( i \) starts at an integer time.
-
 \subsection{The Data} \label{sec:modelData}  
 
 We now present the data required for the model.  
 
-We define the set of flights \( F \), the set of nodes \( V \), and the set of arcs \( E \).  
+We define the set of flights \(\mathcal F \),  and the direct graph $G=(V,E)$, with the set of nodes \( V \), and the set of arcs \( E \).  
 For each arc \( (x,x') \in E \), we denote its distance as \( d(x,x') \).  
 
-For each flight \( i \), we specify its source node \( s_i \) and destination node \( e_i \).  
+For each flight \( i \in\mathcal F\), we specify its source node \( s_i \) and destination node \( e_i \), since the path that will connect those two nodes has to be decided.  
 
-The speed limits are defined by the maximum speed \( \overline{v}_{f,x,x'} \) and the minimum speed \( \underline{v}_{f,x,x'} \) for each flight \( f \) on arc \( (x,x') \).  
+The speed limits are defined by the maximum speed \( \overline{v}_{f,x,x'} \) and the minimum speed \( \underline{v}_{f,x,x'} \) for each flight \( f\in\mathcal F \) on arc \( (x,x')\in E\).  
 
-The radius of the safety disk assigned to each flight is denoted by \( D \). The objective is to ensure that the safety disks of any two flights do not intersect.  
+The diameter of the safety disk assigned to each flight is denoted by \( D \). We must ensure that the safety disks of any two flights do not intersect.  
 
-To model safety constraints based on angular separation, we define the multiplicative factors \( S(\alpha^{+-}_{x,x_1,x_2}) \), \( S(\alpha^{-}_{x,x_1,x_2}) \), and \( S(\alpha^{+}_{x,x_1,x_2}) \) for each triplet of nodes \( (x, x_1, x_2) \) such that arcs exist in the correct direction between \( x, x_1 \) and \( x, x_2 \).  
-These factors help prevent the intersection of safety disks under specific angle conditions \( \alpha \).  
-For further details and to understand how \( \alpha \) is calculated, refer to Section 4.2 of \cite{pelegrin-2023}.  
+To model safety constraints based on angular separation, we define the multiplicative factors \( S(\alpha^{+-}_{x,x_1,x_2}) \), \( S(\alpha^{-}_{x,x_1,x_2}) \), and \( S(\alpha^{+}_{x,x_1,x_2}) \) for each triplet of nodes \( (x, x_1, x_2) \) where arcs exist in the correct direction between \( x, x_1 \) and \( x, x_2 \).  
+Given an angle \( \alpha \), the function \( S(\alpha) \) is defined as follows:  
+\[
+S(\alpha) = 
+\begin{cases} 
+\frac{1}{\sin\alpha} & \text{if } \alpha < \frac{\pi}{2}, \\ 
+1 & \text{otherwise}.  
+\end{cases} 
+\]  
+These factors ensure that safety disks do not intersect under specific angular conditions.  
+For further details on the computation of \( \alpha \), refer to Section 4.2 of \cite{pelegrin-2023}.  
 
-Finally, \( \hat{t}^{ear}_{i,x} \) and \( \hat{t}^{lat}_{i,x} \) represent the precomputed safe time intervals for each flight at each node.  
+Finally, \( \hat{t}^{ear}_{i,x} \) and \( \hat{t}^{lat}_{i,x} \) represent the precomputed safe time intervals of the scheduling, obtained by the strategic deconfliction, for each flight at each node.  
 The procedure for generating these values is described in Section \ref{sec:generationInstance}.  
+
+\subsection{The Variables} \label{sec:modelVar}  
+
+We now introduce the variables used in the model.  
+
+First, we define a binary variable \( w_{x,x',i} \) for each flight \( i\in\mathcal F \) and each arc \( (x,x')\in E \).  
+The variable is set to \( w_{x,x',i} = 1 \) if and only if flight \( i \) uses the arc \( (x,x') \).  
+Thus, this variable provides path flexibility while ensuring that each flight starts and ends at the designated nodes. This eliminates the need to follow a predetermined route for each flight.
+To ensure safe passage through a node \( x \), we introduce \( t^{ear}_{i,x} \) and \( t^{lat}_{i,x} \), which represent the earliest and latest time periods during which flight \( i \) can safely traverse the node \( x \).  
+
+Considering a used arc \( (x,x')\in E \), we define the lower bound \( \underline{t}_{i,x'} \) based on \( t^{ear}_{i,x} \), which represents the minimum time at which flight \( i\in\mathcal F \) must reach node \( x' \) to maintain a feasible speed.  
+Similarly, the upper bound \( \overline{t}_{i,x'} \) is defined following the same logic to ensure compliance with the maximum speed constraints.  
+
+Finally, we add an integer variable \( ts^\text{ear}_i \) which enforces that flight \( i\in\mathcal F \) starts at an integer time.
+
 \end{document}

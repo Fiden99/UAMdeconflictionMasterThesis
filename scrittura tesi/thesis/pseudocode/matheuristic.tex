@@ -4,23 +4,24 @@
 \begin{algorithmic}
 \REQUIRE the graph with  times, the path that inflight, non collaborative flights and high priority flight follows 
 \ENSURE Paths and times for tactical deconflicting
-\STATE $\alpha\gets 4$
-\STATE $it\gets 0$
-\STATE $found\gets$ False
-\STATE $sameOpt\gets 0$
+\STATE $\beta\gets 4$
 \STATE $maxIteration\gets 20$
 \STATE $maxSameOpt\gets 3$
 \STATE $\varepsilon\gets 10^{-4}$
 \STATE $maxTimeUnf\gets 5$
+\STATE $timeLim\gets 30$
+\STATE $it\gets 0$
+\STATE $found\gets$ False
+\STATE $sameOpt\gets 0$
 \FORALL{$f \in F,i \in V,j \in V:(i,j)\in E$}
     \STATE $d^\text{MCF}_{f,i,j}\gets d(i,j)$
 \ENDFOR
 \WHILE{$found=$ false}  
-    \STATE solve the model presented in \ref{sssec:spp}
+    \STATE solve the model presented in \ref{sssec:spp} with variable called $w^P$
     \IF{the problem is unfeasible}
         \STATE \textbf{break}
     \ENDIF
-    \STATE save using $w$ the path obtained by \ref{sssec:spp}
+    \STATE save in $w$ the values of $w^P$
 \algstore{beforeTempT}
 \end{algorithmic}
 \end{algorithm}
@@ -38,10 +39,10 @@
     \ENDWHILE
     \ENDFOR
     \STATE solve model presented in \ref{ssec:deconflictingHeur}
-    \IF{$obtainedSol = False\land$ couldn't find a solution due to timeLimit}
-    \STATE impose timeLimit to $2\cdot (it+1)$ minutes
-    \STATE solve the previous model with timelimit
-    \STATE reset to previous timeLimit
+    \IF{$obtainedSol = False\land$ couldn't find a solution due to timeLimit $timeLim$}
+    \STATE $timeLim\gets 120\cdot (it+1)$
+    \STATE solve the previous model with timelimit $timeLim$
+    \STATE $timeLim\gets 30$
     \ENDIF
     \IF{we have found a feasible solution}
     \STATE $obtainedSol\gets$ True
@@ -67,30 +68,30 @@
     \STATE $found\gets$ True
     \ELSE
     \IF{problem infeasible $\lor$ couldn't obtain a solution in time}
-    \FORALL{$f_i\in F,f_j\in F,x\in V$ s.t. $i\neq j\land (i,x)\in FV\land (j,x) \land (|tempT^{ear}_{i,x} - tempT^{ear}_{i,x}|< maxTimeUnf \lor |\hat t^{ear}_{i,x} - t^{ear}_{i,x}| < maxTimeUnf $}
+    \FORALL{$i\in F,j\in F,x\in V$ s.t. $i\neq j\land (i,x)\in FV\land (j,x) \land (|tempT^{ear}_{i,x} - tempT^{ear}_{i,x}|< maxTimeUnf \lor |\hat t^{ear}_{i,x} - t^{ear}_{i,x}| < maxTimeUnf $}
     \FORALL{$(a,b)\in E$ s.t. $a=x \lor b=x$}
-    \STATE $d^{MCF}_{i,a,b}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{i,a,b},10^5\}$
-    \STATE $d^{MCF}_{j,a,b}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{j,a,b},10^5\}$
+    \STATE $d^{MCF}_{i,a,b}\gets\min\{\sqrt\beta\cdot d^{MCF}_{i,a,b},10^5\}$
+    \STATE $d^{MCF}_{j,a,b}\gets\min\{\sqrt\beta\cdot d^{MCF}_{j,a,b},10^5\}$
     \ENDFOR
     \ENDFOR
     \ELSE
     %trail1
-    \FORALL{$f_i\in F,f_j\in F,x\in V$ s.t. $(i,x)\in FV\land (j,x)\in FV$}
-    \FORALL{$(a,b,y,y')\in trail$ s.t. $a=i\land b=j\land y=x\land\exists$ a trail constrain for such tuple that is active}
-    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y,y'},10^5\}$
-    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y,y'},10^5\}$
+    \FORALL{$i\in F,j\in F,x\in V$ s.t. $(i,x)\in FV\land (j,x)\in FV$}
+    \FORALL{$(a,b,y,y')\in trail$ s.t. $(a=i)\land (b=j)\land (y=x)\land(\exists$ a trail constrain for such tuple that is active)}
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{a,y,y'},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{b,y,y'},10^5\}$
     \ENDFOR
     %trail2
-    \FORALL{$(a,b,y,y')\in trail$ s.t. $a=i\land b=j\land y'=x\land\exists$ a trail constrain for such tuple that is active}
-    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y,y'},10^5\}$
-    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y,y'},10^5\}$
+    \FORALL{$(a,b,y,y')\in trail$ s.t. $(a=i)\land (b=j)\land (y'=x)\land(\exists$ a trail constrain for such tuple that is active)}
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{a,y,y'},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{b,y,y'},10^5\}$
     \ENDFOR
     %merge
-    \FORALL{$(a,b,y,y_1,y_2)\in merge$ s.t. $a=i\land b=j\land y=x\land \exists$ a merge constrain for such tuple that is active}
-    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y_1,y},10^5\}$
-    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y_1,y},10^5\}$    
-    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y_2,y},10^5\}$
-    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y_2,y},10^5\}$
+    \FORALL{$(a,b,y,y_1,y_2)\in merge$ s.t. $(a=i)\land (b=j)\land (y=x)\land (\exists$ a merge constrain for such tuple that is active)}
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{a,y_1,y},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{b,y_1,y},10^5\}$    
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{a,y_2,y},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{b,y_2,y},10^5\}$
     \ENDFOR
 \algstore{alg:wholeMath:updateMerge}
 \end{algorithmic}
@@ -99,24 +100,24 @@
 \begin{algorithmic}
 \algrestore{alg:wholeMath:updateMerge}
 
-    \FORALL{$(a,b,y,y_1,y_2)\in split$ s.t. $a=i\land b=j\land y=x\land \exists$ a split constrain for such tuple that is active}
-    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y,y_1},10^5\}$
-    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y,y_1},10^5\}$    
-    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y,y_2},10^5\}$
-    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y,y_2},10^5\}$
+    \FORALL{$(a,b,y,y_1,y_2)\in split$ s.t. $(a=i)\land (b=j)\land (y=x)\land (\exists$ a split constrain for such tuple that is active)}
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{a,y,y_1},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{b,y,y_1},10^5\}$    
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{a,y,y_2},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{b,y,y_2},10^5\}$
     \ENDFOR
     %diver_1=\{&(i \in F, j \in F, x\in V, a\in dA, x_1\in V, x_2 \in V\text{ s.t. }\nonumber\\ &(i,j,x,dA)\in allConf\land (x,x_1) \in E\land (x_2,x)\in E \land \nonumber\\ &\land w_{x,x_1,i}+ w_{x2,x,j} =2 \land angle_{x,x_1,x_2} = a\}\\
-    \FORALL{$(a,b,y,y_1,y_2)\in diver1$ s.t. $a=i\land b=j\land y=x\land \exists$ a diver1 constrain for such tuple that is active}
-    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y,y_1},10^5\}$
-    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y,y_1},10^5\}$    
-    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y_2,y},10^5\}$
-    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y_2,y},10^5\}$
+    \FORALL{$(a,b,y,y_1,y_2)\in diver1$ s.t. $(a=i)\land (b=j)\land (y=x)\land (\exists$ a diver1 constrain for such tuple that is active)}
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{a,y,y_1},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{b,y,y_1},10^5\}$    
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{a,y_2,y},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{b,y_2,y},10^5\}$
     \ENDFOR
-    \FORALL{$(a,b,y,y_1,y_2)\in diver2$ s.t. $a=i\land b=j\land y=x\land \exists$ a diver2 constrain for such tuple that is active}
-    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y_1,y},10^5\}$
-    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y_1,y},10^5\}$    
-    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{a,y,y_2},10^5\}$
-    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\alpha\cdot d^{MCF}_{b,y,y_2},10^5\}$
+    \FORALL{$(a,b,y,y_1,y_2)\in diver2$ s.t. $(a=i)\land (b=j)\land (y=x)\land (\exists$ a diver2 constrain for such tuple that is active)}
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{a,y_1,y},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{b,y_1,y},10^5\}$    
+    \STATE $d^{MCF}_{a,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{a,y,y_2},10^5\}$
+    \STATE $d^{MCF}_{b,y,y'}\gets\min\{\sqrt\beta\cdot d^{MCF}_{b,y,y_2},10^5\}$
     \ENDFOR
     \ENDFOR
     \ENDIF

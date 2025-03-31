@@ -1,23 +1,31 @@
 \documentclass[../thesis.tex]{subfiles}
 \begin{document}
-\tiny
+\scalebox{0.8}{ % Cambia il valore per ridimensionare (es. 0.8 per l'80% della grandezza originale)
+    \begin{minipage}{\textwidth} % Necessario per evitare problemi con l'align
 %da correggere
 \begin{align}%\label{eq:solveConflicts}
-    tini \leq & ts^\text{ear}_i &\forall f_i\in F\setminus inFlight\\
+    tini \leq & ts^\text{ear}_i &\forall i\in F\setminus inFlight\\
     t^\text{lat}_{i,x}=& t^\text{ear}_{i,x}+\hat t^\text{lat}_{i,x} -\hat t^\text{ear}_{i,x}& \forall i\in \mathcal F\setminus AP, \forall x \in V \text{ s.t. }(f,i)\in FV\setminus timeFixed\\
-    ts^\text{ear}_i = &t^\text{ear}_{i,s_i} & f_i\in F\\
+    ts^\text{ear}_i = &t^\text{ear}_{i,s_i} & i\in F\\
 %define min and max time
     \underline t_{i,x} \leq& t^\text{ear}_{i,x}
     &\forall i \in \mathcal F, \forall x\in V: x\neq s_i\\
     t^\text{ear}_{i,x} \leq& \overline t_{i,x}
     &\forall i\in \mathcal F,\forall x\in V: x\neq s_i\\
     \underline t_{i,x'}=&t^\text{ear}_{i,x}+\frac{d(x,x')}{\overline v_{x,x',i}}
-    &\forall f_i\in \mathcal F\setminus (AP\cup NC), x'\in V, x \in V\text{ s.t. } w_{x,x',i}=1\land \nonumber\\&&
+    &\forall i\in \mathcal F\setminus (AP\cup NC), x'\in V, x \in V\text{ s.t. } w_{x,x',i}=1\land \nonumber\\&&
     \land (i,x')\in FV\setminus timeFixed \land (x,y)\in E \land x'\neq e_i\\
     \overline t_{i,x'}=&t^\text{ear}_{i,x}+\frac{d(x,x')}{\underline v_{x,x',i}}
-    &\forall f_i\in \mathcal F\setminus (AP\cup NC), x'\in V, x \in V\text{ s.t. } w_{x,x',i}=1\land \nonumber\\&&
-    \land (i,x')\in FV\setminus timeFixed \land (x,y)\in E \land x'\neq e_i\\
+    &\forall i\in \mathcal F\setminus (AP\cup NC), x'\in V, x \in V\text{ s.t. } w_{x,x',i}=1\land \nonumber\\&&
+    \land (i,x')\in FV\setminus timeFixed \land (x,y)\in E \land x'\neq e_i%\\
 %defining conflicts
+    \end{align}
+\end{minipage}
+}
+
+\scalebox{0.8}{ 
+\begin{minipage}{\textwidth}
+    \begin{align}
 %trail
     \bigvee&\Big(
     t^\text{ear}_{j,x}-t^\text{lat}_{i,x}\geq \frac D{\underline v_{i,x,x'}}), %\nonumber\\&
@@ -28,48 +36,56 @@
     & (i,j,x,x')\in trail2\\
 %merge
     \bigvee &\Bigg(
-    \left(t^\text{ear}_{j,x} - t^\text{lat}_{i,x} \geq S(\alpha^-_{x,x_1,x_2}) \frac{D}{\underline{v}_{j,x_2,x}}\right)
+    \left(t^\text{ear}_{j,x} - t^\text{lat}_{i,x} \geq S(\beta^-_{x,x_1,x_2}) \frac{D}{\underline{v}_{j,x_2,x}}\right)
     ,\nonumber\\ 
-    & \left(t^\text{ear}_{i,x} - t^\text{lat}_{j,x} \geq S(\alpha^-_{x,x_1,x_2}) \frac{D}{\underline{v}_{i,x_1,x}}\right)
+    & \left(t^\text{ear}_{i,x} - t^\text{lat}_{j,x} \geq S(\beta^-_{x,x_1,x_2}) \frac{D}{\underline{v}_{i,x_1,x}}\right)
     \Bigg)
-    &  (f_i,f_j,x,x_1,x_2)\in merge\\
+    &  (i,j,x,x_1,x_2)\in merge\\
 %\end{align}
 %\begin{align}
 %diver1
     \bigvee&
-    \Bigg(\left(t^\text{ear}_{j,x}-t^\text{lat}_{i,x}\geq S(\alpha^{+-}_{x,x_1,x_2})\left(\frac D{\underline v_{j,x_2,x}} + \frac D{\underline v_{i,x,x_1}}\right)\right)
+    \Bigg(\left(t^\text{ear}_{j,x}-t^\text{lat}_{i,x}\geq S(\beta^{+-}_{x,x_1,x_2})\left(\frac D{\underline v_{j,x_2,x}} + \frac D{\underline v_{i,x,x_1}}\right)\right)
     ,\nonumber\\&\left(
-    t^\text{ear}_{i,x}-t^\text{lat}_{j,x}\geq S(\alpha^{+-}_{x,x1,x2})\left(\frac D{\underline v_{i,x_2,x}}+\frac D{\underline v_{j,x,x_1}}\right)\right)\Bigg)
-    & (f_i,f_j,x,x_1,x_2)\in diver_1\cup diver_2\\
+    t^\text{ear}_{i,x}-t^\text{lat}_{j,x}\geq S(\beta^{+-}_{x,x1,x2})\left(\frac D{\underline v_{i,x_2,x}}+\frac D{\underline v_{j,x,x_1}}\right)\right)\Bigg)
+    & (i,j,x,x_1,x_2)\in diver_1\cup diver_2\\
 %diver1
 %    \bigvee&
-%    \Bigg(\left(t^\text{ear}_{j,x}-t^\text{lat}_{i,x}\geq S(\alpha^{+-}_{x,x_1,x_2})\left(\frac D{\underline v_{j,x_2,x}} + \frac D{\underline v_{i,x,x_1}}\right)\right)
+%    \Bigg(\left(t^\text{ear}_{j,x}-t^\text{lat}_{i,x}\geq S(\beta^{+-}_{x,x_1,x_2})\left(\frac D{\underline v_{j,x_2,x}} + \frac D{\underline v_{i,x,x_1}}\right)\right)
 %    ,\nonumber\\&\left(
-%    t^\text{ear}_{i,x}-t^\text{lat}_{j,x}\geq S(\alpha^{+-}_{x,x1,x2})\left(\frac D{\underline v_{i,x_2,x}}+\frac D{\underline v_{j,x,x_1}}\right)\right)\Bigg)
-%    & (f_i,f_j,x,x_1,x_2)\in diver\\
+%    t^\text{ear}_{i,x}-t^\text{lat}_{j,x}\geq S(\beta^{+-}_{x,x1,x2})\left(\frac D{\underline v_{i,x_2,x}}+\frac D{\underline v_{j,x,x_1}}\right)\right)\Bigg)
+%    & (i,j,x,x_1,x_2)\in diver\\
 %split  
     \bigvee&\Bigg(
     \left(
-    t^\text{ear}_{j,x}-t^\text{lat}_{i,x}\geq S(\alpha^+_{x,x_1,x_2}) \frac D{\underline v_{i,x,x_1}}\right),
+    t^\text{ear}_{j,x}-t^\text{lat}_{i,x}\geq S(\beta^+_{x,x_1,x_2}) \frac D{\underline v_{i,x,x_1}}\right),
     \nonumber\\&\left(
-    t^\text{ear}_{i,x}-t^\text{lat}_{j,x}\geq S(\alpha^+_{x,x_1,x_2})\frac D {\underline v_{j,x,x_2}}
-    \right)\Bigg) & (f_i,f_j,x,x_1,x_2)\in split \\
+    t^\text{ear}_{i,x}-t^\text{lat}_{j,x}\geq S(\beta^+_{x,x_1,x_2})\frac D {\underline v_{j,x,x_2}}
+    \right)\Bigg) & (i,j,x,x_1,x_2)\in split
     %fix passed
+    \end{align}
+\end{minipage}
+}
+
+\scalebox{1}{ 
+\begin{minipage}{\textwidth}
+    \begin{align}
     %definition of variables
-    t^\text{ear}_{i,x} =& \hat t^\text{ear}_{i,x}& f_i\in F, x\in V\text { s.t. } (i,x)\in timeFixed\\
-    t^\text{lat}_{i,x} =& \hat t^\text{lat}_{i,x}& f_i\in F, x\in V\text { s.t. } (i,x)\in timeFixed\\
+    t^\text{ear}_{i,x} =& \hat t^\text{ear}_{i,x}& i\in F, x\in V\text { s.t. } (i,x)\in timeFixed\\
+    t^\text{lat}_{i,x} =& \hat t^\text{lat}_{i,x}& i\in F, x\in V\text { s.t. } (i,x)\in timeFixed\\
     t^\text{ear}_{i,x} =& \hat t^\text{ear}_{i,x} + \tau_i &\forall f\in AP, x\in Path_f\\
     t^\text{lat}_{i,x} =& \hat t^\text{lat}_{i,x} + \tau_i &\forall f\in AP, x\in Path_f\\
-    &\mathclap{t^\text{ear}_{i,x} \in \mathbb{R}_+}&\forall f_i\in F,x\in V\text{ s.t. } (i,x)\in FV \nonumber \\
-    &\mathclap{t^\text{lat}_{i,x} \in \mathbb{R}_+}&\forall f_i\in F,x\in V\text{ s.t. } (i,x)\in FV \nonumber \\
-    &\mathclap{\tau_i\in \mathbb{Z}_+} &\forall f_i\in AP\nonumber\\
-    &\mathclap{ts^\text{ear}_i\in \mathbb{Z}_+} &\forall f_i\in F\nonumber
+    &\mathclap{t^\text{ear}_{i,x} \in \mathbb{R}_+}&\forall i\in F,x\in V\text{ s.t. } (i,x)\in FV \nonumber \\
+    &\mathclap{t^\text{lat}_{i,x} \in \mathbb{R}_+}&\forall i\in F,x\in V\text{ s.t. } (i,x)\in FV \nonumber \\
+    &\mathclap{\tau_i\in \mathbb{Z}_+} &\forall i\in AP\nonumber\\
+    &\mathclap{ts^\text{ear}_i\in \mathbb{Z}_+} &\forall i\in F\nonumber
 \end{align}
 Objectives:
 \begin{align}
     %\min \sum_{i,x,x'} w_{x,x',i} \\
-    %&\min \sum_{f_i \in F,x \in V,y \in V:(x,y)\in E} w_{x,y,i}d_{i,j}
+    %&\min \sum_{i \in F,x \in V,y \in V:(x,y)\in E} w_{x,y,i}d_{i,j}
     UAM:&\min \sum_{f\in AP} \tau_i + \sum_{i\in F\setminus{AP\cup NC}} |t^\text{ear}_{i,e_{i}}-\hat t^\text{ear}_{i,e_{i}}|
 \end{align}
-
+\end{minipage}
+}
 \end{document}

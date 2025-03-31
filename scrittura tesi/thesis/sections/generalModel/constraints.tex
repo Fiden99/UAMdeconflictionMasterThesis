@@ -6,7 +6,6 @@
 %\subsection{The Constraints}\label{ssec:bigModel:constraints}
 
 After defining the data and variables, we now present the model that describes the problem we aim to solve.
-Using \( w \), we define the path that each flight will follow.
 We employ the well-known flow conservation constraints, ensuring that each flight has exactly one outgoing arc from its source and exactly one incoming arc to its destination.
 
 \begin{align}
@@ -24,24 +23,26 @@ Finally, we define \( t^{lat}_{i,x} \) as the sum of \( t^{ear}_{i,x} \) and the
 \begin{align}
 % Define min and max time
 % Define t^ear and t^lat
-    \hat t^\text{ear}_{i,s_i} \leq& t^\text{ear}_{i,s_i} & \forall i \in \mathcal{F} \label{eq:constrain:defineStartingTime}\\
+    ts^\text{ear}_{i}\geq&\hat t^\text{ear}_{i,s_i}& \forall i \in \mathcal{F} \label{eq:constrain:defineStartingTime}\\
     t^\text{lat}_{i,x} =& t^\text{ear}_{i,x} + \hat t^\text{lat}_{i,x} - \hat t^\text{ear}_{i,x} & \forall i \in \mathcal{F}, \forall x \in V \label{eq:constrain:defineLat} \\
     ts^\text{ear}_{i} =& t^\text{ear}_{i,s_i} & \forall i \in \mathcal{F}\label{eq:constrain:startInt}
 \end{align}
 
 Now we define $\overline t$ and $\underline t$, defined by the maximum and minimum speed allowed, and we want that $t^{ear}$ will be between that values.
-Note that constraints \eqref{eq:constrain:define_t_min} and \eqref{eq:constrain:define_t_max} are bilinear. In section \ref{sec:linearization:times}, we will discuss their linearization.
+Note that constraints \eqref{eq:constrain:define_t_min} and \eqref{eq:constrain:define_t_max} are bilinear. In Section \ref{sec:linearization:times}, we will discuss their linearization.
 \begin{align}\label{eq:constrain:defineSpeedBound}
-    \underline t_{i,x} \leq& t^\text{ear}_{i,x}
+    \underline t_{i,x} \leq& t^\text{ear}_{i,x}\leq \overline t_{i,x}
     &\forall i \in \mathcal F, \forall x\in V\text{ s.t. } x\neq s_i\\
-    t^\text{ear}_{i,x} \leq& \overline t_{i,x}
-    &\forall i\in \mathcal F,\forall x\in V\text{ s.t. } x\neq s_i\\
+    %
+    %t^\text{ear}_{i,x} \leq& \overline t_{i,x} &\forall i\in \mathcal F,\forall x\in V\text{ s.t. } x\neq s_i\\
+    %
     \underline t_{i,x'}=&\sum_{x\in V: (x,x')\in E} w_{x,x',i}\left(t^\text{ear}_{i,x}+\frac{d(x,x')}{\overline v_{x,x',i}}\right) &\forall i\in \mathcal F, x'\in V
     \label{eq:constrain:define_t_min}\\
+    %
     \overline t_{i,x'}=&\sum_{x\in V: (x,x')\in E} w_{x,x',i}\left(t^\text{ear}_{i,x}+\frac{d(x,x')}{\underline v_{x,x',i}}\right) &\forall i \in\mathcal F, x'\in V\label{eq:constrain:define_t_max}
 \end{align}
 
-Finally, we analyze conflicts, starting with \textit{trailing conflicts}. These occur when two flights use the same arc and must maintain a sufficient separation to avoid collisions. Since both flights travel at the same speed along the edge, ensuring an adequate separation at the endpoints is sufficient. Specifically, the minimum separation distance at the endpoints must be at least \( D \).
+Finally, we analyze conflicts, starting with \textit{trailing conflicts}. These occur when two flights use the same arc and must maintain a sufficient separation to avoid collisions. Since both flights travel at the same speed along the arc, ensuring an adequate separation at the endpoints is sufficient. Specifically, the minimum separation distance at the endpoints must be at least \( D \).
 
 \begin{align}
 %defining conflicts
@@ -56,20 +57,23 @@ Finally, we analyze conflicts, starting with \textit{trailing conflicts}. These 
     & \forall i,j \in \mathcal{F},\forall(x,x')\in E \text{ s.t. } i\neq j
 \end{align}
 
+As we can observe, if an arc is used by two different flights, we must ensure that the safety time interval, given by \( \frac{D}{\underline v} \), is maintained between the start of the safety passing time of one flight and the end of the other.
+
 Next, we analyze the \textit{non-trailing conflicts}, which occur when two flights share a common node but not a complete arc.  
-If multiple flight paths intersect at node \(x\), we must ensure that their passage is sufficiently spaced to prevent collisions.  
+If multiple flight paths intersect at node \(x\in V\), we must ensure that their passage is sufficiently spaced to prevent collisions.  
 These conflicts can be classified into three categories:  
 
 \begin{itemize}
-    \item \textbf{Merging conflicts}, defined by constraint \eqref{eq:constrain:merge}, occur when two flights terminate at the same node \(x\).
-    \item \textbf{Diverging conflicts}, defined by constraint \eqref{eq:constrain:diver}, arise when one flight arrives at \(x\) while another departs from the same node.
-    \item \textbf{Splitting conflicts}, defined by constraint \eqref{eq:constrain:split}, occur when two flights meet at \(x\) and then continue toward different nodes.
+    \item \textbf{Merging conflicts}, defined by constraint \eqref{eq:constrain:merge} and showed in Figure \ref{graph:merging}, occur when two flights terminate at the same node \(x\in V\).
+    \item \textbf{Diverging conflicts}, defined by constraint \eqref{eq:constrain:diver} and showed in Figure \ref{graph:diverging}, arise when one flight arrives at \(x\in V\) while another departs from the same node.
+    \item \textbf{Splitting conflicts}, defined by constraint \eqref{eq:constrain:split} and showed in Figure \ref{graph:splitting}, occur when two flights meet at \(x\in V\) and then continue toward different nodes.
 \end{itemize}
 
-The left-hand side of each implication indicates the presence of a conflict at node \(x\),  
-while the right-hand side represents the constraint designed to prevent the conflict,  
-as thoroughly described in \cite{pelegrin-2023}.
-
+The left-hand side of each implication indicates the presence of a conflict at node \(x\in V\), while the right-hand side represents the constraint designed to prevent it.
+Regarding trail conflicts, the start and end times of the safety interval must be sufficiently separated. This separation is determined by the safety time distance, scaled by a multiplicative factor that depends on the acuteness of the considered angle.
+The more acute the angle, the closer the paths are, and consequently, the required time interval between the two flights passing through the same node must be longer to prevent safety violations.
+For further details, refer to the original article \cite{pelegrin-2023}.
+Section \ref{sec:linearization:conflicts} details how the following constraints can be linearized.  
 {\tiny
 \begin{align}
 %merge
@@ -105,10 +109,8 @@ as thoroughly described in \cite{pelegrin-2023}.
 
 Finally, we define the possible values for the variables as follows:
 \begin{align}
-    &t^\text{ear}_{i,x} \in \mathbb{R}_{+}, &\forall i\in \mathcal{F}, x\in V \nonumber \\
-    &t^\text{lat}_{i,x} \in \mathbb{R}_{+}, &\forall i\in \mathcal{F}, x\in V \nonumber \\    
-    &\underline{t}_{i,x} \in \mathbb{R}_{+}, &\forall i\in \mathcal{F}, x\in V \nonumber \\
-    &\overline{t}_{i,x} \in \mathbb{R}_{+}, &\forall i\in \mathcal{F}, x\in V \nonumber \\
+    &t^\text{ear}_{i,x},t^\text{lat}_{i,x} \in \mathbb{R}_{+}, &\forall i\in \mathcal{F}, x\in V \nonumber \\
+    &\underline{t}_{i,x},\overline{t}_{i,x} \in \mathbb{R}_{+}, &\forall i\in \mathcal{F}, x\in V \nonumber \\
     &ts^\text{ear}_i \in \mathbb{Z}_{+}, &\forall i\in \mathcal{F} \nonumber\\
     &w_{x,x',i} \in \{0,1\}, &\forall (x,x')\in E, i\in \mathcal{F} \nonumber
 \end{align}
@@ -116,7 +118,7 @@ Finally, we define the possible values for the variables as follows:
 \subsection{Objectives}
 There are multiple possible objective functions. Equation \eqref{eq:obj:MC} minimizes the total distance traveled, which is particularly useful for heuristics or as a subproblem in a column-generation approach.
 However, our main objective is given in \eqref{eq:obj:UAM}, which aims to minimize the total travel time, although this may lead to fairness issues.
-Finally, if we are interested in evaluating the effectiveness of a strategic model, it is more relevant to minimize the deviation between the planned and actual arrival times, as formulated in \eqref{eq:obj:MercedesObj}.
+Finally, if we are interested in evaluating the effectiveness of a tactical model, it is more relevant to minimize the deviation between the planned and actual arrival times, as formulated in \eqref{eq:obj:MercedesObj}.
 \begin{align}
     %\min \sum_{i,x,x'} w_{x,x',i} \\
     &\min \sum_{i \in F,x \in V,y \in V:(x,y)\in E} w_{x,y,i}d_{x,y} \label{eq:obj:MC}\\

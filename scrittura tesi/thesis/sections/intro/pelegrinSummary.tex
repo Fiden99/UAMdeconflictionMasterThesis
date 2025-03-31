@@ -3,18 +3,21 @@
 \begin{document}
 \section{Pelegrin's works}
 
-As stated in \cite{pelegrin-2023}, aircraft can be assumed to follow a well-defined \textit{network track}, which provides an internal structure to UAM corridors.  
-Based on this, we can model UAM corridors using a directed graph, where the nodes represent either vertiports or cruise-level nodes.  
-By \textit{cruise-level nodes}, we refer to nodes corresponding to take-off and landing pads, as well as intersections of different tracks.  
-Since we are considering tactical deconfliction over a short time horizon, we assume that the graph remains static throughout the process.  
+As stated in \cite{pelegrin-2023}, aircraft can be assumed to follow a well-defined \textit{network track}, which forms the UAM corridors.
+Based on this, we model UAM corridors as a directed graph, where the nodes represent either vertiports or cruise-level nodes.
+By \textit{cruise-level nodes}, we mean nodes corresponding to take-off and landing pads, as well as intersections of different tracks.
+Moreover, to allow for speed changes, we introduce breakpoint nodes along the arcs, each corresponding to 1 minute at standard speed.
+Since we focus on tactical deconfliction over a short time horizon, we assume that the graph remains static throughout the process.
 
-The model presented in the paper enforces a minimum safe distance that must be maintained between two aircraft, distinguishing between \textit{trailing} and \textit{non-trailing} conflicts.  
+The model presented in the paper enforces a minimum safe distance that must be maintained between each pair of aircraft, distinguishing between \textit{trailing} and \textit{non-trailing} conflicts.  
 \begin{itemize}
-    \item A \textbf{trailing conflict} occurs when two aircraft are on the same edge and must maintain at least $D$ units of separation.  
-    \item A \textbf{non-trailing conflict} arises when two flights share a common source or destination node.  
+    \item A \textbf{trailing conflict} occurs when two aircraft are on the same arc.% and must maintain at least $D$ units of separation.  
+    \item A \textbf{non-trailing conflict} arises when two flights pass through the same node but not through the same arc. 
+    %share a common source or destination node.  
 \end{itemize}  
 
-Since the speed of a flight is constant along an edge, conflicts need to be analyzed only at the relevant nodes.  
+Since the speed of a flight is constant along an arc, we don't need to impose conflicts constrains on the arcs, but we can impose them only on the nodes.
+%need to be analyzed only at the relevant nodes.  
 Non-trailing conflicts can be classified into three categories, illustrated in Figure \ref{fig:conflicts}:  
 \begin{itemize}
     \item \textbf{Merging}: both aircraft enter the same node $x$.  
@@ -22,14 +25,14 @@ Non-trailing conflicts can be classified into three categories, illustrated in F
     \item \textbf{Splitting}: both aircraft exit from the same node $x$.  
 \end{itemize}  
 
-To resolve these conflicts, different strategies must be applied depending on the type of interaction, while also considering the relative angles between aircraft to ensure a minimum separation of $D$ units.  
-The proposed model optimizes the timing at which each flight occupies a node, ensuring compliance with speed constraints, minimizing total deviation at each node, and reducing delays for high-priority traffic.%
-%As stated in \cite{pelegrin-2023}, aircraft can be assumed to follow a well-defined \textit{network track}, which provides an internal structure to UAM corridors.
+%cambiare strategies con qualcosa di meglio
+To resolve these conflicts, different conditions must be imposed depending on the type of interaction, while also considering the relative angles between aircraft to ensure a minimum separation of $D$ units.  
+The proposed model optimizes the timing of each flight’s safe passage through each node, ensuring compliance with speed constraints, minimizing total deviation at each node, and reducing delays for high-priority traffic.%As stated in \cite{pelegrin-2023}, aircraft can be assumed to follow a well-defined \textit{network track}, which provides an internal structure to UAM corridors.
 %In this way, we can use direct graph to model the UAM corridors, more specifically the nodes of the graph will be veliports or cruise level nodes.
 %With cruise level nodes we indicate the one node per take-off and one per landing pad and the intersection of the different tracks.
 %Since we're considering a tactical deconfliction with short time horizon, we consider that the graph don't change during the process.
 %The model presented in the paper consider a minimum safe distance that must be kept between two aircraft, for trailing and non-trailing conflicts.
-%The first one happens when there are two aircraft in the same edge and they have to maintain at least $D$ units of distance.
+%The first one happens when there are two aircraft in the same arc and they have to maintain at least $D$ units of distance.
 %The second one happens when two flight have a source or destination node in common.
 %We can classify the non-trailing conflict in three different groups, that can be visualized in Figure \ref{fig:conflicts}:
 %\begin{itemize}
@@ -43,6 +46,7 @@ The proposed model optimizes the timing at which each flight occupies a node, en
 
 \centering
 \begin{subfigure}{0.3\textwidth}
+\centering
 \begin{tikzpicture}[node distance={15mm}, thick]
 \node[circle, draw=black, fill=black!40] (1) {}; 
 \node[] (2)[right of=1]{};
@@ -52,11 +56,12 @@ The proposed model optimizes the timing at which each flight occupies a node, en
 \draw [<-] (1) -- node[midway, above] {$f_j$} (3);
 
 \end{tikzpicture} 
-\label{graph:merging}
 \caption{Merging conflicts}
+\label{graph:merging}
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.3\textwidth}
+\centering
 \begin{tikzpicture}[node distance={15mm}, thick, main/.style = {draw, circle}] 
 \node[circle, draw=black, fill=black!40] (1) {}; 
 \node[] (2)[right of=1]{};
@@ -71,6 +76,7 @@ The proposed model optimizes the timing at which each flight occupies a node, en
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.3\textwidth}
+\centering
 \begin{tikzpicture}[node distance={15mm}, thick, main/.style = {draw, circle}] 
 \node[circle, draw=black, fill=black!40] (1) {}; 
 \node[] (2)[right of=1]{};

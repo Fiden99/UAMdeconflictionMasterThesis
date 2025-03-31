@@ -1,7 +1,7 @@
 \documentclass[../../../thesis.tex]{subfiles}
 \begin{document}
 
-\section{Pelegrin's Comments}
+\section{Computational results of exact model}
 The results were obtained using AMPL and Gurobi 12.0.0 as the solver, with the following modifications to the standard iteration:
 \begin{itemize}
     \item AMPL presolve disabled;
@@ -11,16 +11,18 @@ The results were obtained using AMPL and Gurobi 12.0.0 as the solver, with the f
 \end{itemize}
 
 \subsection{Delay and Drift Cases}
-As shown in Tables \ref{table:mercedes:resultsComparison1} and \ref{table:mercedes:resultsComparison2}, the objective function values remain largely consistent across instances involving drift and delays, with a maximum deviation of one point in the mean. In some cases, the flexibility to change the path improves the objective function, justifying the better mean value observed in the table. However, certain instances demonstrate that keeping a fixed path results in a superior objective function, as evidenced in Table \ref{table:mercedes:betterFixedDD}.
+As shown in Tables \ref{table:mercedes:resultsComparison1} and \ref{table:mercedes:resultsComparison2}, which statistically compare the objective function values between instances with and without the possibility of path modifications, the results remain largely consistent across cases involving drift and delays, with a maximum deviation of one point in the mean.
+In certain cases, the flexibility to adjust the path leads to an improved objective function, explaining the higher mean value observed in the tables. However, some instances indicate that maintaining a fixed path yields a superior objective function, as highlighted in Table \ref{table:mercedes:betterFixedDD}.
+The observed differences are always on the order of $10^{-6}$, likely attributable to approximation errors or MIP tolerance.
 
 \subfile{../../tables/mercedes/comparison/betterFixedDD}
 
-The observed differences are always on the order of $10^{-6}$, likely attributable to approximation errors or MIP tolerance. Conversely, Table \ref{table:mercedes:betterFreeDD} highlights instances where modifying the path yields an improved objective function value, with more significant differences.
+Conversely, Table \ref{table:mercedes:betterFreeDD} highlights instances where modifying the path yields an improved objective function value, with more significant differences.
 
 \subfile{../../tables/mercedes/comparison/betterFreeDD}
 
 \subsection{High-Priority Cases}
-In high-priority scenarios, as illustrated in Table \ref{table:mercedes:betterFixedAP}, the solutions differ by at most $10^{-5}$. As previously discussed, such minor variations are not particularly significant.
+In high-priority scenarios, as illustrated in Table \ref{table:mercedes:betterFixedAP}, the solutions differ by at most $10^{-6}$. As previously discussed, such minor variations are not particularly significant.
 
 \subfile{../../tables/mercedes/comparison/betterFixedAP}
 
